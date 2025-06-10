@@ -85,7 +85,7 @@ export default function CookingUploadPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 bg-gray-900 text-white rounded-lg shadow-xl  overflow-y-auto"
+    <div className="max-w-5xl mx-auto p-4 bg-gray-900 text-white rounded-lg shadow-xl  overflow-y-auto hide-scrollbar"
     style={{
         width: "1200px",
         height: "95vh",

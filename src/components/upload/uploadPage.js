@@ -18,7 +18,7 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
-      <div className="bg-zinc-900 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4">
+      <div className="bg-zinc-900 p-6 rounded-2xl shadow-xl w-full max-w-md space-y-4 hide-scrollbar">
         <h2 className="text-2xl font-semibold">Tải lên ảnh hoặc video</h2>
 
         <div>
