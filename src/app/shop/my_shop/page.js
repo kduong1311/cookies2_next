@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
@@ -110,10 +111,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Navigation */}
-      <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
+       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
         <nav className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a 
-            href="/shop/my_shop/products" 
+          <Link
+            href="/shop/my_shop/products"
             className="group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">
@@ -123,10 +124,10 @@ export default function DashboardPage() {
                 <p className="text-blue-100 text-sm">Thêm, sửa, xóa sản phẩm</p>
               </div>
             </div>
-          </a>
-          
-          <a 
-            href="/shop/my_shop/orders" 
+          </Link>
+
+          <Link
+            href="/shop/my_shop/orders"
             className="group bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">
@@ -136,10 +137,10 @@ export default function DashboardPage() {
                 <p className="text-green-100 text-sm">Xem và xử lý đơn hàng</p>
               </div>
             </div>
-          </a>
-          
-          <a 
-            href="/shop/dashboard/pending" 
+          </Link>
+
+          <Link
+            href="/shop/dashboard/pending"
             className="group bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">
@@ -149,7 +150,7 @@ export default function DashboardPage() {
                 <p className="text-yellow-100 text-sm">Xét duyệt đơn hàng mới</p>
               </div>
             </div>
-          </a>
+          </Link>
         </nav>
       </div>
     </div>

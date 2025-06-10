@@ -1,6 +1,7 @@
 // app/shop/dashboard/products/page.js
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([
@@ -90,12 +91,12 @@ export default function ProductsPage() {
           </h1>
           <p className="text-gray-400">Thêm, sửa, xóa và quản lý sản phẩm</p>
         </div>
-        <a 
+        <Link
           href="/shop/dashboard" 
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
           ← Về Dashboard
-        </a>
+        </Link>
       </div>
 
       {/* Stats Cards */}
