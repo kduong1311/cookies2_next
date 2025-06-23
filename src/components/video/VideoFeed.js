@@ -9,7 +9,6 @@ export default function VideoFeed({ isRecipeOpen, setIsRecipeOpen, isCommentOpen
         {/* Video Player */}
         <div className={`flex-shrink-0 max-h-screen overflow-hidden rounded-lg ${isRecipeOpen || isCommentOpen ? 'max-w-[600px]' : 'max-w-[800px]'}`}>
           <VideoPlayer
-            onAvatarClick={() => setIsProfileOpen(true)}
             isRecipeOpen={isRecipeOpen}
             isCommentOpen={isCommentOpen}
           />

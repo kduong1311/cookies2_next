@@ -1,8 +1,9 @@
-
+'use client';
 import CustomVideo from "./CustomVideo";
 import { ShoppingBag } from "lucide-react";
+import Link from 'next/link';
 
-export default function VideoPlayer({ onAvatarClick, isRecipeOpen, isCommentOpen}) {
+export default function VideoPlayer({ isRecipeOpen, isCommentOpen}) {
   return (
     <div className={`w-auto max-h-[97vh] relative ${isRecipeOpen || isCommentOpen ? 'max-w-[600px]' : 'max-w-[1000px]'}`}>
       <CustomVideo src="/pho.mp4" />
@@ -10,13 +11,15 @@ export default function VideoPlayer({ onAvatarClick, isRecipeOpen, isCommentOpen
       {/* Avatar and text */}
       <div
         className="absolute bottom-5 left-4 text-white flex items-center"
-        onClick={onAvatarClick}
       >
+      <Link href={"/profile/1SIrfb41r4hVj0YqRlWeqoW5Idw1"}>
         <img
           src={'/Logo.png'}
           alt="avatar"
           className="w-10 h-10 rounded-full mr-3 border border-[#f18921]"
         />
+      </Link>
+        
         <div>
           <p className="font-semibold">{'Tran Khanh Duong'}</p>
           <p className="text-sm text-gray-200">{'Day la video dau tien cua toi'}</p>

@@ -27,8 +27,8 @@ export default function TopNavbar() {
             className="p-2 bg-orange rounded-full transition-colors duration-200 relative"
           >
             <svg
-              width="20"
-              height="20"
+              width="40"
+              height="40"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +78,7 @@ export default function TopNavbar() {
 
         {/* User Avatar */}
         <div className="relative">
-          <button className="w-10 h-10 rounded-full overflow-hidden border-2 border-orange hover:border-gray-400 transition-colors duration-200">
+          <button className="w-15` h-15 rounded-full overflow-hidden border-2 border-orange hover:border-gray-400 transition-colors duration-200">
             <img
               src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
               alt="User Avatar"
@@ -86,7 +86,7 @@ export default function TopNavbar() {
             />
           </button>
           {/* Online status indicator */}
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-gray-800 rounded-full"></div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full"></div>
         </div>
       </div>
     </div>

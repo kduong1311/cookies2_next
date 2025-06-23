@@ -1,222 +1,210 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import ProfileHeader from './ProfileHeader';
 import ProfileTabs from './ProfileTabs';
 import VideoGrid from './VideoGrid';
 import RecipeGrid from './RecipeGrid';
 import SavedGrid from './SaveGrid';
-import { ArrowLeft } from 'lucide-react';
+import { AlertOctagon, ArrowLeft } from 'lucide-react';
+import axios from 'axios';
 
-const ProfilePage = ({ onBack }) => {
+const ProfilePage = ({ userId }) => {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  const [isOwner, setIsOwner] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [profileUser, setProfileUser] = useState(null);
+
   const [activeTab, setActiveTab] = useState('videos');
   const [viewMode, setViewMode] = useState('grid');
 
-  // Mock data
-  const userProfile = {
-    coverImage: 'https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg',
-    avatar: 'https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg',
-    name: 'Minh Châu',
-    username: '@minh_chau_cook',
-    bio: 'Đầu bếp nghiệp dư yêu thích chia sẻ những món ăn ngon từ khắp nơi trên thế giới 🍳👨‍🍳',
-    followers: 15420,
-    following: 892,
-    totalVideos: 127,
-    totalRecipes: 89,
-    isOnline: true
-  };
+  const [userVideos, setUserVideos] = useState([]);
+  const [userRecipes, setUserRecipes] = useState([]);
+  const [userSavedItems, setUserSavedItems] = useState([]);
 
-  const videos = [
-    {
-      id: 1,
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Cách làm Phở Bò truyền thống',
-      duration: '12:45',
-      views: '25.2K',
-      likes: 1250
-    },
-    {
-      id: 2,
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Bánh Mì Việt Nam chuẩn vị',
-      duration: '8:30',
-      views: '18.7K',
-      likes: 890
-    },
-    {
-      id: 3,
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Bún Chả Hà Nội đậm đà',
-      duration: '15:20',
-      views: '32.1K',
-      likes: 2100
-    },
-    {
-      id: 4,
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Chè Ba Màu mát lạnh',
-      duration: '10:15',
-      views: '12.5K',
-      likes: 650
-    },
-    {
-      id: 5,
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Gỏi Cuốn tôm thịt',
-      duration: '6:45',
-      views: '22.8K',
-      likes: 1180
-    },
-    {
-      id: 6,
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Cà Ri Gà đậm đà',
-      duration: '18:30',
-      views: '28.9K',
-      likes: 1550
-    }
-  ];
+  const [videosLoading, setVideosLoading] = useState(false);
+  const [recipesLoading, setRecipesLoading] = useState(false);
+  const [savedLoading, setSavedLoading] = useState(false);
 
-  const recipes = [
-    {
-      id: 1,
-      image: '/api/placeholder/300/200',
-      title: 'Phở Bò Hà Nội',
-      difficulty: 'Khó',
-      time: '3 giờ',
-      rating: 4.8,
-      saves: 520
-    },
-    {
-      id: 2,
-      image: '/api/placeholder/300/200',
-      title: 'Bánh Cuốn Hà Nội',
-      difficulty: 'Trung bình',
-      time: '1.5 giờ',
-      rating: 4.6,
-      saves: 340
-    },
-    {
-      id: 3,
-      image: '/api/placeholder/300/200',
-      title: 'Chả Cá Lã Vọng',
-      difficulty: 'Dễ',
-      time: '45 phút',
-      rating: 4.9,
-      saves: 680
-    },
-    {
-      id: 4,
-      image: '/api/placeholder/300/200',
-      title: 'Nem Nướng Nha Trang',
-      difficulty: 'Trung bình',
-      time: '2 giờ',
-      rating: 4.7,
-      saves: 420
-    },
-    {
-      id: 5,
-      image: '/api/placeholder/300/200',
-      title: 'Bún Bò Huế cay nồng',
-      difficulty: 'Khó',
-      time: '2.5 giờ',
-      rating: 4.9,
-      saves: 750
-    },
-    {
-      id: 6,
-      image: '/api/placeholder/300/200',
-      title: 'Cao Lầu Hội An',
-      difficulty: 'Trung bình',
-      time: '1 giờ',
-      rating: 4.5,
-      saves: 380
-    }
-  ];
+  const handleBack = () => router.back();
 
-  const savedItems = [
-    {
-      id: 1,
-      type: 'video',
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Cách làm Sushi Nhật Bản',
-      author: 'Chef Takeshi',
-      duration: '20:15'
-    },
-    {
-      id: 2,
-      type: 'recipe',
-      image: '/api/placeholder/300/200',
-      title: 'Pizza Margherita chuẩn Ý',
-      author: 'Maria Rossi',
-      time: '30 phút'
-    },
-    {
-      id: 3,
-      type: 'video',
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Dimsum Hồng Kông',
-      author: 'Chef Wong',
-      duration: '15:45'
-    },
-    {
-      id: 4,
-      type: 'recipe',
-      image: '/api/placeholder/300/200',
-      title: 'Pad Thai truyền thống',
-      author: 'Chef Somchai',
-      time: '25 phút'
-    },
-    {
-      id: 5,
-      type: 'video',
-      thumbnail: '/api/placeholder/300/200',
-      title: 'Ramen Tonkotsu đậm đà',
-      author: 'Chef Yamamoto',
-      duration: '25:30'
-    },
-    {
-      id: 6,
-      type: 'recipe',
-      image: '/api/placeholder/300/200',
-      title: 'Croissant Pháp bơ thơm',
-      author: 'Chef Pierre',
-      time: '4 giờ'
+  useEffect(() => {
+    if (!authLoading) {
+      setIsOwner(user?.user_id === userId);
     }
-  ];
+  }, [authLoading, user, userId]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+                const res2 = await axios.get("http://103.253.145.7:3001/api/posts/user/1SIrfb41r4hVj0YqRlWeqoW5Idw1",
+          {withCredentials: true});
+        const res = await axios.get(`http://103.253.145.7:3000/api/users/${userId}`, {withCredentials: true});
+        console.log(res2.data);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setProfileUser(res.data);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) fetchUser();
+  }, [userId]);
+
+  // const fetchUserVideos = async () => {
+  //   try {
+  //     setVideosLoading(true);
+  //     const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}/videos`);
+  //     const data = res.ok ? await res.json() : [];
+  //     setUserVideos(data);
+  //   } catch {
+  //     setUserVideos([]);
+  //   } finally {
+  //     setVideosLoading(false);
+  //   }
+  // };
+
+  // const fetchUserRecipes = async () => {
+  //   try {
+  //     setRecipesLoading(true);
+  //     const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}/recipes`);
+  //     const data = res.ok ? await res.json() : [];
+  //     setUserRecipes(data);
+  //   } catch {
+  //     setUserRecipes([]);
+  //   } finally {
+  //     setRecipesLoading(false);
+  //   }
+  // };
+
+  // const fetchUserSavedItems = async () => {
+  //   try {
+  //     setSavedLoading(true);
+  //     const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}/saved`, {
+  //       method: "GET",
+  //       credentials: "include",
+  //     });
+  //     const data = res.ok ? await res.json() : [];
+  //     setUserSavedItems(data);
+  //   } catch {
+  //     setUserSavedItems([]);
+  //   } finally {
+  //     setSavedLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (!profileUser) return;
+  //   if (activeTab === 'videos' && userVideos.length === 0) fetchUserVideos();
+  //   if (activeTab === 'recipes' && userRecipes.length === 0) fetchUserRecipes();
+  //   if (activeTab === 'saved' && isOwner && userSavedItems.length === 0) fetchUserSavedItems();
+  // }, [activeTab, profileUser]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full bg-gray-800 max-h-[90vh] overflow-y-auto rounded-2xl hide-scrollbar">
+        <div className="sticky top-0 z-10 bg-gray-800 shadow-sm px-4 py-3 flex items-center border-b">
+          <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-300 mr-4">
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            <span className="text-sm">back</span>
+          </button>
+          <h2 className="text-lg font-semibold text-white">Profile</h2>
+        </div>
+
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <AlertOctagon className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-white mb-2">Failed to load profile</p>
+            <p className="text-gray-400 text-sm">{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileUser) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-gray-800 text-white">
+        <p>User not found</p>
+      </div>
+    );
+  }
+
+  const EmptyState = ({ type, loading }) => (
+    <div className="flex items-center justify-center h-40">
+      <div className="text-center">
+        {loading ? (
+          <>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
+            <p className="text-gray-400">Loading {type}...</p>
+          </>
+        ) : (
+          <>
+            <p className="text-gray-400 mb-2">No {type} yet</p>
+            <p className="text-gray-500 text-sm">
+              {isOwner ? `Start sharing your ${type}!` : `This user hasn't shared any ${type} yet.`}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="w-full h-full bg-gray-800 max-h-[90vh] overflow-y-auto rounded-2xl hide-scrollbar">
-      {/* Header với nút back */}
       <div className="sticky top-0 z-10 bg-gray-800 shadow-sm px-4 py-3 flex items-center border-b">
-        <button 
-          onClick={onBack}
-          className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
-        >
+        <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-300 mr-4">
           <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="text-sm">Back</span>
+          <span className="text-sm">back</span>
         </button>
-        <h2 className="text-lg font-semibold">Profile</h2>
+        <h2 className="text-lg font-semibold text-white">Profile</h2>
       </div>
-      
-      <ProfileHeader userProfile={userProfile} />
-      
-      <ProfileTabs 
+
+      <ProfileHeader userProfile={profileUser} />
+
+      <ProfileTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         viewMode={viewMode}
         setViewMode={setViewMode}
+        isOwner={isOwner}
       />
 
       <div className="px-4 py-6">
         {activeTab === 'videos' && (
-          <VideoGrid videos={videos} viewMode={viewMode} />
+          userVideos.length > 0 ? <VideoGrid videos={userVideos} viewMode={viewMode} /> : <EmptyState type="videos" loading={videosLoading} />
         )}
-
         {activeTab === 'recipes' && (
-          <RecipeGrid recipes={recipes} viewMode={viewMode} />
+          userRecipes.length > 0 ? <RecipeGrid recipes={userRecipes} viewMode={viewMode} /> : <EmptyState type="recipes" loading={recipesLoading} />
         )}
-
         {activeTab === 'saved' && (
-          <SavedGrid savedItems={savedItems} viewMode={viewMode} />
+          !isOwner ? (
+            <div className="flex items-center justify-center h-40 text-gray-400">Saved items are private</div>
+          ) : userSavedItems.length > 0 ? (
+            <SavedGrid savedItems={userSavedItems} viewMode={viewMode} />
+          ) : (
+            <EmptyState type="saved items" loading={savedLoading} />
+          )
         )}
       </div>
     </div>

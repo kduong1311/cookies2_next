@@ -12,21 +12,30 @@ import CommentPage from "@/components/video/CommentPage";
 import ProfilePage from "@/components/Profile/ProfilePage";
 import ChatBot from "@/components/chatbot/chatBot";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function MainLayout({ children }) {
   const pathname = usePathname();
+  const {user} = useAuth();
 
   const [isRecipeOpen, setIsRecipeOpen] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/upload") || pathname.startsWith("/about");
+const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/upload") || pathname.startsWith("/about") || pathname.startsWith("/profile");
 
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
 
   return (
     <div className="flex h-screen bg-black text-white">
-      <TopNavbar />
+      {
+        user ? (
+          <TopNavbar />
+        ) : (
+          <></>
+        )
+      }
+
       <LeftSidebar
         openShop={() => {}}
         goToVideoFeed={() => {
