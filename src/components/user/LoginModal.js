@@ -83,7 +83,7 @@ export default function LoginModal({ open, onOpenChange }) {
                 const password = e.target.password.value;
 
                 try {
-                  const res = await fetch("https://103.253.145.7/api/users/login", {
+                  const res = await fetch("http://103.253.145.7:3000/api/users/login", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",

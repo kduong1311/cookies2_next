@@ -14,7 +14,7 @@ export function AuthProvider({children}) {
 
     const checkAuthStatus = async () => {
         try {
-            const res = await fetch("https://103.253.145.7/api/users/me", {
+            const res = await fetch("http://103.253.145.7:3000/api/users/me", {
                 method: "GET",
                 credentials: "include",
             });
@@ -23,6 +23,7 @@ export function AuthProvider({children}) {
                 const userData = await res.json();
                 setUser(userData);
             } else {
+                console.warn("Not authenticated");
                 setUser(null);
             }
         } catch (err) {
@@ -39,7 +40,7 @@ export function AuthProvider({children}) {
 
     const logout = async () => {
         try {
-            await fetch("https://103.253.145.7/api/users/logout", {
+            await fetch("http://103.253.145.7/api/users/logout", {
                 method: "POST",
                 credentials: "include",
             });
