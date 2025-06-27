@@ -83,7 +83,7 @@ export default function CookingUploadPage() {
     try {
       const formData = new FormData();
       formData.append("user_id", user.id);
-      formData.append("content_type", multi);
+      formData.append("content_type", "multi");
       formData.append("title", title);
       formData.append("description", caption);
       formData.append("cooking_time", 0);
