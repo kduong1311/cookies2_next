@@ -40,7 +40,7 @@ export function AuthProvider({children}) {
 
     const logout = async () => {
         try {
-            await fetch("http://103.253.145.7/api/users/logout", {
+            await fetch("http://103.253.145.7:3000/api/users/logout", {
                 method: "POST",
                 credentials: "include",
             });

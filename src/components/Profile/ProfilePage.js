@@ -43,11 +43,7 @@ const ProfilePage = ({ userId }) => {
     const fetchUser = async () => {
       try {
         setLoading(true);
-                const res2 = await axios.get("http://103.253.145.7:3001/api/posts/user/1SIrfb41r4hVj0YqRlWeqoW5Idw1",
-          {withCredentials: true});
         const res = await axios.get(`http://103.253.145.7:3000/api/users/${userId}`, {withCredentials: true});
-        console.log(res2.data);
-
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         setProfileUser(res.data);
       } catch (err) {
