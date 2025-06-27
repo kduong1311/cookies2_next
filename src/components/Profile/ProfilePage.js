@@ -41,10 +41,9 @@ const ProfilePage = ({ userId }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
+       try {
         setLoading(true);
-        const res = await axios.get(`http://103.253.145.7:3000/api/users/${userId}`, {withCredentials: true});
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await axios.get(`http://103.253.145.7:3000/api/users/${userId}`, { withCredentials: true });
         setProfileUser(res.data);
       } catch (err) {
         setError(err.response?.data?.message || err.message);
