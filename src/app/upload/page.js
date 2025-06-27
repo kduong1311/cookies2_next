@@ -77,6 +77,8 @@ export default function CookingUploadPage() {
     setRecipe({...recipe, instructions: newInstructions})
   }
 
+  const now = new Date().toISOString();
+
   const handleSubmit = async () => {
     if (!file) return alert("Select a video or image, pls");
 
@@ -90,13 +92,13 @@ export default function CookingUploadPage() {
       formData.append("difficulty_level", "easy");
       formData.append("has_recipe", hasRecipe? true : false);
       formData.append("is_premium", false);
-      formData.append("premium_price", null);
+      formData.append("premium_price", 0.00);
       formData.append("views_count", 0);
       formData.append("likes_count", 0);
       formData.append("comments_count", 0);
       formData.append("shares_count", 0);
-      formData.append("created_at", Date.now());
-      formData.append("updated_at", Date.now());
+      formData.append("created_at", now);
+      formData.append("updated_at", now);
       formData.append("status", "published");
       formData.append("is_featured", "false");
 
