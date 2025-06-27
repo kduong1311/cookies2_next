@@ -118,7 +118,7 @@ const ProfilePage = ({ userId }) => {
         <div className="sticky top-0 z-10 bg-gray-800 shadow-sm px-4 py-3 flex items-center border-b">
           <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-300 mr-4">
             <ArrowLeft className="w-5 h-5 mr-2" />
-            <span className="text-sm">back</span>
+            <span className="text-sm">back to back</span>
           </button>
           <h2 className="text-lg font-semibold text-white">Profile</h2>
         </div>
@@ -166,7 +166,8 @@ const ProfilePage = ({ userId }) => {
   );
 
   return (
-    <div className="w-full h-full bg-gray-800 max-h-[90vh] overflow-y-auto rounded-2xl hide-scrollbar">
+  <div className="w-full flex justify-center items-center min-h-screen bg-black">
+    <div className="w-full max-w-[1000px] bg-gray-800 h-[95vh] overflow-y-auto rounded-2xl hide-scrollbar">
       <div className="sticky top-0 z-10 bg-gray-800 shadow-sm px-4 py-3 flex items-center border-b">
         <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-300 mr-4">
           <ArrowLeft className="w-5 h-5 mr-2" />
@@ -203,7 +204,9 @@ const ProfilePage = ({ userId }) => {
         )}
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default ProfilePage;

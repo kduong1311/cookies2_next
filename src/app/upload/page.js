@@ -2,12 +2,17 @@
 
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin } from "lucide-react"
+import { Description } from "@radix-ui/react-dialog";
 
 export default function CookingUploadPage() {
+
+  const {user} = useAuth();
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
+  const [title, setTitle] = useState("")
   const [caption, setCaption] = useState("")
   const [tags, setTags] = useState([])
   const [currentTag, setCurrentTag] = useState("")
@@ -72,17 +77,46 @@ export default function CookingUploadPage() {
     setRecipe({...recipe, instructions: newInstructions})
   }
 
-  const handleSubmit = () => {
-    console.log({
-      file,
-      caption,
-      tags,
-      location,
-      hasRecipe,
-      recipe: hasRecipe ? recipe : null
-    })
-    alert("Đăng bài thành công!")
-  }
+  const handleSubmit = async () => {
+    if (!file) return alert("Select a video or image, pls");
+
+    try {
+      const formData = new FormData();
+      formData.append("user_id", user.id);
+      formData.append("content_type", multi);
+      formData.append("title", title);
+      formData.append("description", caption);
+      formData.append("cooking_time", 0);
+      formData.append("difficulty_level", "easy");
+      formData.append("has_recipe", hasRecipe? true : false);
+      formData.append("is_premium", false);
+      formData.append("premium_price", null);
+      formData.append("views_count", 0);
+      formData.append("likes_count", 0);
+      formData.append("comments_count", 0);
+      formData.append("shares_count", 0);
+      formData.append("created_at", Date.now());
+      formData.append("updated_at", Date.now());
+      formData.append("status", "published");
+      formData.append("is_featured", "false");
+
+      const response = await fetch("http://103.253.145.7:3001/api/posts", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload fail!");
+      }
+
+      const result = await response.json();
+      alert("Upload successfull!")
+    }catch (err) {
+      alert(`Upload error ${err.message}`);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-4 bg-gray-900 text-white rounded-lg shadow-xl  overflow-y-auto hide-scrollbar"
@@ -97,7 +131,7 @@ export default function CookingUploadPage() {
           <ChefHat className="w-6 h-6 text-orange-500" />
           <h1 className="text-2xl font-bold text-white">Chia sẻ món ngon</h1>
         </div>
-        <p className="text-gray-400 text-sm">Khoe món ăn tuyệt vời của bạn với cộng đồng!</p>
+        <p className="text-gray-400 text-sm">Show off your amazing food to the community!</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
@@ -149,17 +183,32 @@ export default function CookingUploadPage() {
                         Trình duyệt không hỗ trợ video.
                       </video>
                     )}
-                    <p className="mt-2 text-xs text-gray-400">Nhấn để thay đổi</p>
+                    <p className="mt-2 text-xs text-gray-400">Click to change</p>
                   </div>
                 )}
               </label>
             </div>
           </div>
 
+          {/* Title */}
+          <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
+            <Label className="text-sm font-semibold text-white mb-2 block">
+              Post Title
+            </Label>
+            <textarea
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Let's share your story..."
+              className="w-full h-20 p-3 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
+            />
+            <p className="text-xs text-gray-500 mt-1">{title.length}/80</p>
+          </div>
+
+
           {/* Caption */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <Label className="text-sm font-semibold text-white mb-2 block">
-              Mô tả món ăn
+              Descriptions:
             </Label>
             <textarea
               value={caption}
@@ -170,7 +219,7 @@ export default function CookingUploadPage() {
             <p className="text-xs text-gray-500 mt-1">{caption.length}/500</p>
           </div>
 
-          {/* Tags */}
+          {/* Tags
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <Label className="text-sm font-semibold text-white mb-2 block items-center gap-2">
               <Hash className="w-4 h-4 text-orange-500" />
@@ -205,22 +254,8 @@ export default function CookingUploadPage() {
                 </span>
               ))}
             </div>
-          </div>
+          </div> */}
 
-          {/* Location */}
-          <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
-            <Label className="text-sm font-semibold text-white mb-2 block items-center gap-2">
-              <MapPin className="w-4 h-4 text-orange-500" />
-              Địa điểm
-            </Label>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Thêm địa điểm..."
-              className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-            />
-          </div>
         </div>
 
         {/* Right Column - Recipe */}
