@@ -19,9 +19,9 @@ export const fetchProducts = async () => {
     const productsArray = Array.isArray(data.data) ? data.data : [];
 
     return productsArray.map((product) => ({
-      id: product.product_id, // key đúng trong response của bạn
+      id: product.product_id,
       name: product.name,
-      price: parseFloat(product.price) * 25000, // chuyển sang VND
+      price: parseFloat(product.price),
       sale_price: product.sale_price,
       currency: product.currency,
       stock_quantity: product.stock_quantity,
@@ -31,7 +31,7 @@ export const fetchProducts = async () => {
           : "https://res.cloudinary.com/da9rooi9r/image/upload/v1751081884/d05pk7j6cmrp4x60uynf.png",
       rating: parseFloat(product.rating),
       description: product.description,
-      total_sale: product.total_sales, // key là total_sales
+      total_sale: product.total_sales,
     }));
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -42,20 +42,20 @@ export const fetchProducts = async () => {
 export const fetchProductById = async (id) => {
   try {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: "GET",
-        credentials: "include",
-    }
-    );
+      method: "GET",
+      credentials: "include",
+    });
 
     console.log(`${API_BASE_URL}/products/${id}`);
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
-    const product = await response.json();
-    
-    // Transform single product data
+
+    const jsonResponse = await response.json();
+    const product = jsonResponse.data;
+
     return {
-      id: product.id,
+      id: product.product_id,
       name: product.name,
       price: product.price,
       sale_price: product.sale_price,
@@ -66,7 +66,7 @@ export const fetchProductById = async (id) => {
         : "https://res.cloudinary.com/da9rooi9r/image/upload/v1751081884/d05pk7j6cmrp4x60uynf.png",
       rating: product.rating,
       description: product.description,
-      total_sale: product.total_sale
+      total_sale: product.total_sales,
     };
   } catch (error) {
     console.error('Error fetching product:', error);

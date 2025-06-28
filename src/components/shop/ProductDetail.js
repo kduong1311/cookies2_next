@@ -101,7 +101,7 @@ export default function ProductDetail({ productId, onBack }) {
         <div className="lg:w-1/2">
           <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
             <img
-              src={product.images?.[selectedImage] || "/default-image.jpg"}
+              src={product.images?.[selectedImage] || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png"}
               alt={product.name}
               className="w-full h-full object-cover"
             />
