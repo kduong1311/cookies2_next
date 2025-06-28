@@ -10,13 +10,14 @@ export default function ProductCard({ data }) {
         <img
           src={data.image}
           alt={"image"}
-          className="w-full h-40 object-cover block rounded-t-lg"
+          className="w-full h-50 object-cover block rounded-t-lg"
         />
         <CardContent className="pb-4">
           <p className="text-gray-400">My shop</p>
           <h2 className="text-lg text-white font-semibold truncate">
             {data.name}
           </h2>
+          <p className="text-gray-400">{data.description}</p>
 
           <p className="text-green-500 font-bold text-xl mt-2">
           {(data.price || 0).toLocaleString()}₫
