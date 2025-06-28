@@ -58,7 +58,7 @@ export default function ProductDetail({ productId, onBack }) {
       color: selectedColor,
       size: selectedSize,
       quantity: quantity,
-      price: product.salePrice || product.price,
+      price: product.sale_price || product.price,
     });
     alert("Đã thêm vào giỏ hàng!");
   };
@@ -148,7 +148,7 @@ export default function ProductDetail({ productId, onBack }) {
           </div>
 
           <div className="mb-6">
-            {product.salePrice ? (
+            {product.sale_price ? (
               <div className="flex items-center gap-3">
                 <span className="text-2xl font-bold">{parseFloat(product.sale_price).toLocaleString("vi-VN")}₫</span>
                 <span className="text-lg text-gray-400 line-through">{parseFloat(product.price).toLocaleString("vi-VN")}₫</span>

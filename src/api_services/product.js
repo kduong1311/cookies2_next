@@ -65,7 +65,7 @@ export const fetchProductById = async (id) => {
       sale_price: product.sale_price,
       currency: product.currency,
       stock_quantity: product.stock_quantity,
-      image: images, // <-- Trả về mảng URL
+      images: images, // <-- Trả về mảng URL
       rating: product.rating,
       description: product.description,
       total_sale: product.total_sales,
