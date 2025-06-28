@@ -27,7 +27,7 @@ export const fetchProducts = async () => {
       stock_quantity: product.stock_quantity,
       image:
         Array.isArray(product.images) && product.images.length > 0
-          ? product.images[0]
+          ? product.images[0].image_url
           : "https://res.cloudinary.com/da9rooi9r/image/upload/v1751081884/d05pk7j6cmrp4x60uynf.png",
       rating: parseFloat(product.rating),
       description: product.description,
