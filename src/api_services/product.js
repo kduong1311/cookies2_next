@@ -46,6 +46,8 @@ export const fetchProductById = async (id) => {
         credentials: "include",
     }
     );
+
+    console.log(`${API_BASE_URL}/products/${id}`);
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
