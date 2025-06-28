@@ -54,6 +54,10 @@ export const fetchProductById = async (id) => {
     const jsonResponse = await response.json();
     const product = jsonResponse.data;
 
+    const images = Array.isArray(product.images) && product.images.length > 0
+      ? product.images.map(img => img.image_url) // <-- Lấy danh sách image_url
+      : ["https://res.cloudinary.com/da9rooi9r/image/upload/v1751081884/d05pk7j6cmrp4x60uynf.png"];
+
     return {
       id: product.product_id,
       name: product.name,
@@ -61,9 +65,7 @@ export const fetchProductById = async (id) => {
       sale_price: product.sale_price,
       currency: product.currency,
       stock_quantity: product.stock_quantity,
-      image: Array.isArray(product.images) && product.images.length > 0
-        ? product.images[0]
-        : "https://res.cloudinary.com/da9rooi9r/image/upload/v1751081884/d05pk7j6cmrp4x60uynf.png",
+      image: images, // <-- Trả về mảng URL
       rating: product.rating,
       description: product.description,
       total_sale: product.total_sales,
@@ -73,3 +75,4 @@ export const fetchProductById = async (id) => {
     return null;
   }
 };
+
