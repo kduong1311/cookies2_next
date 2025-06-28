@@ -41,7 +41,11 @@ export const fetchProducts = async () => {
 
 export const fetchProductById = async (id) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`);
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: "GET",
+        credentials: "include",
+    }
+    );
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
@@ -57,7 +61,7 @@ export const fetchProductById = async (id) => {
       stock_quantity: product.stock_quantity,
       image: Array.isArray(product.images) && product.images.length > 0
         ? product.images[0]
-        : "/default-image.jpg",
+        : "https://res.cloudinary.com/da9rooi9r/image/upload/v1751081884/d05pk7j6cmrp4x60uynf.png",
       rating: product.rating,
       description: product.description,
       total_sale: product.total_sale
