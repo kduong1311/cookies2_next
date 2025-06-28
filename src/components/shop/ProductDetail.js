@@ -17,10 +17,10 @@ export default function ProductDetail({ productId, onBack }) {
   useEffect(() => {
     const loadProduct = async () => {
       if (!productId) return;
-      console.log("ProductID", productId)
       try {
         setLoading(true);
         const fetchedProduct = await fetchProductById(productId);
+        console.log(fetchedProduct);
         if (fetchedProduct) {
           setProduct(fetchedProduct);
           setSelectedColor(fetchedProduct.colors?.[0] || "");
@@ -150,10 +150,10 @@ export default function ProductDetail({ productId, onBack }) {
           <div className="mb-6">
             {product.salePrice ? (
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold">{parseFloat(product.salePrice).toLocaleString("vi-VN")}₫</span>
+                <span className="text-2xl font-bold">{parseFloat(product.sale_price).toLocaleString("vi-VN")}₫</span>
                 <span className="text-lg text-gray-400 line-through">{parseFloat(product.price).toLocaleString("vi-VN")}₫</span>
                 <span className="bg-red-600 px-2 py-1 text-xs rounded">
-                  {Math.round((1 - parseFloat(product.salePrice) / parseFloat(product.price)) * 100)}% Sale
+                  {Math.round((1 - parseFloat(product.sale_price) / parseFloat(product.price)) * 100)}% Sale
                 </span>
               </div>
             ) : (
@@ -162,19 +162,8 @@ export default function ProductDetail({ productId, onBack }) {
           </div>
 
           <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Descriptions</h3>
+            <h3 className="text-lg font-medium mb-2">Descriptions: </h3>
             <p className="text-gray-300">{product.description}</p>
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Feature details:</h3>
-            <ul className="list-disc pl-5 text-gray-300">
-              {product.features && product.features.length > 0 ? (
-                product.features.map((feature, index) => <li key={index}>{feature}</li>)
-              ) : (
-                <li>No feature details available.</li>
-              )}
-            </ul>
           </div>
 
           <div className="mb-6">
