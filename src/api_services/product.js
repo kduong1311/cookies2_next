@@ -6,7 +6,7 @@ const API_BASE_URL = 'http://103.253.145.7:3003/api';
 export const fetchProducts = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/products`, {
-        method: "POST",
+        method: "GET",
         credentials: "include",
     });
     if (!response.ok) {
