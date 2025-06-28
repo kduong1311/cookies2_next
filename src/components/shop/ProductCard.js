@@ -10,7 +10,7 @@ export default function ProductCard({ data }) {
         <img
           src={data.image}
           alt={"image"}
-          className="w-full h-50 object-cover block rounded-t-lg"
+          className="w-full h-65 object-cover block rounded-t-lg"
         />
         <CardContent className="pb-4">
           <p className="text-gray-400">My shop</p>

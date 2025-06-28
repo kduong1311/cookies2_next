@@ -17,7 +17,7 @@ export default function ProductDetail({ productId, onBack }) {
   useEffect(() => {
     const loadProduct = async () => {
       if (!productId) return;
-
+      console.log("ProductID", productId)
       try {
         setLoading(true);
         const fetchedProduct = await fetchProductById(productId);
