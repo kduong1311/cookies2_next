@@ -17,7 +17,7 @@ export default function ProductCard({ data }) {
           <h2 className="text-lg text-white font-semibold truncate">
             {data.name}
           </h2>
-          <p className="text-gray-400">{data.description}</p>
+          <p className="text-gray-400 truncate">{data.description}</p>
 
           <p className="text-green-500 font-bold text-xl mt-2">
           {(data.price || 0).toLocaleString()}₫

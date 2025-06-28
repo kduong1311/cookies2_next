@@ -17,21 +17,21 @@ export default function ProductDetail({ productId, onBack }) {
   useEffect(() => {
     const loadProduct = async () => {
       if (!productId) return;
-      
+
       try {
         setLoading(true);
         const fetchedProduct = await fetchProductById(productId);
         if (fetchedProduct) {
           setProduct(fetchedProduct);
-          setSelectedColor(fetchedProduct.colors[0]);
-          setSelectedSize(fetchedProduct.sizes[1]);
+          setSelectedColor(fetchedProduct.colors?.[0] || "");
+          setSelectedSize(fetchedProduct.sizes?.[0] || "");
           setError(null);
         } else {
-          setError('Product not found');
+          setError("Product not found");
         }
       } catch (err) {
-        setError('Failed to load product');
-        console.error('Error loading product:', err);
+        setError("Failed to load product");
+        console.error("Error loading product:", err);
       } finally {
         setLoading(false);
       }
@@ -48,33 +48,24 @@ export default function ProductDetail({ productId, onBack }) {
     }
   };
 
-  const handleColorChange = (color) => {
-    setSelectedColor(color);
-  };
-
-  const handleSizeChange = (size) => {
-    setSelectedSize(size);
-  };
+  const handleColorChange = (color) => setSelectedColor(color);
+  const handleSizeChange = (size) => setSelectedSize(size);
 
   const handleAddToCart = () => {
-    // Xử lý thêm vào giỏ hàng
     console.log("Thêm vào giỏ hàng:", {
       productId: product.id,
       name: product.name,
       color: selectedColor,
       size: selectedSize,
       quantity: quantity,
-      price: product.salePrice || product.price
+      price: product.salePrice || product.price,
     });
-    // Có thể thêm notification hoặc update cart state
-    alert('Đã thêm vào giỏ hàng!');
+    alert("Đã thêm vào giỏ hàng!");
   };
 
   const handleBuyNow = () => {
     handleAddToCart();
-    // Chuyển đến trang thanh toán
-    // router.push('/checkout');
-    alert('Chuyển đến trang thanh toán!');
+    alert("Chuyển đến trang thanh toán!");
   };
 
   if (loading) {
@@ -88,16 +79,11 @@ export default function ProductDetail({ productId, onBack }) {
   if (error || !product) {
     return (
       <div className="bg-black-cs text-white min-h-screen px-4 py-6">
-        <button 
-          onClick={() => router.back()} 
-          className="flex items-center mb-6 text-gray-400 hover:text-white"
-        >
+        <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
           <ChevronLeft size={20} />
           <span>Back</span>
         </button>
-        <div className="text-center py-8 text-red-500">
-          {error || 'Product not found'}
-        </div>
+        <div className="text-center py-8 text-red-500">{error || "Product not found"}</div>
       </div>
     );
   }
@@ -105,10 +91,7 @@ export default function ProductDetail({ productId, onBack }) {
   return (
     <div className="bg-black-cs text-white min-h-screen px-4 py-6">
       {/* Nút quay lại */}
-      <button 
-        onClick={() => router.back()} 
-        className="flex items-center mb-6 text-gray-400 hover:text-white"
-      >
+      <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
         <ChevronLeft size={20} />
         <span>Back</span>
       </button>
@@ -117,9 +100,9 @@ export default function ProductDetail({ productId, onBack }) {
         {/* Phần hình ảnh sản phẩm */}
         <div className="lg:w-1/2">
           <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
-            <img 
-              src={product.images[selectedImage]} 
-              alt={product.name} 
+            <img
+              src={product.images?.[selectedImage] || "/default-image.jpg"}
+              alt={product.name}
               className="w-full h-full object-cover"
             />
             <button className="absolute top-4 right-4 bg-gray-800 bg-opacity-70 p-2 rounded-full">
@@ -127,50 +110,54 @@ export default function ProductDetail({ productId, onBack }) {
             </button>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {product.images.map((image, index) => (
-              <div 
-                key={index}
-                onClick={() => setSelectedImage(index)}
-                className={`aspect-square rounded cursor-pointer border-2 ${selectedImage === index ? 'border-white' : 'border-transparent'}`}
-              >
-                <img 
-                  src={image} 
-                  alt={`${product.name} - ${index + 1}`} 
-                  className="w-full h-full object-cover rounded"
-                />
+            {product.images && product.images.length > 0 ? (
+              product.images.map((image, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedImage(index)}
+                  className={`aspect-square rounded cursor-pointer border-2 ${
+                    selectedImage === index ? "border-white" : "border-transparent"
+                  }`}
+                >
+                  <img src={image} alt={`${product.name} - ${index + 1}`} className="w-full h-full object-cover rounded" />
+                </div>
+              ))
+            ) : (
+              <div className="aspect-square rounded border border-gray-700 flex items-center justify-center text-gray-400">
+                No images
               </div>
-            ))}
+            )}
           </div>
         </div>
 
         {/* Thông tin sản phẩm */}
         <div className="lg:w-1/2">
           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-          
+
           <div className="flex items-center gap-2 mb-4">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={16} 
-                  className={i < Math.floor(product.rating) ? "text-yellow-500 fill-yellow-500" : "text-gray-500"}
+                <Star
+                  key={i}
+                  size={16}
+                  className={i < Math.floor(parseFloat(product.rating)) ? "text-yellow-500 fill-yellow-500" : "text-gray-500"}
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-400">{product.rating} ({product.reviewCount} sold)</span>
+            <span className="text-sm text-gray-400">{product.rating} ({product.totalReviews || 0} reviews)</span>
           </div>
 
           <div className="mb-6">
             {product.salePrice ? (
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold">{product.salePrice.toLocaleString('vi-VN')}₫</span>
-                <span className="text-lg text-gray-400 line-through">{product.price.toLocaleString('vi-VN')}₫</span>
+                <span className="text-2xl font-bold">{parseFloat(product.salePrice).toLocaleString("vi-VN")}₫</span>
+                <span className="text-lg text-gray-400 line-through">{parseFloat(product.price).toLocaleString("vi-VN")}₫</span>
                 <span className="bg-red-600 px-2 py-1 text-xs rounded">
-                  {Math.round((1 - product.salePrice / product.price) * 100)}% Sale
+                  {Math.round((1 - parseFloat(product.salePrice) / parseFloat(product.price)) * 100)}% Sale
                 </span>
               </div>
             ) : (
-              <span className="text-2xl font-bold">{product.price.toLocaleString('vi-VN')}₫</span>
+              <span className="text-2xl font-bold">{parseFloat(product.price).toLocaleString("vi-VN")}₫</span>
             )}
           </div>
 
@@ -182,81 +169,75 @@ export default function ProductDetail({ productId, onBack }) {
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Feature details:</h3>
             <ul className="list-disc pl-5 text-gray-300">
-              {product.features.map((feature, index) => (
-                <li key={index}>{feature}</li>
-              ))}
+              {product.features && product.features.length > 0 ? (
+                product.features.map((feature, index) => <li key={index}>{feature}</li>)
+              ) : (
+                <li>No feature details available.</li>
+              )}
             </ul>
           </div>
 
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Color</h3>
             <div className="flex flex-wrap gap-2">
-              {product.colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => handleColorChange(color)}
-                  className={`px-4 py-2 rounded-md ${
-                    selectedColor === color
-                      ? 'bg-orange-500 text-white font-medium'
-                      : 'bg-gray-800 text-white'
-                  }`}
-                >
-                  {color}
-                </button>
-              ))}
+              {product.colors && product.colors.length > 0 ? (
+                product.colors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => handleColorChange(color)}
+                    className={`px-4 py-2 rounded-md ${
+                      selectedColor === color ? "bg-orange-500 text-white font-medium" : "bg-gray-800 text-white"
+                    }`}
+                  >
+                    {color}
+                  </button>
+                ))
+              ) : (
+                <p className="text-gray-400">No colors available.</p>
+              )}
             </div>
           </div>
 
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Size</h3>
             <div className="flex flex-wrap gap-2">
-              {product.sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => handleSizeChange(size)}
-                  className={`px-4 py-2 rounded-md ${
-                    selectedSize === size
-                      ? 'bg-orange-500 text-white font-medium'
-                      : 'bg-gray-800 text-white'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+              {product.sizes && product.sizes.length > 0 ? (
+                product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => handleSizeChange(size)}
+                    className={`px-4 py-2 rounded-md ${
+                      selectedSize === size ? "bg-orange-500 text-white font-medium" : "bg-gray-800 text-white"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))
+              ) : (
+                <p className="text-gray-400">No sizes available.</p>
+              )}
             </div>
           </div>
 
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">Quantity</h3>
             <div className="flex items-center">
-              <button 
-                onClick={() => handleQuantityChange('decrease')}
-                className="p-2 bg-gray-800 rounded-l-md hover:bg-gray-700"
-              >
+              <button onClick={() => handleQuantityChange("decrease")} className="p-2 bg-gray-800 rounded-l-md hover:bg-gray-700">
                 <Minus size={16} />
               </button>
               <span className="px-6 py-2 bg-gray-800 border-l border-r border-gray-700">{quantity}</span>
-              <button 
-                onClick={() => handleQuantityChange('increase')}
-                className="p-2 bg-gray-800 rounded-r-md hover:bg-gray-700"
-              >
+              <button onClick={() => handleQuantityChange("increase")} className="p-2 bg-gray-800 rounded-r-md hover:bg-gray-700">
                 <Plus size={16} />
               </button>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <button 
-              onClick={handleAddToCart}
-              className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 py-3 px-6 rounded-lg flex-1"
-            >
+            <button onClick={handleAddToCart} className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 py-3 px-6 rounded-lg flex-1">
               <ShoppingCart size={20} />
               <span>Add to cart</span>
             </button>
-            <button 
-              onClick={handleBuyNow}
-              className="bg-orange-500 text-white hover:bg-orange-600 py-3 px-6 rounded-lg font-medium flex-1"
-            >
+            <button onClick={handleBuyNow} className="bg-orange-500 text-white hover:bg-orange-600 py-3 px-6 rounded-lg font-medium flex-1">
               Buy Now
             </button>
           </div>
@@ -271,31 +252,6 @@ export default function ProductDetail({ productId, onBack }) {
               <span>Add to favorite list</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Phần đánh giá và sản phẩm liên quan */}
-      <div className="mt-12">
-        <h2 className="text-xl font-bold mb-6 pb-2 border-b border-gray-800">Feedbacks from customers</h2>
-        <div className="text-center py-8 text-gray-400">
-          No feedback available!
-        </div>
-      </div>
-
-      <div className="mt-12">
-        <h2 className="text-xl font-bold mb-6 pb-2 border-b border-gray-800">Related products</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="bg-gray-900 rounded-lg overflow-hidden cursor-pointer hover:transform hover:scale-105 transition-transform">
-              <div className="aspect-square">
-                <img src={product.images[0]} alt="Product" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-3">
-                <h3 className="font-medium truncate">Related product {item}</h3>
-                <p className="text-gray-400 text-sm mt-1">{(product.price * 0.9).toLocaleString('vi-VN')}₫</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

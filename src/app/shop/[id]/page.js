@@ -2,10 +2,11 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import ProductDetail from '@/components/shop/ProductDetail';
+import { use } from "react";
 
 export default function ProductDetailPage({ params }) {
   const router = useRouter();
-  const productId = params.id;
+  const { id: productId } = use(params);
 
   const handleBack = () => {
     router.push('/shop');
