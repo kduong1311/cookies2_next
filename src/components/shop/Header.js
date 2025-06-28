@@ -24,8 +24,7 @@ export default function Header(onCartClick) {
           <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">2</span>
         </button>
         
-        <button className="p-2 hover:text-yellow-500 transition-colors relative"
-        onClick={onCartClick}>
+        <button className="p-2 hover:text-yellow-500 transition-colors relative">
           <ShoppingCart size={20} />
           <span className="absolute -top-1 -right-1 bg-yellow-500 text-black rounded-full w-4 h-4 flex items-center justify-center text-xs">3</span>
         </button>

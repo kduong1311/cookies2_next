@@ -5,7 +5,7 @@ import { Star } from "lucide-react"; // Nếu dùng icon library như lucide
 
 export default function ProductCard({ data }) {
   return (
-    <Link href={'/'}>
+    <Link href={`/shop/${data.id}`}>
       <Card className="border-none cursor-pointer bg-gray-cs p-0">
         <img
           src={data.image}
@@ -15,7 +15,7 @@ export default function ProductCard({ data }) {
         <CardContent className="pb-4">
           <p className="text-gray-400">My shop</p>
           <h2 className="text-lg text-white font-semibold truncate">
-            {data.title}
+            {data.name}
           </h2>
 
           <p className="text-green-500 font-bold text-xl mt-2">
@@ -27,7 +27,7 @@ export default function ProductCard({ data }) {
               <Star className="w-4 h-4 text-yellow-400 mr-1 fill-yellow-400" />
               {data.rating ?? 0}
             </span>
-            <span>{(data.sell || 0).toLocaleString()} sold</span>
+            <span>{(data.total_sale || 0).toLocaleString()} sold</span>
           </div>
         </CardContent>
       </Card>

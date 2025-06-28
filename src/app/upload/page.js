@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin } from "lucide-react"
 import { Description } from "@radix-ui/react-dialog";
+import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 
 export default function CookingUploadPage() {
 
@@ -80,44 +81,59 @@ export default function CookingUploadPage() {
   const now = new Date().toISOString();
 
   const handleSubmit = async () => {
-    if (!file) return alert("Select a video or image, pls");
 
+    if (!file) return alert("Bạn chưa chọn file!");
     try {
-      const formData = new FormData();
-      formData.append("user_id", user.id);
-      formData.append("content_type", "multi");
-      formData.append("title", title);
-      formData.append("description", caption);
-      formData.append("cooking_time", 0);
-      formData.append("difficulty_level", "easy");
-      formData.append("has_recipe", hasRecipe? true : false);
-      formData.append("is_premium", false);
-      formData.append("premium_price", 0.00);
-      formData.append("views_count", 0);
-      formData.append("likes_count", 0);
-      formData.append("comments_count", 0);
-      formData.append("shares_count", 0);
-      formData.append("created_at", now);
-      formData.append("updated_at", now);
-      formData.append("status", "published");
-      formData.append("is_featured", "false");
-
-      const response = await fetch("http://103.253.145.7:3001/api/posts", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Upload fail!");
-      }
-
-      const result = await response.json();
-      alert("Upload successfull!")
-    }catch (err) {
-      alert(`Upload error ${err.message}`);
+      console.log("Đang upload file lên Cloudinary...");
+      const uploadedUrl = await uploadToCloudinary(file);
+      console.log("Upload thành công! URL:", uploadedUrl);
+      // Ví dụ: hiển thị ảnh hoặc gửi URL về BE
+      alert(`Upload thành công!\nURL: ${uploadedUrl}`);
+      console.log(uploadedUrl)
+    } catch (err) {
+      console.error("Upload lỗi:", err);
     }
+
+    // if (!file) return alert("Select a video or image, pls");
+
+    // try {
+    //   const formData = new FormData();
+    //   formData.append("user_id", user.id);
+    //   formData.append("content_type", "multi");
+    //   formData.append("title", title);
+    //   formData.append("description", caption);
+    //   formData.append("cooking_time", 0);
+    //   formData.append("difficulty_level", "easy");
+    //   formData.append("has_recipe", hasRecipe? true : false);
+    //   formData.append("is_premium", false);
+    //   formData.append("premium_price", 0.00);
+    //   formData.append("views_count", 0);
+    //   formData.append("likes_count", 0);
+    //   formData.append("comments_count", 0);
+    //   formData.append("shares_count", 0);
+    //   formData.append("created_at", now);
+    //   formData.append("updated_at", now);
+    //   formData.append("status", "published");
+    //   formData.append("is_featured", "false");
+
+    //   const response = await fetch("http://103.253.145.7:3001/api/posts", {
+    //     method: "POST",
+    //     body: formData,
+    //     credentials: "include",
+    //   });
+
+    //   if (!response.ok) {
+    //     const errorData = await response.json();
+    //     throw new Error(errorData.message || "Upload fail!");
+    //   }
+
+    //   const result = await response.json();
+    //   alert("Upload successfull!")
+    // }catch (err) {
+    //   alert(`Upload error ${err.message}`);
+    // }
+
+
   };
 
   return (
