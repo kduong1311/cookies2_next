@@ -186,7 +186,7 @@ export default function CookingUploadPage() {
       // Step 3: Create recipe if has_recipe is true
       if (hasRecipe) {
         const recipeData = {
-          post_id: postResult.data.id, // Assuming the API returns the post ID
+          post_id: postResult.data.post_id, // Assuming the API returns the post ID
           name: recipe.title.trim(),
           cuisine_type: cuisine || "Other",
           meal_type: mealType || "dinner",
