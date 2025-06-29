@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin } from "lucide-react"
+import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin, DollarSign } from "lucide-react"
 import { Description } from "@radix-ui/react-dialog";
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 
@@ -19,6 +19,11 @@ export default function CookingUploadPage() {
   const [currentTag, setCurrentTag] = useState("")
   const [location, setLocation] = useState("")
   const [hasRecipe, setHasRecipe] = useState(false)
+  const [cuisine, setCuisine] = useState("");
+  const [mealType, setMealType] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
+  const [premiumPrice, setPremiumPrice] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const [recipe, setRecipe] = useState({
     title: "",
     prepTime: "",
@@ -28,6 +33,15 @@ export default function CookingUploadPage() {
     ingredients: [""],
     instructions: [""]
   })
+
+  const cuisineOptions = [
+    "Vietnamese", "Chinese", "Japanese", "Korean", "Thai", "Italian", 
+    "French", "American", "Mexican", "Indian", "Other"
+  ];
+
+  const mealTypeOptions = [
+    "breakfast", "lunch", "dinner", "snack", "dessert", "appetizer", "beverage"
+  ];
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
@@ -78,62 +92,163 @@ export default function CookingUploadPage() {
     setRecipe({...recipe, instructions: newInstructions})
   }
 
-  const now = new Date().toISOString();
+  // Parse ingredients from text format to API format
+  const parseIngredients = (ingredientTexts) => {
+    return ingredientTexts
+      .filter(text => text.trim())
+      .map((text, index) => {
+        // Try to parse quantity and unit from text like "500g thịt heo" or "2 quả trứng"
+        const match = text.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)?\s+(.+)$/);
+        if (match) {
+          return {
+            name: match[3].trim(),
+            quantity: parseFloat(match[1]),
+            unit: match[2] || "piece",
+            position: index
+          };
+        } else {
+          return {
+            name: text.trim(),
+            quantity: 1,
+            unit: "piece",
+            position: index
+          };
+        }
+      });
+  };
+
+  // Parse instructions to API format
+  const parseInstructions = (instructionTexts) => {
+    return instructionTexts
+      .filter(text => text.trim())
+      .map((text, index) => ({
+        step_number: index + 1,
+        description: text.trim(),
+        duration: 5 // Default duration, could be enhanced to parse from text
+      }));
+  };
 
   const handleSubmit = async () => {
-
     if (!file) return alert("Bạn chưa chọn file!");
+        if (!title.trim()) return alert("Vui lòng nhập tiêu đề!");
+    
+    // Only validate recipe fields if hasRecipe is true
+    if (hasRecipe) {
+      if (!recipe.title.trim()) return alert("Vui lòng nhập tên món ăn!");
+      if (isPremium && (!premiumPrice || premiumPrice <= 0)) return alert("Vui lòng nhập giá hợp lệ cho nội dung premium!");
+    }
+
+    setIsUploading(true);
+
     try {
+      // Step 1: Upload file to Cloudinary
       console.log("Đang upload file lên Cloudinary...");
       const uploadedUrl = await uploadToCloudinary(file);
       console.log("Upload thành công! URL:", uploadedUrl);
-      // Ví dụ: hiển thị ảnh hoặc gửi URL về BE
-      alert(`Upload thành công!\nURL: ${uploadedUrl}`);
-      console.log(uploadedUrl)
+
+      // Step 2: Create post
+      const postData = {
+        content_type: file.type.startsWith("image") ? "image" : "video",
+        title: title.trim(),
+        description: caption.trim(),
+        cooking_time: parseInt(recipe.cookTime) || 0,
+        difficulty_level: recipe.difficulty === "Dễ" ? "easy" : recipe.difficulty === "Trung bình" ? "medium" : "hard",
+        serving_size: parseInt(recipe.servings) || 1,
+        has_recipe: hasRecipe,
+        is_premium: hasRecipe ? isPremium : false,
+        premium_price: hasRecipe && isPremium ? parseFloat(premiumPrice) : 0,
+        status: "published",
+        is_featured: false,
+        media: [{
+          url: uploadedUrl,
+          type: file.type.startsWith("image") ? "image" : "video"
+        }]
+      };
+
+      console.log("Đang tạo post...", postData);
+      const postResponse = await fetch("http://103.253.145.7:3001/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+        credentials: "include",
+      });
+
+      if (!postResponse.ok) {
+        const errorData = await postResponse.json();
+        throw new Error(errorData.message || "Tạo post thất bại!");
+      }
+
+      const postResult = await postResponse.json();
+      console.log("Tạo post thành công:", postResult);
+
+      // Step 3: Create recipe if has_recipe is true
+      if (hasRecipe) {
+        const recipeData = {
+          post_id: postResult.data.id, // Assuming the API returns the post ID
+          name: recipe.title.trim(),
+          cuisine_type: cuisine || "Other",
+          meal_type: mealType || "dinner",
+          preparation_time: parseInt(recipe.prepTime) || 0,
+          cooking_time: parseInt(recipe.cookTime) || 0,
+          is_premium: isPremium,
+          ingredients: parseIngredients(recipe.ingredients),
+          steps: parseInstructions(recipe.instructions)
+        };
+
+        console.log("Đang tạo recipe...", recipeData);
+        const recipeResponse = await fetch("http://103.253.145.7:3004/api/recipes/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(recipeData),
+          credentials: "include",
+        });
+
+        if (!recipeResponse.ok) {
+          const errorData = await recipeResponse.json();
+          console.error("Tạo recipe thất bại:", errorData);
+          // Don't throw error here since post was created successfully
+          alert("Post đã được tạo thành công nhưng có lỗi khi tạo recipe!");
+        } else {
+          const recipeResult = await recipeResponse.json();
+          console.log("Tạo recipe thành công:", recipeResult);
+        }
+      }
+
+      alert("Đăng bài thành công!");
+      
+      // Reset form
+      setFile(null);
+      setPreview(null);
+      setTitle("");
+      setCaption("");
+      setTags([]);
+      setCurrentTag("");
+      setLocation("");
+      setHasRecipe(false);
+      setCuisine("");
+      setMealType("");
+      setIsPremium(false);
+      setPremiumPrice("");
+      setRecipe({
+        title: "",
+        prepTime: "",
+        cookTime: "",
+        servings: "",
+        difficulty: "Dễ",
+        ingredients: [""],
+        instructions: [""]
+      });
+
     } catch (err) {
       console.error("Upload lỗi:", err);
+      alert(`Upload lỗi: ${err.message}`);
+    } finally {
+      setIsUploading(false);
     }
-
-    // if (!file) return alert("Select a video or image, pls");
-
-    // try {
-    //   const formData = new FormData();
-    //   formData.append("user_id", user.id);
-    //   formData.append("content_type", "multi");
-    //   formData.append("title", title);
-    //   formData.append("description", caption);
-    //   formData.append("cooking_time", 0);
-    //   formData.append("difficulty_level", "easy");
-    //   formData.append("has_recipe", hasRecipe? true : false);
-    //   formData.append("is_premium", false);
-    //   formData.append("premium_price", 0.00);
-    //   formData.append("views_count", 0);
-    //   formData.append("likes_count", 0);
-    //   formData.append("comments_count", 0);
-    //   formData.append("shares_count", 0);
-    //   formData.append("created_at", now);
-    //   formData.append("updated_at", now);
-    //   formData.append("status", "published");
-    //   formData.append("is_featured", "false");
-
-    //   const response = await fetch("http://103.253.145.7:3001/api/posts", {
-    //     method: "POST",
-    //     body: formData,
-    //     credentials: "include",
-    //   });
-
-    //   if (!response.ok) {
-    //     const errorData = await response.json();
-    //     throw new Error(errorData.message || "Upload fail!");
-    //   }
-
-    //   const result = await response.json();
-    //   alert("Upload successfull!")
-    // }catch (err) {
-    //   alert(`Upload error ${err.message}`);
-    // }
-
-
   };
 
   return (
@@ -211,7 +326,7 @@ export default function CookingUploadPage() {
           {/* Title */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <Label className="text-sm font-semibold text-white mb-2 block">
-              Post Title
+              Post Title *
             </Label>
             <textarea
               value={title}
@@ -219,9 +334,8 @@ export default function CookingUploadPage() {
               placeholder="Let's share your story..."
               className="w-full h-20 p-3 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
             />
-            <p className="text-xs text-gray-500 mt-1">{title.length}/80</p>
+            <p className="text-xs text-gray-500 mt-1">{title.length}/200</p>
           </div>
-
 
           {/* Caption */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
@@ -236,44 +350,6 @@ export default function CookingUploadPage() {
             />
             <p className="text-xs text-gray-500 mt-1">{caption.length}/500</p>
           </div>
-
-          {/* Tags
-          <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
-            <Label className="text-sm font-semibold text-white mb-2 block items-center gap-2">
-              <Hash className="w-4 h-4 text-orange-500" />
-              Hashtags
-            </Label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={currentTag}
-                onChange={(e) => setCurrentTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addTag()}
-                placeholder="Thêm hashtag..."
-                className="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-              />
-              <Button 
-                onClick={addTag}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-3 rounded-lg"
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded-full text-xs flex items-center gap-1"
-                >
-                  #{tag}
-                  <button onClick={() => removeTag(tag)} className="hover:text-orange-300">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div> */}
-
         </div>
 
         {/* Right Column - Recipe */}
@@ -307,7 +383,7 @@ export default function CookingUploadPage() {
                 <h3 className="text-lg font-semibold text-white">Thông tin cơ bản</h3>
                 
                 <div>
-                  <Label className="text-xs font-medium text-gray-300">Tên món ăn</Label>
+                  <Label className="text-xs font-medium text-gray-300">Tên món ăn *</Label>
                   <input
                     type="text"
                     value={recipe.title}
@@ -319,27 +395,64 @@ export default function CookingUploadPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
+                    <Label className="text-xs font-medium text-gray-300">Loại ẩm thực</Label>
+                    <select
+                      value={cuisine}
+                      onChange={(e) => setCuisine(e.target.value)}
+                      className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
+                    >
+                      <option value="">Chọn loại ẩm thực</option>
+                      {cuisineOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs font-medium text-gray-300">Loại bữa ăn</Label>
+                    <select
+                      value={mealType}
+                      onChange={(e) => setMealType(e.target.value)}
+                      className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
+                    >
+                      <option value="">Chọn loại bữa ăn</option>
+                      {mealTypeOptions.map(option => (
+                        <option key={option} value={option}>
+                          {option === 'breakfast' ? 'Sáng' : 
+                           option === 'lunch' ? 'Trưa' : 
+                           option === 'dinner' ? 'Tối' : 
+                           option === 'snack' ? 'Ăn vặt' : 
+                           option === 'dessert' ? 'Tráng miệng' : 
+                           option === 'appetizer' ? 'Khai vị' : 
+                           'Đồ uống'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
                     <Label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Prep
+                      <Clock className="w-3 h-3" /> Prep (phút)
                     </Label>
                     <input
-                      type="text"
+                      type="number"
                       value={recipe.prepTime}
                       onChange={(e) => setRecipe({...recipe, prepTime: e.target.value})}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                      placeholder="15 phút"
+                      placeholder="15"
                     />
                   </div>
                   <div>
                     <Label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Cook
+                      <Clock className="w-3 h-3" /> Cook (phút)
                     </Label>
                     <input
-                      type="text"
+                      type="number"
                       value={recipe.cookTime}
                       onChange={(e) => setRecipe({...recipe, cookTime: e.target.value})}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                      placeholder="30 phút"
+                      placeholder="30"
                     />
                   </div>
                 </div>
@@ -350,11 +463,11 @@ export default function CookingUploadPage() {
                       <Users className="w-3 h-3" /> Khẩu phần
                     </Label>
                     <input
-                      type="text"
+                      type="number"
                       value={recipe.servings}
                       onChange={(e) => setRecipe({...recipe, servings: e.target.value})}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                      placeholder="4 người"
+                      placeholder="4"
                     />
                   </div>
                   <div>
@@ -370,6 +483,42 @@ export default function CookingUploadPage() {
                     </select>
                   </div>
                 </div>
+              </div>
+
+              {/* Premium Settings */}
+              <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-semibold text-white flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-yellow-500" />
+                    Nội dung Premium
+                  </Label>
+                  <button
+                    onClick={() => setIsPremium(!isPremium)}
+                    className={`w-10 h-5 rounded-full transition-colors ${
+                      isPremium ? 'bg-yellow-500' : 'bg-gray-600'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                        isPremium ? 'translate-x-5' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {isPremium && (
+                  <div>
+                    <Label className="text-xs font-medium text-gray-300">Giá (VND)</Label>
+                    <input
+                      type="number"
+                      value={premiumPrice}
+                      onChange={(e) => setPremiumPrice(e.target.value)}
+                      className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-white placeholder-gray-400"
+                      placeholder="50000"
+                      min="0"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Người dùng sẽ phải trả phí để xem công thức này</p>
+                  </div>
+                )}
               </div>
 
               {/* Ingredients */}
@@ -452,10 +601,10 @@ export default function CookingUploadPage() {
           {/* Submit Button */}
           <Button
             onClick={handleSubmit}
-            disabled={!file}
+            disabled={!file || isUploading}
             className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl text-base font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Đăng bài ngay
+            {isUploading ? "Đang đăng bài..." : "Đăng bài ngay"}
           </Button>
         </div>
       </div>

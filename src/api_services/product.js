@@ -5,10 +5,7 @@ const API_BASE_URL = 'http://103.253.145.7:3003/api';
 
 export const fetchProducts = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products`, {
-      method: "GET",
-      credentials: "include",
-    });
+    const response = await fetch(`${API_BASE_URL}/products`);
     if (!response.ok) {
       throw new Error("Failed to fetch products");
     }
@@ -41,10 +38,7 @@ export const fetchProducts = async () => {
 
 export const fetchProductById = async (id) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      method: "GET",
-      credentials: "include",
-    });
+    const response = await fetch(`${API_BASE_URL}/products/${id}`);
 
     console.log(`${API_BASE_URL}/products/${id}`);
     if (!response.ok) {
