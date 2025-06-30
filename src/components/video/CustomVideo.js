@@ -1,10 +1,24 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Volume2, Play, Settings } from "lucide-react";
 
-export default function CustomVideo({ src }) {
+export default function CustomVideo({ src, isActive }) {
   const videoRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  // Auto play/pause based on isActive prop
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isActive) {
+      video.play();
+      setPlaying(true);
+    } else {
+      video.pause();
+      setPlaying(false);
+    }
+  }, [isActive]);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -35,13 +49,15 @@ export default function CustomVideo({ src }) {
   };
 
   return (
-    <div className="relative w-full max-w-[1000px] max-h-[97vh] h-auto rounded-lg overflow-hidden bg-black">
+    <div className="relative w-full h-full rounded-lg overflow-hidden bg-black">
       <video
         src={src}
         ref={videoRef}
         onTimeUpdate={handleTimeUpdate}
-        className="w-full h-auto object-contain cursor-pointer"
+        className="w-full h-full object-cover cursor-pointer"
         onClick={togglePlay}
+        loop
+        muted
       />
 
       {/* Top Controls */}
@@ -55,7 +71,7 @@ export default function CustomVideo({ src }) {
         className="absolute bottom-0 left-0 w-full h-2 bg-gray-700 cursor-pointer z-10"
         onClick={handleProgressClick}
       >
-        <div className="h-full bg-orange" style={{ width: `${progress}%` }}></div>
+        <div className="h-full bg-orange-500" style={{ width: `${progress}%` }}></div>
       </div>
 
       {/* Center Play Icon: chỉ hiện khi paused, không chặn pointer */}

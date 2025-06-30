@@ -38,7 +38,11 @@ export default function LeftSidebar({ openShop,  goToVideoFeed }) {
         router.push("/");
       },  
     },
-    { label: "Explore", icon: <Compass className="mr-3" /> },
+    { label: "Search", icon: <Compass className="mr-3" />,
+      onClick: () => {
+        router.push("/search");
+      },
+    },
     { label: "Followed", icon: <HeartPlus className="mr-3" /> },
     { label: "Shop", icon: <ShoppingBag className="mr-3" />,
       onClick: () => {
