@@ -183,3 +183,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+.main_div {
+  --color: #ffffff;
+  position: relative;
+  z-index: 1;
+  display: inline-block; /* cần để viền khớp nút */
+}
+
+.main_div::before,
+.main_div::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  z-index: -5;
+  transition: 0.5s;
+}
+
+.main_div::before {
+  top: -7px;
+  left: -7px;
+  border-top: 3px solid var(--color);
+  border-left: 3px solid var(--color);
+}
+
+.main_div::after {
+  bottom: -7px;
+  right: -7px;
+  border-right: 3px solid var(--color);
+  border-bottom: 3px solid var(--color);
+}
+
+.main_div:hover::before,
+.main_div:hover::after {
+  width: 100%;
+  height: 100%;
+}
+
+.main_div button {
+  padding: 0.5em 1.5em;
+  font-size: 14px;
+  background: #ffffff;
+  color: #ff7b00;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}

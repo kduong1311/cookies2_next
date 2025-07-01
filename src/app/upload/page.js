@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin, DollarSign } from "lucide-react"
+import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin, DollarSign, Image as ImageIcon } from "lucide-react"
 import { Description } from "@radix-ui/react-dialog";
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 
@@ -24,6 +24,8 @@ export default function CookingUploadPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [premiumPrice, setPremiumPrice] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [recipeCover, setRecipeCover] = useState(null);
+  const [recipeCoverPreview, setRecipeCoverPreview] = useState(null);
   const [recipe, setRecipe] = useState({
     title: "",
     prepTime: "",
@@ -50,6 +52,14 @@ export default function CookingUploadPage() {
       setPreview(URL.createObjectURL(selectedFile))
     }
   }
+
+  const handleRecipeCoverChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setRecipeCover(selectedFile);
+      setRecipeCoverPreview(URL.createObjectURL(selectedFile));
+    }
+  };
 
   const addTag = () => {
     if (currentTag.trim() && !tags.includes(currentTag.trim())) {
@@ -136,15 +146,19 @@ export default function CookingUploadPage() {
     if (hasRecipe) {
       if (!recipe.title.trim()) return alert("Vui lòng nhập tên món ăn!");
       if (isPremium && (!premiumPrice || premiumPrice <= 0)) return alert("Vui lòng nhập giá hợp lệ cho nội dung premium!");
+      if (parseInt(recipe.prepTime) < 0 || parseInt(recipe.cookTime) < 0) return alert("Thời gian không được âm!");
+      if (parseInt(recipe.servings) < 0) return alert("Số khẩu phần không được âm!");
     }
 
     setIsUploading(true);
 
     try {
       // Step 1: Upload file to Cloudinary
-      console.log("Đang upload file lên Cloudinary...");
       const uploadedUrl = await uploadToCloudinary(file);
-      console.log("Upload thành công! URL:", uploadedUrl);
+
+      if (hasRecipe && recipeCover) {
+        const recipeCoverUrl = await uploadToCloudinary(recipeCover);
+      }
 
       // Step 2: Create post
       const postData = {
@@ -186,7 +200,7 @@ export default function CookingUploadPage() {
       // Step 3: Create recipe if has_recipe is true
       if (hasRecipe) {
         const recipeData = {
-          post_id: postResult.post_id, // Assuming the API returns the post ID
+          post_id: postResult.post_id,
           name: recipe.title.trim(),
           cuisine_type: cuisine || "Other",
           meal_type: mealType || "dinner",
@@ -194,7 +208,8 @@ export default function CookingUploadPage() {
           cooking_time: parseInt(recipe.cookTime) || 0,
           is_premium: isPremium,
           ingredients: parseIngredients(recipe.ingredients),
-          steps: parseInstructions(recipe.instructions)
+          steps: parseInstructions(recipe.instructions),
+          cover_media_url: recipeCoverUrl,
         };
 
         console.log("Đang tạo recipe...", recipeData);
@@ -378,6 +393,30 @@ export default function CookingUploadPage() {
 
           {hasRecipe && (
             <>
+            <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700 space-y-3">
+            <h3 className="text-lg font-semibold text-white">Ảnh bìa công thức (tùy chọn)</h3>
+            <div className="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center hover:border-orange-500 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                id="recipeCover"
+                onChange={handleRecipeCoverChange}
+                className="hidden"
+              />
+              <label htmlFor="recipeCover" className="cursor-pointer flex flex-col items-center gap-2">
+                {!recipeCoverPreview ? (
+                  <>
+                    <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <p className="text-sm font-medium text-white">Chọn ảnh bìa cho công thức</p>
+                  </>
+                ) : (
+                  <img src={recipeCoverPreview} alt="cover preview" className="rounded-lg w-full max-h-48 object-cover" />
+                )}
+              </label>
+            </div>
+          </div>
               {/* Recipe Basic Info */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700 space-y-3">
                 <h3 className="text-lg font-semibold text-white">Thông tin cơ bản</h3>

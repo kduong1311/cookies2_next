@@ -1,0 +1,71 @@
+.navbar-button {
+  font-family: inherit;
+  font-size: 16px;
+  background: #212121;
+  color: white;
+  fill: rgb(155, 153, 153);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  width: 100%;
+  padding: 0.6em 0.8em;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.navbar-button span {
+  display: block;
+  margin-left: 0.3em;
+  transition: opacity 0.5s linear;
+}
+
+.navbar-button svg {
+  display: block;
+  transform-origin: center center;
+  transition: transform 0.3s ease-in-out, fill 0.3s;
+}
+
+.navbar-button:hover {
+  background: #f18921;
+}
+
+.navbar-button:hover .svg-wrapper {
+  transform: scale(1.25);
+  transition: 0.5s linear;
+}
+
+.navbar-button:hover svg {
+  transform: translateX(1.2em) scale(1.1);
+}
+
+.navbar-button:hover span {
+  opacity: 0;
+}
+
+.navbar-button:active {
+  transform: scale(0.95);
+}
+
+.svg-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-button.active .svg-wrapper {
+  transform: scale(1.25);
+  transition: 0.5s linear;
+}
+
+.navbar-button.active svg {
+  transform: translateX(1.2em) scale(1.1);
+}
+
+.navbar-button.active span {
+  opacity: 0;
+}
+
+.navbar-button.active {
+  background-color: #f18921;
+}

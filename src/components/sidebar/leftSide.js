@@ -1,18 +1,17 @@
 "use client";
-import { Home, Compass, Bell, User, Flame, HeartPlus, ShoppingBag, BellRing, Info, Upload, LogIn } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Compass, BellRing, Flame, HeartPlus, ShoppingBag, Info, Upload, LogIn, LogOut, Search } from 'lucide-react';
 import LoginModal from '@/components/user/LoginModal';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConfirm } from '@/contexts/ConfirmContext';
-import { Description } from '@radix-ui/react-dialog';
+import "@/app/css/loginButton.css";
 
-export default function LeftSidebar({ openShop,  goToVideoFeed }) {
+export default function LeftSidebar({ openShop, goToVideoFeed }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeItem, setActiveItem] = useState("Featured");
   const router = useRouter();
-  const {logout, user} = useAuth();
+  const { logout, user } = useAuth();
   const confirm = useConfirm();
 
   const handleClick = (item, callback) => {
@@ -25,38 +24,20 @@ export default function LeftSidebar({ openShop,  goToVideoFeed }) {
       title: "Logout",
       description: "Are you sure you want to logout?"
     });
-
     if (ok) {
       await logout();
       setIsLoginModalOpen(true);
     }
-  }; 
+  };
 
   const navItems = [
-    { label: "Featured", icon: <Flame className="mr-3" />, 
-      onClick: () => {
-        router.push("/");
-      },  
-    },
-    { label: "Search", icon: <Compass className="mr-3" />,
-      onClick: () => {
-        router.push("/search");
-      },
-    },
-    { label: "Followed", icon: <HeartPlus className="mr-3" /> },
-    { label: "Shop", icon: <ShoppingBag className="mr-3" />,
-      onClick: () => {
-        router.push("/shop");
-      },
-    },
-    { label: "Notifications", icon: <BellRing className="mr-3" /> },
-    { label: "Upload", icon: <Upload className="mr-3" />, 
-        onClick: () => {
-          router.push("/upload");
-      },
-    },
-    { label: "About me", icon: <Info className="mr-3" />
-    }, 
+    { label: "Featured", icon: <Flame className="h-5 w-5" />, onClick: () => router.push("/") },
+    { label: "Search", icon: <Search className="h-5 w-5" />, onClick: () => router.push("/search") },
+    { label: "Followed", icon: <HeartPlus className="h-5 w-5" /> },
+    { label: "Shop", icon: <ShoppingBag className="h-5 w-5" />, onClick: () => router.push("/shop") },
+    { label: "Notifications", icon: <BellRing className="h-5 w-5" /> },
+    { label: "Upload", icon: <Upload className="h-5 w-5" />, onClick: () => router.push("/upload") },
+    { label: "About me", icon: <Info className="h-5 w-5" /> },
   ];
 
   return (
@@ -65,43 +46,41 @@ export default function LeftSidebar({ openShop,  goToVideoFeed }) {
         <img src='/Logo2-white.png' alt='logo' />
         <div className="w-full flex justify-center mt-3">
           {user ? (
-          <Button
-            onClick={handleLogout}
-            variant="secondary"
-            className="bg-white text-[#f18921] hover:bg-gray-100 rounded-2xl px-6"
-          >
-            <LogIn className="mr-4 h-2 w-4" />
-            Logout
-          </Button>
+            // ⚡ Nút Logout kiểu border-animation
+            <div className="main_div">
+              <button onClick={handleLogout}>
+                <LogOut className="inline mr-2 h-4 w-4" />
+                Logout
+              </button>
+            </div>
           ) : (
-          <>
-            <Button
-              onClick={() => setIsLoginModalOpen(true)}
-              variant="secondary"
-              className="bg-white text-[#f18921] hover:bg-gray-100 rounded-2xl px-6"
-            >
-              <LogIn className="mr-4 h-2 w-4"/>
-              Login
-            </Button>
-            <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />
-          </>
-        )}
+            <>
+              {/* ⚡ Nút Login kiểu border-animation */}
+              <div className="main_div">
+                <button onClick={() => setIsLoginModalOpen(true)}>
+                  <LogIn className="inline mr-2 h-4 w-4" />
+                  Login
+                </button>
+              </div>
+              <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />
+            </>
+          )}
         </div>
       </div>
 
       <nav className="flex-grow">
         <ul className="space-y-4">
           {navItems.map(({ label, icon, onClick }) => (
-            <li
-              key={label}
-              onClick={() => handleClick(label, onClick)}
-              className={`flex items-center p-3 rounded-lg cursor-pointer 
-                ${activeItem === label
-                  ? 'bg-orange text-white'
-                  : 'hover-orange-bg text-white/80 hover:text-white'}`}
-            >
-              {icon}
-              <span className="font-medium">{label}</span>
+            <li key={label}>
+              <button
+                onClick={() => handleClick(label, onClick)}
+                className={`navbar-button ${activeItem === label ? 'active bg-orange' : ''}`}
+              >
+                <div className="svg-wrapper">
+                  {icon}
+                </div>
+                <span className="ml-3 font-medium">{label}</span>
+              </button>
             </li>
           ))}
         </ul>
