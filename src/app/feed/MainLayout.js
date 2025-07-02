@@ -21,6 +21,7 @@ export default function MainLayout({ children }) {
   const [isRecipeOpen, setIsRecipeOpen] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [currentPostId, setCurrentPostId] = useState(null);
 
 const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/upload") || pathname.startsWith("/about") || pathname.startsWith("/profile") || pathname.startsWith("/search");
 
@@ -62,6 +63,7 @@ const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/uploa
                   isCommentOpen={isCommentOpen}
                   setIsCommentOpen={setIsCommentOpen}
                   setIsProfileOpen={setIsProfileOpen}
+                  setCurrentPostId={setCurrentPostId}
                 />
               )}
             </div>
@@ -76,7 +78,8 @@ const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/uploa
                   transition={{ duration: 0.3 }}
                   className="w-[800px] bg-gray-800 text-black p-6 overflow-y-auto shadow-lg hide-scrollbar"
                 >
-                  <RecipePage />
+                  <RecipePage
+                  postId={currentPostId}/>
                 </motion.div>
               )}
 
@@ -98,7 +101,6 @@ const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/uploa
       </div>
 
       <RightSidebar />
-      {console.log("Gemini API Key:", process.env.NEXT_PUBLIC_GEMINI_API_KEY)}
       <ChatBot apiKey={process.env.NEXT_PUBLIC_GEMINI_API_KEY}/>
     </div>
   );

@@ -3,7 +3,7 @@ import VideoPlayer from './VideoPlayer';
 import VideoInteractions from './VideoInteractions';
 import Loading from '../Loading';
 
-export default function VideoFeed({ isRecipeOpen, setIsRecipeOpen, isCommentOpen, setIsCommentOpen, setIsProfileOpen }) {
+export default function VideoFeed({ isRecipeOpen, setIsRecipeOpen, isCommentOpen, setIsCommentOpen, setIsProfileOpen, setCurrentPostId}) {
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState({});
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
@@ -77,6 +77,13 @@ export default function VideoFeed({ isRecipeOpen, setIsRecipeOpen, isCommentOpen
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentPostIndex, posts.length]);
+
+  useEffect(() => {
+  if (posts.length > 0 && currentPostIndex >= 0) {
+    const currentPost = posts[currentPostIndex];
+    setCurrentPostId(currentPost?.post_id);
+  }
+}, [currentPostIndex, posts, setCurrentPostId]);
 
   const currentPost = posts[currentPostIndex];
   const currentUser = users[currentPost?.user_id];

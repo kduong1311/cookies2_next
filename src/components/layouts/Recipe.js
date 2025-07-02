@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Clock, 
   Users, 
@@ -7,107 +7,117 @@ import {
   MessageSquare, 
   Share2, 
   Bookmark, 
-  Star 
+  Star,
+  ArrowLeft,
+  Loader
 } from 'lucide-react';
 
-export default function RecipePage() {
+export default function RecipePage({ postId, onBack }) {
   const [saved, setSaved] = useState(false);
   const [liked, setLiked] = useState(false);
   const [rating, setRating] = useState(0);
+  const [recipe, setRecipe] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample recipe data
-  const recipe = {
-    title: "Traditional Vietnamese Beef Pho",
-    author: "Chef Nguyen Van A",
-    authorAvatar: "https://cafefcdn.com/203337114487263232/2025/1/1/47208442311669476181209639033670841156961389n-1735736938941-17357369390451505103058.jpg",
-    coverImage: "https://bizweb.dktcdn.net/100/477/987/products/pho-bo-ha-noi-jpeg.jpg?v=1712628941747",
-    description: "Vietnamese beef pho, a traditional dish famous for its rich flavor from beef bone broth simmered for many hours with characteristic spices.",
-    prepTime: 30,
-    cookTime: 180,
-    servings: 6,
-    difficulty: "Medium",
-    ingredients: [
-      { name: "Beef bones", amount: "1.5", unit: "kg" },
-      { name: "Beef fillet", amount: "500", unit: "g" },
-      { name: "Ginger", amount: "1", unit: "root" },
-      { name: "Onion", amount: "2", unit: "bulbs" },
-      { name: "Star anise", amount: "3", unit: "pieces" },
-      { name: "Cinnamon stick", amount: "2", unit: "sticks" },
-      { name: "Cloves", amount: "5", unit: "pieces" },
-      { name: "Black cardamom", amount: "2", unit: "pieces" },
-      { name: "Coriander seeds", amount: "1", unit: "teaspoon" },
-      { name: "Salt", amount: "2", unit: "tablespoons" },
-      { name: "Fish sauce", amount: "3", unit: "tablespoons" },
-      { name: "Rock sugar", amount: "30", unit: "g" },
-      { name: "Rice noodles (pho)", amount: "1", unit: "kg" },
-      { name: "Green onions", amount: "100", unit: "g" },
-      { name: "Thai basil", amount: "1", unit: "bunch" },
-      { name: "Mint", amount: "1", unit: "bunch" },
-      { name: "Bean sprouts", amount: "200", unit: "g" },
-      { name: "Lime", amount: "2", unit: "fruits" },
-      { name: "Fresh chili", amount: "3", unit: "fruits" }
-    ],
-    steps: [
-      {
-        title: "Prepare bones and meat",
-        description: "Wash beef bones thoroughly, put them in a pot of cold water and boil for 5 minutes to remove foam and impurities. Then take the bones out, rinse them with cold water. Wash beef fillet, slice thinly and set aside."
-      },
-      {
-        title: "Prepare spices",
-        description: "Grill or char onions and ginger directly over a flame until fragrant and slightly charred. Then peel off the burnt skin. Lightly toast dry spices like star anise, cinnamon, cloves, and black cardamom until fragrant."
-      },
-      {
-        title: "Cook the broth",
-        description: "Add blanched bones to a pot, pour water to cover the bones by about 5cm. Add grilled onion, ginger, and toasted spices. Simmer over low heat for about 3 hours, skimming off foam occasionally to keep the broth clear."
-      },
-      {
-        title: "Season the broth",
-        description: "After the broth has developed a sweet flavor from the bones, season with salt, fish sauce, and rock sugar. Adjust seasonings to taste so the broth has a clear, slightly sweet, and slightly salty flavor."
-      },
-      {
-        title: "Prepare pho noodles and herbs",
-        description: "Briefly blanch pho noodles in boiling water, then drain and rinse with cold water. Wash fresh herbs like Thai basil, mint, and bean sprouts thoroughly and drain."
-      },
-      {
-        title: "Assemble and serve",
-        description: "Place pho noodles in a bowl, arrange sliced beef fillet on top, and pour hot broth over. Add chopped green onions and sprinkle with pepper. Serve with fresh herbs, lime, and fresh chili."
+  // Fetch recipe data from API
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      if (!postId) return;
+      
+      try {
+        setLoading(true);
+        const response = await fetch(`http://103.253.145.7:3004/api/recipes/post/${postId}`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setRecipe(data.data);
+        } else {
+          setError('Failed to load recipe');
+        }
+      } catch (err) {
+        setError('Error fetching recipe data');
+        console.error('Error fetching recipe:', err);
+      } finally {
+        setLoading(false);
       }
-    ],
-    comments: [
-      {
-        user: "Tran Thi B",
-        avatar: "/api/placeholder/40/40",
-        content: "The recipe is very detailed and easy to follow. I tried it and my whole family loved it!",
-        date: "2 days ago"
-      },
-      {
-        user: "Le Van C",
-        avatar: "/api/placeholder/40/40",
-        content: "The pho is truly delicious. I added a little beef shank and it really suited my family's taste.",
-        date: "1 week ago"
-      }
-    ]
-  };
+    };
+
+    fetchRecipe();
+  }, [postId]);
 
   const handleRatingChange = (newRating) => {
     setRating(newRating);
   };
 
+  const getDifficultyLevel = (cookingTime) => {
+    if (cookingTime <= 30) return { level: 'Easy', stars: 1 };
+    if (cookingTime <= 60) return { level: 'Medium', stars: 2 };
+    return { level: 'Hard', stars: 3 };
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-gray-800 min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="animate-spin text-orange-500" size={40} />
+          <p className="text-gray-300">Loading recipe...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !recipe) {
+    return (
+      <div className="bg-gray-800 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error || 'Recipe not found'}</p>
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
+            >
+              Go Back
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const difficulty = getDifficultyLevel(recipe.cooking_time);
+  const totalTime = recipe.total_time || (recipe.preparation_time + recipe.cooking_time);
+
   return (
     <div className="bg-gray-800 min-h-screen pb-12">
+      {/* Header with back button */}
+      {onBack && (
+        <div className="p-4 border-b border-gray-600">
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-gray-300 hover:text-white transition"
+          >
+            <ArrowLeft size={20} />
+            <span>Back to Feed</span>
+          </button>
+        </div>
+      )}
+
       {/* Header and cover image */}
       <div className="relative">
         <img 
-          src={recipe.coverImage} 
-          alt={recipe.title} 
+          src={recipe.cover_media_url || "https://bizweb.dktcdn.net/100/477/987/products/pho-bo-ha-noi-jpeg.jpg?v=1712628941747"} 
+          alt={recipe.name} 
           className="w-full h-64 md:h-96 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{recipe.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">{recipe.name}</h1>
           <div className="flex items-center gap-3 mb-3">
-            <img src={recipe.authorAvatar} alt="Author" className="w-8 h-8 rounded-full" />
-            <span>{recipe.author}</span>
+            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+              <ChefHat size={16} />
+            </div>
+            <span>Recipe by Chef</span>
           </div>
         </div>
       </div>
@@ -119,30 +129,30 @@ export default function RecipePage() {
             <div className="flex flex-col items-center text-gray-100">
               <Clock className="text-orange-500 mb-1" />
               <span className="text-sm text-gray-300">Prep Time</span>
-              <span className="font-medium">{recipe.prepTime} mins</span>
+              <span className="font-medium">{recipe.preparation_time} mins</span>
             </div>
             <div className="flex flex-col items-center text-gray-100">
               <ChefHat className="text-orange-500 mb-1" />
               <span className="text-sm text-gray-300">Cook Time</span>
-              <span className="font-medium">{recipe.cookTime} mins</span>
+              <span className="font-medium">{recipe.cooking_time} mins</span>
             </div>
             <div className="flex flex-col items-center text-gray-100">
               <Users className="text-orange-500 mb-1" />
-              <span className="text-sm text-gray-300">Servings</span>
-              <span className="font-medium">{recipe.servings} people</span>
+              <span className="text-sm text-gray-300">Total Time</span>
+              <span className="font-medium">{totalTime} mins</span>
             </div>
             <div className="flex flex-col items-center text-gray-100">
               <div className="flex mb-1">
                 {[1, 2, 3].map((level) => (
                   <Star 
                     key={level} 
-                    className={level <= 2 ? "text-orange-500 fill-orange-500" : "text-gray-400"} 
+                    className={level <= difficulty.stars ? "text-orange-500 fill-orange-500" : "text-gray-400"} 
                     size={16}
                   />
                 ))}
               </div>
               <span className="text-sm text-gray-300">Difficulty</span>
-              <span className="font-medium">{recipe.difficulty}</span>
+              <span className="font-medium">{difficulty.level}</span>
             </div>
           </div>
         </div>
@@ -153,22 +163,44 @@ export default function RecipePage() {
         <div className="bg-gray-700 rounded-lg shadow-lg p-6 mb-6">
           {/* Description */}
           <div className="mb-8">
-            <p className="text-gray-200 italic">{recipe.description}</p>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                {recipe.cuisine_type}
+              </span>
+              <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm capitalize">
+                {recipe.meal_type}
+              </span>
+              {recipe.is_premium && (
+                <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
+                  Premium ${recipe.premium_price}
+                </span>
+              )}
+            </div>
+            <p className="text-gray-200 italic">
+              Delicious {recipe.cuisine_type} {recipe.name} perfect for {recipe.meal_type}. 
+              Ready in just {totalTime} minutes!
+            </p>
           </div>
 
           {/* Ingredients */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
-              Ingredients
+              Ingredients ({recipe.ingredients.length})
             </h2>
             <div className="bg-gray-600 rounded-lg p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                 {recipe.ingredients.map((ingredient, index) => (
-                  <div key={index} className="flex items-center justify-between border-b border-dashed border-gray-500 pb-2">
-                    <div className="font-medium text-gray-200">{ingredient.name}:</div>
+                  <div key={ingredient.ingredient_id} className="flex items-center justify-between border-b border-dashed border-gray-500 pb-2">
+                    <div className="font-medium text-gray-200 flex items-center">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full mr-3"></span>
+                      {ingredient.name}
+                      {ingredient.is_optional && (
+                        <span className="text-gray-400 text-sm ml-2">(optional)</span>
+                      )}
+                    </div>
                     <div className="text-gray-300">
-                      {ingredient.amount} {ingredient.unit}
+                      {ingredient.quantity} {ingredient.unit}
                     </div>
                   </div>
                 ))}
@@ -180,18 +212,40 @@ export default function RecipePage() {
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
-              Instructions
+              Instructions ({recipe.steps.length} steps)
             </h2>
             <div className="space-y-6">
-              {recipe.steps.map((step, index) => (
-                <div key={index} className="bg-gray-600 rounded-lg p-6">
+              {recipe.steps
+                .sort((a, b) => a.step_number - b.step_number)
+                .map((step, index) => (
+                <div key={step.step_id} className="bg-gray-600 rounded-lg p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
-                      {index + 1}
+                      {step.step_number}
                     </div>
-                    <div>
-                      <h3 className="font-bold text-lg mb-2 text-gray-100">{step.title}</h3>
-                      <p className="text-gray-300">{step.description}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4 mb-2">
+                        <h3 className="font-bold text-lg text-gray-100">Step {step.step_number}</h3>
+                        {step.duration && (
+                          <div className="flex items-center gap-1 text-sm text-gray-300">
+                            <Clock size={14} />
+                            <span>{step.duration} mins</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-gray-300 mb-3">{step.description}</p>
+                      {step.tip && (
+                        <div className="bg-blue-500/20 border-l-4 border-blue-500 p-3 rounded">
+                          <p className="text-blue-200 text-sm">💡 Tip: {step.tip}</p>
+                        </div>
+                      )}
+                      {step.media_url && (
+                        <img 
+                          src={step.media_url} 
+                          alt={`Step ${step.step_number}`}
+                          className="mt-3 rounded-lg max-w-full h-48 object-cover"
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -211,11 +265,11 @@ export default function RecipePage() {
                     className={liked ? "text-red-500 fill-red-500" : "text-gray-300"} 
                     size={20} 
                   />
-                  <span className="text-gray-300">128</span>
+                  <span className="text-gray-300">Like</span>
                 </button>
                 <button className="flex items-center gap-2">
                   <MessageSquare className="text-gray-300" size={20} />
-                  <span className="text-gray-300">{recipe.comments.length}</span>
+                  <span className="text-gray-300">Comments</span>
                 </button>
               </div>
               <div className="flex items-center gap-4">
@@ -248,88 +302,22 @@ export default function RecipePage() {
                     className={`cursor-pointer ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-400"}`}
                   />
                 ))}
+                {rating > 0 && (
+                  <span className="text-gray-300 ml-2">({rating}/5)</span>
+                )}
               </div>
             </div>
 
-            {/* Comments */}
-            <div>
-              <h3 className="font-bold text-lg mb-4 text-gray-100">Comments ({recipe.comments.length})</h3>
-              <div className="space-y-4 mb-6">
-                {recipe.comments.map((comment, index) => (
-                  <div key={index} className="flex gap-3">
-                    <img 
-                      src={comment.avatar} 
-                      alt={comment.user} 
-                      className="w-10 h-10 rounded-full" 
-                    />
-                    <div className="flex-1">
-                      <div className="bg-gray-600 p-3 rounded-lg">
-                        <div className="font-medium text-gray-100">{comment.user}</div>
-                        <p className="text-gray-300">{comment.content}</p>
-                      </div>
-                      <div className="text-xs text-gray-400 mt-1">{comment.date}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Comment Form */}
-              <div className="flex gap-3">
-                <img 
-                  src="/api/placeholder/40/40" 
-                  alt="User" 
-                  className="w-10 h-10 rounded-full" 
-                />
-                <div className="flex-1">
-                  <textarea 
-                    className="w-full bg-gray-600 border border-gray-500 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-100"
-                    placeholder="Write your comment..."
-                    rows={3}
-                  ></textarea>
-                  <button className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-orange-600 transition">
-                    Submit Comment
-                  </button>
-                </div>
+            {/* Recipe Info Footer */}
+            <div className="bg-gray-600 rounded-lg p-4">
+              <div className="text-sm text-gray-300">
+                <p>Recipe ID: {recipe.recipe_id}</p>
+                <p>Created: {new Date(recipe.created_at).toLocaleDateString()}</p>
+                {recipe.updated_at !== recipe.created_at && (
+                  <p>Last updated: {new Date(recipe.updated_at).toLocaleDateString()}</p>
+                )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Related Recipes */}
-        <div className="bg-gray-700 rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-gray-100">Similar Recipes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition bg-gray-600">
-                <div className="relative">
-                  <img 
-                    src={`/api/placeholder/300/200`} 
-                    alt="Recipe" 
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-gray-700 p-1 rounded-full">
-                    <Heart size={18} className="text-gray-300" />
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold mb-2 text-gray-100">Delicious Dish #{item}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-300 mb-2">
-                    <Clock size={14} />
-                    <span>30 mins</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star 
-                        key={star}
-                        size={14}
-                        className={`${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-400"}`}
-                      />
-                    ))}
-                    <span className="text-sm text-gray-300 ml-1">(42)</span>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

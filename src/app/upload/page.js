@@ -159,7 +159,7 @@ export default function CookingUploadPage() {
 
       let recipeCoverUrl = "";
       if (hasRecipe && recipeCover) {
-        const recipeCoverUrl = await uploadToCloudinary(recipeCover);
+        recipeCoverUrl = await uploadToCloudinary(recipeCover);
       }
 
       // Step 2: Create post
@@ -215,7 +215,7 @@ export default function CookingUploadPage() {
         };
 
         console.log("Đang tạo recipe...", recipeData);
-        const recipeResponse = await fetch("http://103.253.145.7:3004/api/recipes/", {
+        const recipeResponse = await fetch("http://103.253.145.7:3004/api/recipes", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -322,8 +322,8 @@ export default function CookingUploadPage() {
                       <Image 
                         src={preview} 
                         alt="preview" 
-                        width={500}      // hoặc giá trị phù hợp với ảnh của bạn
-                        height={300}     // nên tỷ lệ đúng với max-h/w bạn mong muốn
+                        width={500}
+                        height={300} 
                         className="rounded-lg w-full max-h-48 object-cover" 
                       />
                     ) : (
