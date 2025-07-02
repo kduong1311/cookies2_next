@@ -1,11 +1,18 @@
 import React from 'react';
 import { Play, Heart } from 'lucide-react';
+import Image from 'next/image';
 
 const VideoCard = ({ video }) => {
   return (
     <div className="bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        <img src={video.thumbnail} alt={video.title} className="w-full h-48 object-cover" />
+        <Image 
+          src={video.thumbnail}
+          alt={video.title}
+          width={130}
+          height={192}
+          className="w-full h-48 object-cover"
+        />
         <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm flex items-center">
           <Play className="w-3 h-3 mr-1" />
           {video.duration}

@@ -1,30 +1,35 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    appDir: true,
+
+  images: {
+    domains: [
+      'marketplace.canva.com',
+      'https://api.cloudinary.com/v1_1/da9rooi9r/auto/upload',
+      'res.cloudinary.com',
+    ],
   },
   
   // Fix lỗi Critters và các module Node.js khác
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Disable Node.js modules trên client-side
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        os: false,
-        crypto: false,
-        stream: false,
-        assert: false,
-        http: false,
-        https: false,
-        url: false,
-        zlib: false,
-      }
-    }
-    return config
-  },
+  // webpack: (config, { isServer }) => {
+  //   if (!isServer) {
+  //     // Disable Node.js modules trên client-side
+  //     config.resolve.fallback = {
+  //       ...config.resolve.fallback,
+  //       fs: false,
+  //       path: false,
+  //       os: false,
+  //       crypto: false,
+  //       stream: false,
+  //       assert: false,
+  //       http: false,
+  //       https: false,
+  //       url: false,
+  //       zlib: false,
+  //     }
+  //   }
+  //   return config
+  // },
 };
 
 export default nextConfig;

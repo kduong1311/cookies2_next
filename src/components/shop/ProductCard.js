@@ -1,15 +1,18 @@
 import React from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react"; // Nếu dùng icon library như lucide
+import { Star } from "lucide-react";
+import Image from "next/image";
 
 export default function ProductCard({ data }) {
   return (
     <Link href={`/shop/${data.id}`}>
       <Card className="border-none cursor-pointer bg-gray-cs p-0">
-        <img
+        <Image
           src={data.image}
           alt={"image"}
+          width={300}
+          height={260}
           className="w-full h-65 object-cover block rounded-t-lg"
         />
         <CardContent className="pb-4">

@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin, DollarSign, Image as ImageIcon } from "lucide-react"
 import { Description } from "@radix-ui/react-dialog";
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
+import Image from "next/image";
 
 export default function CookingUploadPage() {
 
@@ -318,9 +319,11 @@ export default function CookingUploadPage() {
                 ) : (
                   <div className="w-full">
                     {file?.type?.startsWith("image") ? (
-                      <img 
+                      <Image 
                         src={preview} 
                         alt="preview" 
+                        width={500}      // hoặc giá trị phù hợp với ảnh của bạn
+                        height={300}     // nên tỷ lệ đúng với max-h/w bạn mong muốn
                         className="rounded-lg w-full max-h-48 object-cover" 
                       />
                     ) : (
@@ -413,7 +416,13 @@ export default function CookingUploadPage() {
                     <p className="text-sm font-medium text-white">Chọn ảnh bìa cho công thức</p>
                   </>
                 ) : (
-                  <img src={recipeCoverPreview} alt="cover preview" className="rounded-lg w-full max-h-48 object-cover" />
+                  <Image 
+                  src={recipeCoverPreview} 
+                  alt="cover preview" 
+                  width={500} 
+                  height={300}
+                  className="rounded-lg w-full max-h-48 object-cover" 
+                />
                 )}
               </label>
             </div>

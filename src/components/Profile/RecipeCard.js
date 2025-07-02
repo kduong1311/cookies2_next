@@ -1,11 +1,17 @@
 import React from 'react';
 import { Clock, Bookmark } from 'lucide-react';
-
+import Image from 'next/image';
 const RecipeCard = ({ recipe }) => {
   return (
     <div className="bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+        <Image 
+            src={recipe.image} 
+            alt={recipe.title} 
+            width={120}
+            height={192} 
+            className="w-full h-48 object-cover"
+          />
         <div className="absolute top-2 right-2 bg-white bg-opacity-90 p-1 rounded-full">
           <Bookmark className="w-4 h-4 text-gray-600" />
         </div>

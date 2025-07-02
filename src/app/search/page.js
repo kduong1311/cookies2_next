@@ -117,7 +117,7 @@ export default function SearchPage() {
         {!loading && !error && query && results.length === 0 && (
           <div className="text-center py-12">
             <Search className="mx-auto mb-4 text-gray-600" size={48} />
-            <p className="text-gray-400 mb-2">Không tìm thấy kết quả cho "{query}"</p>
+            <p className="text-gray-400 mb-2">Không tìm thấy kết quả cho: {query}</p>
             <p className="text-gray-500 text-sm">Thử tìm kiếm với từ khóa khác</p>
           </div>
         )}
@@ -127,7 +127,7 @@ export default function SearchPage() {
           <>
             <div className="mb-6">
               <p className="text-gray-400">
-                Tìm thấy {results.length} kết quả cho "{query}"
+                Tìm thấy {results.length} kết quả cho: {query}
               </p>
             </div>
             

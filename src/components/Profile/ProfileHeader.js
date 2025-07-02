@@ -1,7 +1,13 @@
+"use client";
 import React from 'react';
 import { CheckCircle, MapPin, Calendar, Users, Video, BookOpen } from 'lucide-react';
+import { useState } from 'react';
+import Image from 'next/image';
 
 const ProfileHeader = ({ userProfile }) => {
+  const [src, setSrc] = useState(displayCover);
+  const [avatarSrc, setAvatarSrc] = useState(displayAvatar);
+
   if (!userProfile) {
     return (
       <div className="w-full h-64 bg-gray-700 animate-pulse rounded-lg">
@@ -43,13 +49,13 @@ const ProfileHeader = ({ userProfile }) => {
     <div className="w-full bg-gray-800 text-white">
       {/* Cover Photo */}
       <div className="relative h-48 bg-gradient-to-r from-orange-400 to-red-500">
-        <img
-          src={displayCover}
+        <Image
+          src={src}
           alt="Cover"
+          width={800}
+          height={450} 
           className="w-full h-full object-cover"
-          onError={(e) => {
-            e.target.src = 'https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg';
-          }}
+          onError={() => setSrc('https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg')}
         />
         <div className="absolute inset-0 bg-black bg-opacity-30"></div>
       </div>
@@ -59,13 +65,13 @@ const ProfileHeader = ({ userProfile }) => {
         {/* Avatar */}
         <div className="relative -mt-12 mb-4">
           <div className="relative inline-block">
-            <img
-              src={displayAvatar}
+            <Image
+              src={avatarSrc}
               alt={displayName}
-              className="w-24 h-24 rounded-full border-4 border-gray-800 bg-gray-700"
-              onError={(e) => {
-                e.target.src = '/Logo.png';
-              }}
+              width={96}
+              height={96}
+              className="w-24 h-24 rounded-full border-4 border-gray-800 bg-gray-700 object-cover"
+              onError={() => setAvatarSrc('/Logo.png')}
             />
             {isOnline && (
               <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-2 border-gray-800 rounded-full"></div>

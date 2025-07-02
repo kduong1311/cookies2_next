@@ -1,14 +1,17 @@
 import React from 'react';
 import { Play, Clock } from 'lucide-react';
+import Image from 'next/image';
 
 const SavedCard = ({ item }) => {
   return (
     <div className="bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        <img 
-          src={item.type === 'video' ? item.thumbnail : item.image} 
-          alt={item.title} 
-          className="w-full h-48 object-cover" 
+        <Image 
+          src={item.type === 'video' ? item.thumbnail : item.image}
+          alt={item.title}
+          width={192}
+          height={192}
+          className="w-full h-48 object-cover"
         />
         {item.type === 'video' && (
           <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm flex items-center">
