@@ -156,6 +156,7 @@ export default function CookingUploadPage() {
       // Step 1: Upload file to Cloudinary
       const uploadedUrl = await uploadToCloudinary(file);
 
+      let recipeCoverUrl = "";
       if (hasRecipe && recipeCover) {
         const recipeCoverUrl = await uploadToCloudinary(recipeCover);
       }

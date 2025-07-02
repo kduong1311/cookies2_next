@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Search, Eye, Heart, ChefHat, Clock, Play, X, Loader2 } from 'lucide-react';
 import ModalVideoPlayer from '@/components/video/modalVideoPlayer';
+import InlineLoading from '@/components/LoadingInline';
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -93,11 +94,11 @@ export default function SearchPage() {
       <div className="max-w-6xl mx-auto p-4">
         {/* Loading State */}
         {loading && (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="animate-spin text-orange-500" size={32} />
-            <span className="ml-3 text-gray-400">Đang tìm kiếm...</span>
-          </div>
-        )}
+  <div className="flex justify-center items-center py-12 space-x-3">
+    <InlineLoading />
+    <span className="text-gray-400">Đang tìm kiếm...</span>
+  </div>
+)}
 
         {/* Error State */}
         {error && (
