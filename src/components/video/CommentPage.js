@@ -22,18 +22,30 @@ export default function CommentPage({ postId }) {
       if (data.status !== "success") throw new Error("Lỗi phản hồi từ server.");
       const fetchedComments = data.data?.comments || [];
 
+      // Fetch users info first
       const userIds = [...new Set(fetchedComments.map(c => c.user_id))];
       const userFetches = userIds.map(async (id) => {
-        const userRes = await fetch(`http://103.253.145.7:3000/api/users/${id}`);
-        if (!userRes.ok) throw new Error("Không thể tải thông tin người dùng.");
-        const userData = await userRes.json();
-        return { id, data: userData };
+        try {
+          const userRes = await fetch(`http://103.253.145.7:3000/api/users/${id}`);
+          if (!userRes.ok) throw new Error("Không thể tải thông tin người dùng.");
+          const userData = await userRes.json();
+          return { id, data: userData };
+        } catch (err) {
+          console.error(`Error fetching user ${id}:`, err);
+          return { id, data: null };
+        }
       });
+      
       const usersData = await Promise.all(userFetches);
       const newUsersMap = {};
-      usersData.forEach(({ id, data }) => newUsersMap[id] = data);
+      usersData.forEach(({ id, data }) => {
+        if (data) {
+          newUsersMap[id] = data;
+        }
+      });
       setUsersMap(newUsersMap);
 
+      // Process comments after users are loaded
       const commentMap = {};
       const rootComments = [];
 
@@ -58,6 +70,7 @@ export default function CommentPage({ postId }) {
         };
       });
 
+      // Build comment tree
       Object.values(commentMap).forEach(comment => {
         if (comment.parentId && commentMap[comment.parentId]) {
           commentMap[comment.parentId].replies.push(comment);
@@ -66,7 +79,21 @@ export default function CommentPage({ postId }) {
         }
       });
 
-      setComments(rootComments.reverse());
+      // Sort comments by time (newest first for root, oldest first for replies)
+      rootComments.sort((a, b) => new Date(b.time) - new Date(a.time));
+      
+      const sortReplies = (comments) => {
+        comments.forEach(comment => {
+          if (comment.replies && comment.replies.length > 0) {
+            comment.replies.sort((a, b) => new Date(a.time) - new Date(b.time));
+            sortReplies(comment.replies);
+          }
+        });
+      };
+      
+      sortReplies(rootComments);
+      setComments(rootComments);
+      
     } catch (err) {
       console.error("Fetch comments error:", err);
       setError("Đã có lỗi khi tải bình luận.");
@@ -78,23 +105,41 @@ export default function CommentPage({ postId }) {
   useEffect(() => {
     if (!postId) return;
     fetchCommentsAndUsers();
-  }, [postId, loggedInUser]);
+  }, [postId]); // Removed loggedInUser from dependency to prevent unnecessary refetches
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
+    
+    // Debug log to check what's being sent
+    console.log("Sending comment with data:", {
+      content: newComment,
+      parent_comment_id: replyTo || null,
+      replyTo: replyTo
+    });
+    
     try {
+      const requestBody = {
+        content: newComment,
+        parent_comment_id: replyTo || null,
+      };
+      
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: newComment,
-          parent_comment_id: replyTo || null,
-        }),
+        body: JSON.stringify(requestBody),
       });
-      if (!res.ok) throw new Error("Không thể gửi bình luận.");
+      
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Server response:", errorData);
+        throw new Error("Không thể gửi bình luận.");
+      }
+      
       const data = await res.json();
+      console.log("Server response:", data);
+      
       if (data.status !== "success") throw new Error("Server trả về lỗi.");
 
       const newCommentObj = {
@@ -134,16 +179,41 @@ export default function CommentPage({ postId }) {
     }
   };
 
-  const handleLike = (commentId) => {
-    const likeRecursive = (comments) => comments.map(comment => {
-      if (comment.id === commentId) {
-        return { ...comment, likes: comment.likes + 1 };
-      } else if (comment.replies?.length) {
-        return { ...comment, replies: likeRecursive(comment.replies) };
+  const handleLike = async (commentId) => {
+    try {
+      // Optimistically update UI first
+      const likeRecursive = (comments) => comments.map(comment => {
+        if (comment.id === commentId) {
+          return { ...comment, likes: comment.likes + 1 };
+        } else if (comment.replies?.length) {
+          return { ...comment, replies: likeRecursive(comment.replies) };
+        }
+        return comment;
+      });
+      setComments(likeRecursive(comments));
+
+      // Then send request to server
+      const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments/${commentId}/like`, {
+        method: "POST",
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        // Revert the optimistic update if request fails
+        const revertLike = (comments) => comments.map(comment => {
+          if (comment.id === commentId) {
+            return { ...comment, likes: comment.likes - 1 };
+          } else if (comment.replies?.length) {
+            return { ...comment, replies: revertLike(comment.replies) };
+          }
+          return comment;
+        });
+        setComments(revertLike(comments));
+        throw new Error("Không thể like bình luận.");
       }
-      return comment;
-    });
-    setComments(likeRecursive(comments));
+    } catch (err) {
+      console.error("Like error:", err);
+    }
   };
 
   const handleDelete = async (commentId) => {
@@ -179,6 +249,9 @@ export default function CommentPage({ postId }) {
           src={comment.avatar}
           alt={comment.username}
           className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            e.target.src = "https://ui-avatars.com/api/?name=?&background=random";
+          }}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -220,7 +293,11 @@ export default function CommentPage({ postId }) {
               <MoreHorizontal size={14} />
             </button>
           </div>
-          {comment.replies?.length > 0 && comment.replies.map(child => renderComment(child, level + 1))}
+          {comment.replies?.length > 0 && (
+            <div className="mt-3">
+              {comment.replies.map(child => renderComment(child, level + 1))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -259,6 +336,9 @@ export default function CommentPage({ postId }) {
             src={loggedInUser?.avatar_url || "https://ui-avatars.com/api/?name=?&background=random"}
             alt="Your avatar"
             className="w-8 h-8 rounded-full object-cover"
+            onError={(e) => {
+              e.target.src = "https://ui-avatars.com/api/?name=?&background=random";
+            }}
           />
           <div className="flex-1 flex gap-2">
             <input
@@ -286,7 +366,13 @@ export default function CommentPage({ postId }) {
 
       {/* Comments List */}
       <div className="flex-1 overflow-y-auto">
-        {comments.map((comment) => renderComment(comment))}
+        {comments.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            Chưa có bình luận nào
+          </div>
+        ) : (
+          comments.map((comment) => renderComment(comment))
+        )}
       </div>  
     </div>
   );
