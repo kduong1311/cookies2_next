@@ -86,6 +86,7 @@ export default function CommentPage({ postId }) {
     try {
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: newComment,
@@ -118,6 +119,7 @@ export default function CommentPage({ postId }) {
     try {
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments/${commentId}`, {
         method: "DELETE",
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Xóa thất bại.");
       await fetchCommentsAndUsers();
