@@ -94,9 +94,42 @@ export default function CommentPage({ postId }) {
         }),
       });
       if (!res.ok) throw new Error("Không thể gửi bình luận.");
+      const data = await res.json();
+      if (data.status !== "success") throw new Error("Server trả về lỗi.");
+
+      const newCommentObj = {
+        id: data.data.comment_id,
+        userId: loggedInUser?.user_id,
+        username: "you",
+        avatar: loggedInUser?.avatar_url || "https://ui-avatars.com/api/?name=?&background=random",
+        content: data.data.content,
+        likes: 0,
+        time: "Now",
+        replies: [],
+        parentId: replyTo,
+      };
+
+      setComments((prev) => {
+        if (replyTo) {
+          // Nếu là reply, tìm comment cha và thêm vào replies
+          const addReply = (comments) =>
+            comments.map((c) => {
+              if (c.id === replyTo) {
+                return { ...c, replies: [...c.replies, newCommentObj] };
+              } else if (c.replies?.length) {
+                return { ...c, replies: addReply(c.replies) };
+              }
+              return c;
+            });
+          return addReply(prev);
+        } else {
+          // Nếu là comment mới (root), thêm vào đầu danh sách
+          return [newCommentObj, ...prev];
+        }
+      });
+
       setNewComment("");
       setReplyTo(null);
-      await fetchCommentsAndUsers();
     } catch (err) {
       console.error("Add comment error:", err);
       alert("Đã có lỗi khi gửi bình luận.");

@@ -26,7 +26,9 @@ export default function VideoInteractions({
       // Gửi request like
       const res = await fetch(
         `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
-        { method: "POST" }
+        { method: "POST",
+          credentials: "include",
+         }
       );
       if (!res.ok) throw new Error("Không thể gửi like!");
 
