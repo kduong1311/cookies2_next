@@ -111,7 +111,6 @@ export default function CommentPage({ postId }) {
 
       setComments((prev) => {
         if (replyTo) {
-          // Nếu là reply, tìm comment cha và thêm vào replies
           const addReply = (comments) =>
             comments.map((c) => {
               if (c.id === replyTo) {
@@ -123,7 +122,6 @@ export default function CommentPage({ postId }) {
             });
           return addReply(prev);
         } else {
-          // Nếu là comment mới (root), thêm vào đầu danh sách
           return [newCommentObj, ...prev];
         }
       });
@@ -149,13 +147,25 @@ export default function CommentPage({ postId }) {
   };
 
   const handleDelete = async (commentId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) return;
     try {
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments/${commentId}`, {
         method: "DELETE",
         credentials: "include",
       });
       if (!res.ok) throw new Error("Xóa thất bại.");
-      await fetchCommentsAndUsers();
+
+      const deleteRecursive = (comments) => comments
+        .map(comment => {
+          if (comment.id === commentId) return null;
+          if (comment.replies?.length) {
+            return { ...comment, replies: deleteRecursive(comment.replies).filter(Boolean) };
+          }
+          return comment;
+        })
+        .filter(Boolean);
+
+      setComments(prev => deleteRecursive(prev));
     } catch (err) {
       console.error("Delete error:", err);
       alert("Không thể xóa bình luận.");

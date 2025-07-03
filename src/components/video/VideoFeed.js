@@ -88,8 +88,6 @@ export default function VideoFeed({ isRecipeOpen, setIsRecipeOpen, isCommentOpen
   const currentPost = posts[currentPostIndex];
   const currentUser = users[currentPost?.user_id];
 
-  console.log(currentPost);
-
   return (
     <>
       {/* Hiển thị modal loading nếu đang fetch */}
