@@ -92,7 +92,7 @@ const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/uploa
                   transition={{ duration: 0.3 }}
                   className="w-[800px] bg-gray-800 text-white p-6 overflow-y-auto shadow-lg hide-scrollbar"
                 >
-                  <CommentPage />
+                  <CommentPage postId={currentPostId}/>
                 </motion.div>
               )}
             </AnimatePresence>

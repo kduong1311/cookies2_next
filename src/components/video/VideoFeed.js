@@ -83,10 +83,12 @@ export default function VideoFeed({ isRecipeOpen, setIsRecipeOpen, isCommentOpen
     const currentPost = posts[currentPostIndex];
     setCurrentPostId(currentPost?.post_id);
   }
-}, [currentPostIndex, posts, setCurrentPostId]);
+  }, [currentPostIndex, posts, setCurrentPostId]);
 
   const currentPost = posts[currentPostIndex];
   const currentUser = users[currentPost?.user_id];
+
+  console.log(currentPost);
 
   return (
     <>

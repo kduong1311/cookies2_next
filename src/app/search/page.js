@@ -94,11 +94,11 @@ export default function SearchPage() {
       <div className="max-w-6xl mx-auto p-4">
         {/* Loading State */}
         {loading && (
-  <div className="flex justify-center items-center py-12 space-x-3">
-    <InlineLoading />
-    <span className="text-gray-400">Đang tìm kiếm...</span>
-  </div>
-)}
+      <div className="flex justify-center items-center py-12 space-x-3">
+            <InlineLoading />
+            <span className="text-gray-400">Searching...</span>
+          </div>
+        )}
 
         {/* Error State */}
         {error && (

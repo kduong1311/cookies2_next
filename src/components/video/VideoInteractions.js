@@ -1,54 +1,95 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { Heart } from "lucide-react";
 import { FaCommentDots, FaBook, FaShareAltSquare } from "react-icons/fa";
 import gsap from "gsap";
 import ShareModal from "../user/ShareModal";
 
-export default function VideoInteractions({ onRecipeClick, onLike, onCommentClick}) {
+export default function VideoInteractions({
+  currentPost,
+  onRecipeClick,
+  onCommentClick,
+  onUpdatePost,   // HÀM REFRESH DỮ LIỆU, được truyền từ cha
+}) {
   const heartRef = useRef(null);
   const [liked, setLiked] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);  // State điều khiển mở modal
+  const [loadingLike, setLoadingLike] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    onLike && onLike();
+  const handleLike = async () => {
+    if (!currentPost?.post_id || loadingLike) return;
 
-    gsap.fromTo(
-      heartRef.current,
-      { scale: 1 },
-      {
-        scale: 1.4,
-        duration: 0.3,
-        yoyo: true,
-        repeat: 1,
-        ease: "power1.inOut",
-      }
-    );
+    setLoadingLike(true);
+
+    try {
+      // Gửi request like
+      const res = await fetch(
+        `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
+        { method: "POST" }
+      );
+      if (!res.ok) throw new Error("Không thể gửi like!");
+
+      setLiked(true);
+
+      // Animate
+      gsap.fromTo(
+        heartRef.current,
+        { scale: 1 },
+        {
+          scale: 1.4,
+          duration: 0.3,
+          yoyo: true,
+          repeat: 1,
+          ease: "power1.inOut",
+        }
+      );
+
+      // Sau khi like thành công, fetch lại post để cập nhật count
+      onUpdatePost && onUpdatePost();
+
+    } catch (error) {
+      console.error("Lỗi khi like:", error);
+    } finally {
+      setLoadingLike(false);
+    }
   };
 
-  const openShareModal = () => {
-    setShareOpen(true);
-  };
+  const openShareModal = () => setShareOpen(true);
+
+  const likeCount = currentPost?.likes_count ?? 0;
+  const commentCount = currentPost?.comments_count ?? 0;
+  const shareCount = currentPost?.shares_count ?? 0;
 
   return (
     <>
-      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col items-center space-y-6">
+      <div className="flex flex-col items-center space-y-6">
         {/* Like button */}
-        <button className="flex flex-col items-center" onClick={handleLike}>
-          <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg">
+        <button
+          className="flex flex-col items-center disabled:cursor-not-allowed"
+          onClick={handleLike}
+          disabled={loadingLike}
+        >
+          <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
             <Heart
               ref={heartRef}
               className={`w-7 h-7 ${
                 liked ? "text-red-500 fill-red-500" : "text-white"
               }`}
             />
+            <span className="absolute -bottom-5 text-xs text-white font-semibold">
+              {likeCount + (liked ? 1 : 0)}
+            </span>
           </div>
         </button>
 
         {/* Comment button */}
         <button className="flex flex-col items-center" onClick={onCommentClick}>
-          <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
             <FaCommentDots className="w-7 h-7 text-white" />
+            <span className="absolute -bottom-5 text-xs text-white font-semibold">
+              {commentCount}
+            </span>
           </div>
         </button>
 
@@ -60,12 +101,12 @@ export default function VideoInteractions({ onRecipeClick, onLike, onCommentClic
         </button>
 
         {/* Share button */}
-        <button
-          className="flex flex-col items-center"
-          onClick={openShareModal}  // Mở modal khi click
-        >
-          <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg">
+        <button className="flex flex-col items-center" onClick={openShareModal}>
+          <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
             <FaShareAltSquare className="w-7 h-7 text-white" />
+            <span className="absolute -bottom-5 text-xs text-white font-semibold">
+              {shareCount}
+            </span>
           </div>
         </button>
       </div>

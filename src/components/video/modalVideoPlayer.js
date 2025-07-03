@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
@@ -9,8 +9,26 @@ import VideoInteractions from "./VideoInteractions";
 export default function ModalVideoPlayer({ video, onClose }) {
   const [isRecipeOpen, setIsRecipeOpen] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [author, setAuthor] = useState(null);
 
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
+
+  useEffect(() => {
+  if (!video?.user_id) return;
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`http://103.253.145.7:3000/api/users/${video.user_id}`);
+      if (!res.ok) throw new Error("Không lấy được thông tin người dùng");
+      const data = await res.json();
+      setAuthor(data);
+    } catch (err) {
+      console.error("Fetch user error:", err);
+      setAuthor(null);
+    }
+  };
+  fetchUser();
+}, [video?.user_id]);
 
   // Đóng modal khi click backdrop
   const handleBackdropClick = (e) => {
@@ -45,7 +63,7 @@ export default function ModalVideoPlayer({ video, onClose }) {
           >
             <VideoPlayer
               currentPost={video}
-              currentUser={video.user}
+              currentUser={author}
               isRecipeOpen={isRecipeOpen}
               isCommentOpen={isCommentOpen}
             />
@@ -62,7 +80,7 @@ export default function ModalVideoPlayer({ video, onClose }) {
                 transition={{ duration: 0.3 }}
                 className="w-[800px] h-[90vh] bg-gray-800 text-black p-6 overflow-y-auto shadow-lg hide-scrollbar"
               >
-                <RecipePage video={video} />
+                <RecipePage postId={video.post_id} />
               </motion.div>
             )}
             {activePanelType === "comment" && (
