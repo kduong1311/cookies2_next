@@ -5,10 +5,11 @@ import { Heart } from "lucide-react";
 import { FaCommentDots, FaBook, FaShareAltSquare } from "react-icons/fa";
 import gsap from "gsap";
 import ShareModal from "../user/ShareModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function VideoInteractions({
   currentPost,
-  currentUser, // <-- thêm currentUser
+  currentUser,
   onRecipeClick,
   onCommentClick,
   onUpdatePost,
@@ -17,12 +18,13 @@ export default function VideoInteractions({
   const [liked, setLiked] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const {user} = useAuth();
 
   // Kiểm tra user đã like chưa khi currentPost hoặc currentUser thay đổi
   useEffect(() => {
     if (currentPost && currentUser) {
       const isLiked = currentPost.likes?.some(
-        (like) => like.user_id === currentUser.id
+        (like) => like.user_id === user.user_id
       );
       setLiked(isLiked);
     } else {
