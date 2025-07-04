@@ -100,7 +100,7 @@ const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/uploa
         )}
       </div>
 
-      <RightSidebar />
+      {/* <RightSidebar /> */}
       <ChatBot apiKey={process.env.NEXT_PUBLIC_GEMINI_API_KEY}/>
     </div>
   );
