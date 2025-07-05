@@ -34,8 +34,6 @@ export default function VideoInteractions({
         setLiked(
           data.data.likes?.some((like) => like.user_id === user.user_id)
         );
-        console.log("user:", user)
-        console.log("userid: ", user.user_id)
         onUpdatePost && onUpdatePost(data.data); // cập nhật post mới cho cha nếu cần
       } catch (err) {
         console.error("Lỗi khi lấy thông tin post:", err);
@@ -49,13 +47,23 @@ export default function VideoInteractions({
     if (!currentPost?.post_id || loadingLike) return;
     setLoadingLike(true);
     try {
-      const res = await fetch(
-        `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
-        { method: "POST", credentials: "include" }
-      );
-      if (!res.ok) throw new Error("Không thể gửi like!");
+      // Nếu đang chưa like -> POST để like
+      if (!liked) {
+        const res = await fetch(
+          `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
+          { method: "POST", credentials: "include" }
+        );
+        if (!res.ok) throw new Error("Không thể gửi like!");
+      } else {
+        // Nếu đã like -> DELETE để unlike
+        const res = await fetch(
+          `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
+          { method: "DELETE", credentials: "include" }
+        );
+        if (!res.ok) throw new Error("Không thể hủy like!");
+      }
 
-      // Sau khi like thành công, refetch post để cập nhật dữ liệu chính xác
+      // Sau khi like/unlike thành công, refetch post để cập nhật dữ liệu chính xác
       const postRes = await fetch(
         `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
         { credentials: "include" }
@@ -68,6 +76,7 @@ export default function VideoInteractions({
       onUpdatePost && onUpdatePost(postData.data);
 
       if (!liked) {
+        // Chỉ animate khi like, không cần animate khi unlike
         gsap.fromTo(
           heartRef.current,
           { scale: 1 },
