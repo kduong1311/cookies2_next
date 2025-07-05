@@ -23,26 +23,21 @@ export default function VideoInteractions({
   // Khởi tạo state từ currentPost và fetch chi tiết nếu cần
   useEffect(() => {
     const initializePostData = async () => {
-      if (!currentPost?.post_id || !user?.user_id) return;
-
-      // Nếu currentPost đã có thông tin likes, sử dụng luôn
-        // Nếu chưa có thông tin likes, fetch từ API
         try {
           const response = await fetch(
             `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
-            {method: "GET", credentials: "include" }
+            {method: "GET"}
           );
-                      console.log("okeee?")
           
           if (response.ok) {
             const data = await response.json();
             const postData = data.data;
+                        console.log(postData)
             
             setLikeCount(postData.likes_count ?? 0);
             setLiked(
               postData.likes?.some((like) => like.user_id === user.user_id) || false
             );
-
             
             // Cập nhật post data cho component cha nếu có callback
             if (onUpdatePost) {
