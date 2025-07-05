@@ -20,15 +20,45 @@ export default function VideoInteractions({
   const [shareOpen, setShareOpen] = useState(false);
   const { user } = useAuth();
 
-  // Khởi tạo state từ currentPost
+  // Khởi tạo state từ currentPost và fetch chi tiết nếu cần
   useEffect(() => {
-    if (currentPost) {
-      setLikeCount(currentPost.likes_count ?? 0);
-      setLiked(
-        currentPost.likes?.some((like) => like.user_id === user?.user_id) || false
-      );
-    }
-  }, [currentPost, user?.user_id]);
+    const initializePostData = async () => {
+      if (!currentPost?.post_id || !user?.user_id) return;
+
+      // Nếu currentPost đã có thông tin likes, sử dụng luôn
+        // Nếu chưa có thông tin likes, fetch từ API
+        try {
+          const response = await fetch(
+            `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
+            {method: "GET", credentials: "include" }
+          );
+                      console.log("okeee?")
+          
+          if (response.ok) {
+            const data = await response.json();
+            const postData = data.data;
+            
+            setLikeCount(postData.likes_count ?? 0);
+            setLiked(
+              postData.likes?.some((like) => like.user_id === user.user_id) || false
+            );
+
+            
+            // Cập nhật post data cho component cha nếu có callback
+            if (onUpdatePost) {
+              onUpdatePost(postData);
+            }
+          }
+        } catch (error) {
+          console.error("Lỗi khi fetch post details:", error);
+          // Fallback về dữ liệu từ currentPost
+          setLikeCount(currentPost.likes_count ?? 0);
+          setLiked(false);
+        }
+    };
+
+    initializePostData();
+  }, [currentPost?.post_id, user?.user_id, onUpdatePost]);
 
   const handleLikeToggle = async () => {
     if (!currentPost?.post_id || loadingLike || !user?.user_id) return;
@@ -99,17 +129,18 @@ export default function VideoInteractions({
       
       if (postRes.ok) {
         const postData = await postRes.json();
+        const serverPostData = postData.data;
         
         // Cập nhật lại state với dữ liệu chính xác từ server
-        const serverLiked = postData.data.likes?.some((like) => like.user_id === user.user_id) || false;
-        const serverLikeCount = postData.data.likes_count ?? 0;
+        const serverLiked = serverPostData.likes?.some((like) => like.user_id === user.user_id) || false;
+        const serverLikeCount = serverPostData.likes_count ?? 0;
         
         setLiked(serverLiked);
         setLikeCount(serverLikeCount);
         
         // Cập nhật post data cho component cha
         if (onUpdatePost) {
-          onUpdatePost(postData.data);
+          onUpdatePost(serverPostData);
         }
       }
       
