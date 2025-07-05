@@ -9,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function VideoInteractions({
   currentPost,
-  currentUser,
   onRecipeClick,
   onCommentClick,
   onUpdatePost,
@@ -18,25 +17,37 @@ export default function VideoInteractions({
   const [liked, setLiked] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const {user} = useAuth();
+  const { user } = useAuth();
 
-  // Kiểm tra user đã like chưa khi currentPost hoặc currentUser thay đổi
+  // Refetch post details để kiểm tra like và cập nhật post
   useEffect(() => {
-    if (currentPost && currentUser) {
-      const isLiked = currentPost.likes?.some(
-        (like) => like.user_id === user.user_id
-      );
-      setLiked(isLiked);
-    } else {
-      setLiked(false);
-    }
-  }, [currentPost, currentUser]);
+    const fetchPostDetails = async () => {
+      if (!currentPost?.post_id || !user?.user_id) return;
+      try {
+        const res = await fetch(
+          `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
+          { credentials: "include" }
+        );
+        if (!res.ok) throw new Error("Không thể lấy thông tin bài viết!");
+
+        const data = await res.json();
+        setLiked(
+          data.data.likes?.some((like) => like.user_id === user.user_id)
+        );
+        console.log("user:", user)
+        console.log("userid: ", user.user_id)
+        onUpdatePost && onUpdatePost(data.data); // cập nhật post mới cho cha nếu cần
+      } catch (err) {
+        console.error("Lỗi khi lấy thông tin post:", err);
+      }
+    };
+
+    fetchPostDetails();
+  }, [currentPost?.post_id, user?.user_id]); // refetch nếu post hoặc user thay đổi
 
   const handleLikeToggle = async () => {
     if (!currentPost?.post_id || loadingLike) return;
-
     setLoadingLike(true);
-
     try {
       const res = await fetch(
         `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
@@ -44,26 +55,25 @@ export default function VideoInteractions({
       );
       if (!res.ok) throw new Error("Không thể gửi like!");
 
-      // Đảo trạng thái ngay
-      setLiked(!liked);
+      // Sau khi like thành công, refetch post để cập nhật dữ liệu chính xác
+      const postRes = await fetch(
+        `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
+        { credentials: "include" }
+      );
+      const postData = await postRes.json();
 
-      // Animate chỉ khi like
+      setLiked(
+        postData.data.likes?.some((like) => like.user_id === user.user_id)
+      );
+      onUpdatePost && onUpdatePost(postData.data);
+
       if (!liked) {
         gsap.fromTo(
           heartRef.current,
           { scale: 1 },
-          {
-            scale: 1.4,
-            duration: 0.3,
-            yoyo: true,
-            repeat: 1,
-            ease: "power1.inOut",
-          }
+          { scale: 1.4, duration: 0.3, yoyo: true, repeat: 1, ease: "power1.inOut" }
         );
       }
-
-      // Gọi update để refetch dữ liệu từ server
-      onUpdatePost && onUpdatePost();
     } catch (error) {
       console.error("Lỗi khi toggle like:", error);
     } finally {
@@ -76,14 +86,6 @@ export default function VideoInteractions({
   const likeCount = currentPost?.likes_count ?? 0;
   const commentCount = currentPost?.comments_count ?? 0;
   const shareCount = currentPost?.shares_count ?? 0;
-
-  // Tính like hiển thị: cộng/trừ 1 nếu local state khác với server
-  let displayLikeCount = likeCount;
-  const serverLiked = currentPost?.likes?.some(
-    (like) => like.user_id === currentUser?.id
-  );
-  if (liked && !serverLiked) displayLikeCount += 1;
-  if (!liked && serverLiked) displayLikeCount -= 1;
 
   return (
     <div className="flex flex-col items-center space-y-6 ml-4 mr-4">
@@ -101,7 +103,7 @@ export default function VideoInteractions({
             }`}
           />
           <span className="absolute -bottom-5 text-xs text-white font-semibold">
-            {displayLikeCount}
+            {likeCount}
           </span>
         </div>
       </button>

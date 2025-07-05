@@ -25,10 +25,12 @@ export default function VideoFeed({
         const data = await response.json();
 
         if (data.status === 'success') {
-          setPosts(data.data);
+          // Xáo trộn danh sách videos
+          const shuffledPosts = shuffleArray(data.data);
+          setPosts(shuffledPosts);
 
-          // Fetch user data for each post
-          const userPromises = data.data.map(async (post) => {
+          // Fetch user data cho danh sách đã shuffle
+          const userPromises = shuffledPosts.map(async (post) => {
             try {
               const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`);
               const userData = await userResponse.json();
@@ -45,6 +47,12 @@ export default function VideoFeed({
             usersMap[userId] = userData;
           });
           setUsers(usersMap);
+
+          // Chọn index ban đầu ngẫu nhiên trong danh sách đã shuffle
+          if (shuffledPosts.length > 0) {
+            const randomIndex = Math.floor(Math.random() * shuffledPosts.length);
+            setCurrentPostIndex(randomIndex);
+          }
         }
       } catch (error) {
         console.error('Error fetching posts:', error);
@@ -58,15 +66,11 @@ export default function VideoFeed({
 
   // Navigation handlers
   const handlePrevious = () => {
-    if (currentPostIndex > 0) {
-      setCurrentPostIndex(currentPostIndex - 1);
-    }
+    setCurrentPostIndex((prev) => (prev === 0 ? posts.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    if (currentPostIndex < posts.length - 1) {
-      setCurrentPostIndex(currentPostIndex + 1);
-    }
+    setCurrentPostIndex((prev) => (prev === posts.length - 1 ? 0 : prev + 1));
   };
 
   // Keyboard navigation
@@ -83,7 +87,7 @@ export default function VideoFeed({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentPostIndex, posts.length]);
+  }, [posts.length]);
 
   useEffect(() => {
     if (posts.length > 0 && currentPostIndex >= 0) {
@@ -140,22 +144,16 @@ export default function VideoFeed({
             <div className="flex flex-col justify-center items-center space-y-4">
               <button
                 onClick={handlePrevious}
-                disabled={currentPostIndex === 0}
-                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors backdrop-blur-sm"
+                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 flex items-center justify-center transition-colors backdrop-blur-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                 </svg>
               </button>
 
-              <div className="text-white text-xs text-center bg-black/60 rounded-full px-3 py-1 backdrop-blur-sm">
-                {currentPostIndex + 1}/{posts.length}
-              </div>
-
               <button
                 onClick={handleNext}
-                disabled={currentPostIndex === posts.length - 1}
-                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors backdrop-blur-sm"
+                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 flex items-center justify-center transition-colors backdrop-blur-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -167,4 +165,14 @@ export default function VideoFeed({
       </div>
     </>
   );
+}
+
+// Hàm xáo trộn chuẩn Fisher-Yates
+function shuffleArray(array) {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
 }
