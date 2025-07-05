@@ -15,76 +15,113 @@ export default function VideoInteractions({
 }) {
   const heartRef = useRef(null);
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [loadingLike, setLoadingLike] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const { user } = useAuth();
 
-  // Refetch post details để kiểm tra like và cập nhật post
+  // Khởi tạo state từ currentPost
   useEffect(() => {
-    const fetchPostDetails = async () => {
-      if (!currentPost?.post_id || !user?.user_id) return;
-      try {
-        const res = await fetch(
-          `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
-          { credentials: "include" }
-        );
-        if (!res.ok) throw new Error("Không thể lấy thông tin bài viết!");
-
-        const data = await res.json();
-        setLiked(
-          data.data.likes?.some((like) => like.user_id === user.user_id)
-        );
-        onUpdatePost && onUpdatePost(data.data); // cập nhật post mới cho cha nếu cần
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin post:", err);
-      }
-    };
-
-    fetchPostDetails();
-  }, [currentPost?.post_id, user?.user_id]); // refetch nếu post hoặc user thay đổi
+    if (currentPost) {
+      setLikeCount(currentPost.likes_count ?? 0);
+      setLiked(
+        currentPost.likes?.some((like) => like.user_id === user?.user_id) || false
+      );
+    }
+  }, [currentPost, user?.user_id]);
 
   const handleLikeToggle = async () => {
-    if (!currentPost?.post_id || loadingLike) return;
+    if (!currentPost?.post_id || loadingLike || !user?.user_id) return;
+    
     setLoadingLike(true);
+    
+    // Optimistic update - cập nhật UI ngay lập tức
+    const previousLiked = liked;
+    const previousLikeCount = likeCount;
+    
+    // Cập nhật state ngay lập tức
+    setLiked(!liked);
+    setLikeCount(prevCount => !liked ? prevCount + 1 : prevCount - 1);
+    
+    // Chạy animation ngay lập tức
+    if (!liked) {
+      gsap.fromTo(
+        heartRef.current,
+        { scale: 1 },
+        { 
+          scale: 1.4, 
+          duration: 0.15, 
+          yoyo: true, 
+          repeat: 1, 
+          ease: "power2.out" 
+        }
+      );
+    }
+
     try {
-      // Nếu đang chưa like -> POST để like
+      let response;
+      
       if (!liked) {
-        const res = await fetch(
+        // Gửi request để like
+        response = await fetch(
           `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
-          { method: "POST", credentials: "include" }
+          { 
+            method: "POST", 
+            credentials: "include",
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         );
-        if (!res.ok) throw new Error("Không thể gửi like!");
       } else {
-        // Nếu đã like -> DELETE để unlike
-        const res = await fetch(
+        // Gửi request để unlike
+        response = await fetch(
           `http://103.253.145.7:3001/api/posts/${currentPost.post_id}/like`,
-          { method: "DELETE", credentials: "include" }
+          { 
+            method: "DELETE", 
+            credentials: "include",
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         );
-        if (!res.ok) throw new Error("Không thể hủy like!");
       }
 
-      // Sau khi like/unlike thành công, refetch post để cập nhật dữ liệu chính xác
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Fetch lại post data để đảm bảo đồng bộ với server
       const postRes = await fetch(
         `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
         { credentials: "include" }
       );
-      const postData = await postRes.json();
-
-      setLiked(
-        postData.data.likes?.some((like) => like.user_id === user.user_id)
-      );
-      onUpdatePost && onUpdatePost(postData.data);
-
-      if (!liked) {
-        // Chỉ animate khi like, không cần animate khi unlike
-        gsap.fromTo(
-          heartRef.current,
-          { scale: 1 },
-          { scale: 1.4, duration: 0.3, yoyo: true, repeat: 1, ease: "power1.inOut" }
-        );
+      
+      if (postRes.ok) {
+        const postData = await postRes.json();
+        
+        // Cập nhật lại state với dữ liệu chính xác từ server
+        const serverLiked = postData.data.likes?.some((like) => like.user_id === user.user_id) || false;
+        const serverLikeCount = postData.data.likes_count ?? 0;
+        
+        setLiked(serverLiked);
+        setLikeCount(serverLikeCount);
+        
+        // Cập nhật post data cho component cha
+        if (onUpdatePost) {
+          onUpdatePost(postData.data);
+        }
       }
+      
     } catch (error) {
       console.error("Lỗi khi toggle like:", error);
+      
+      // Rollback về trạng thái cũ nếu có lỗi
+      setLiked(previousLiked);
+      setLikeCount(previousLikeCount);
+      
+      // Có thể hiển thị toast notification lỗi ở đây
+      // toast.error("Không thể thực hiện hành động này. Vui lòng thử lại!");
     } finally {
       setLoadingLike(false);
     }
@@ -92,7 +129,6 @@ export default function VideoInteractions({
 
   const openShareModal = () => setShareOpen(true);
 
-  const likeCount = currentPost?.likes_count ?? 0;
   const commentCount = currentPost?.comments_count ?? 0;
   const shareCount = currentPost?.shares_count ?? 0;
 
@@ -100,14 +136,14 @@ export default function VideoInteractions({
     <div className="flex flex-col items-center space-y-6 ml-4 mr-4">
       {/* Like button */}
       <button
-        className="flex flex-col items-center disabled:cursor-not-allowed"
+        className="flex flex-col items-center disabled:cursor-not-allowed transition-transform active:scale-95"
         onClick={handleLikeToggle}
         disabled={loadingLike}
       >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <Heart
             ref={heartRef}
-            className={`w-7 h-7 ${
+            className={`w-7 h-7 transition-colors duration-200 ${
               liked ? "text-red-500 fill-red-500" : "text-white"
             }`}
           />
@@ -118,7 +154,10 @@ export default function VideoInteractions({
       </button>
 
       {/* Comment button */}
-      <button className="flex flex-col items-center" onClick={onCommentClick}>
+      <button 
+        className="flex flex-col items-center transition-transform active:scale-95" 
+        onClick={onCommentClick}
+      >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <FaCommentDots className="w-7 h-7 text-white" />
           <span className="absolute -bottom-5 text-xs text-white font-semibold">
@@ -128,14 +167,20 @@ export default function VideoInteractions({
       </button>
 
       {/* Recipe button */}
-      <button className="flex flex-col items-center" onClick={onRecipeClick}>
+      <button 
+        className="flex flex-col items-center transition-transform active:scale-95" 
+        onClick={onRecipeClick}
+      >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg">
           <FaBook className="w-6.5 h-6.5 text-white" />
         </div>
       </button>
 
       {/* Share button */}
-      <button className="flex flex-col items-center" onClick={openShareModal}>
+      <button 
+        className="flex flex-col items-center transition-transform active:scale-95" 
+        onClick={openShareModal}
+      >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <FaShareAltSquare className="w-7 h-7 text-white" />
           <span className="absolute -bottom-5 text-xs text-white font-semibold">
