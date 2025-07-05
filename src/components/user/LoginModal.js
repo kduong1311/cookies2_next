@@ -13,6 +13,7 @@ import Image from "next/image";
 import { FaGooglePlusSquare, FaFacebookSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useAuth } from "@/contexts/AuthContext";
+import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, googleProvider } from "@/lib/firebase";
 
 export default function LoginModal({ open, onOpenChange }) {
   const [formMode, setFormMode] = useState("social");
@@ -57,7 +58,43 @@ export default function LoginModal({ open, onOpenChange }) {
                   <FaFacebookSquare className="mr-2 h-4 w-4" />
                   Login with Facebook
                 </Button>
-                <Button className="w-full justify-center hover-orange-bg" variant="outline">
+                <Button 
+                  className="w-full justify-center hover-orange-bg" 
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      const result = await signInWithPopup(auth, googleProvider);
+                      const idToken = await result.user.getIdToken();
+                      
+                      const res = await fetch("http://103.253.145.7:3000/api/users/google-auth", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ 
+                          idToken,
+                          user: {
+                            username: result.user.displayName || result.user.email.split('@')[0],
+                            photoURL: result.user.photoURL
+                          }
+                        }),
+                        credentials: "include",
+                      });
+                      
+                      const data = await res.json();
+                      
+                      if (!res.ok) {
+                        throw new Error(data.message || "Google login failed");
+                      }
+                      
+                      await login();
+                      alert("Google login successful!");
+                      onOpenChange(false);
+                    } catch (error) {
+                      alert(error.message);
+                    }
+                  }}
+                >
                   <FaGooglePlusSquare className="mr-2 h-4 w-4" />
                   Login with Google
                 </Button>
@@ -83,22 +120,27 @@ export default function LoginModal({ open, onOpenChange }) {
                 const password = e.target.password.value;
 
                 try {
+                  // First, authenticate with Firebase
+                  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                  const idToken = await userCredential.user.getIdToken();
+
+                  // Then send the ID token to your backend
                   const res = await fetch("http://103.253.145.7:3000/api/users/login", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({email, password}),
+                    body: JSON.stringify({ idToken }),
                     credentials: "include",
                   });
                   const data = await res.json();
 
                   if (!res.ok) {
-                    throw new Error(data.message || "login faile");
+                    throw new Error(data.message || "Login failed");
                   }
 
                   await login();
-                  alert("Login successfull");
+                  alert("Login successful");
                   onOpenChange(false);
                 }
                 catch (e) {
@@ -164,12 +206,23 @@ export default function LoginModal({ open, onOpenChange }) {
                 }
 
                 try {
-                  const res = await fetch("http://103.253.145.7:3000/api/users/register", {
+                  // First, create user with Firebase
+                  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                  const idToken = await userCredential.user.getIdToken();
+
+                  // Then send the ID token and user data to your backend
+                  const res = await fetch("http://103.253.145.7:3000/api/users/google-auth", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(bodyData),
+                    body: JSON.stringify({ 
+                      idToken,
+                      user: {
+                        username: bodyData.username,
+                        photoURL: null
+                      }
+                    }),
                     credentials: "include",
                   });
 
@@ -181,8 +234,8 @@ export default function LoginModal({ open, onOpenChange }) {
                     return;
                   }
 
-                  login(data);
-                  alert("Registration Successfull!")
+                  login(data.user);
+                  alert("Registration successful!")
                   onOpenChange(false);
                 } catch (err) {
                   setRegisterError("* " + err.message);
@@ -239,7 +292,7 @@ export default function LoginModal({ open, onOpenChange }) {
               </span>
             ) : (
               <span className="text-gray-400">
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <button
                   className="text-orange-400 hover:underline"
                   onClick={() => setFormMode("register")}
