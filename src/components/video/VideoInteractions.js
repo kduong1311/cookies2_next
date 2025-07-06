@@ -145,35 +145,25 @@ export default function VideoInteractions({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Cập nhật trạng thái server cuối cùng
+      // Request thành công - cập nhật trạng thái server
       lastServerLikeState.current = newLiked;
 
-      // Fetch lại post data để đảm bảo đồng bộ với server (optional)
-      const postRes = await fetch(
-        `http://103.253.145.7:3001/api/posts/${currentPost.post_id}`,
-        { 
-          credentials: "include",
-          signal: controller.signal
-        }
-      );
-      
-      if (postRes.ok) {
-        const postData = await postRes.json();
-        const serverPostData = postData.data;
-        
-        // Chỉ cập nhật nếu không có thay đổi từ user trong lúc request
-        const serverLiked = serverPostData.likes?.some((like) => like.user_id === user.user_id) || false;
-        const serverLikeCount = serverPostData.likes_count ?? 0;
-        
-        // Cập nhật state với dữ liệu từ server
-        setLiked(serverLiked);
-        setLikeCount(serverLikeCount);
-        lastServerLikeState.current = serverLiked;
-        
-        // Cập nhật post data cho component cha
-        if (onUpdatePost) {
-          onUpdatePost(serverPostData);
-        }
+      // Lấy response data nếu có
+      const responseData = await response.json();
+      console.log("Like response:", responseData);
+
+      // Không cần fetch lại post data nữa vì đã có optimistic update
+      // Chỉ cập nhật post data cho component cha với thông tin hiện tại
+      if (onUpdatePost) {
+        // Tạo updated post data
+        const updatedPost = {
+          ...currentPost,
+          likes_count: newLikeCount,
+          likes: newLiked 
+            ? [...(currentPost.likes || []), { user_id: user.user_id }]
+            : (currentPost.likes || []).filter(like => like.user_id !== user.user_id)
+        };
+        onUpdatePost(updatedPost);
       }
       
     } catch (error) {
@@ -187,6 +177,7 @@ export default function VideoInteractions({
       // Rollback về trạng thái cũ nếu có lỗi
       setLiked(currentLiked);
       setLikeCount(currentLikeCount);
+      lastServerLikeState.current = currentLiked;
       
       // Hiển thị thông báo lỗi
       // toast.error("Không thể thực hiện hành động này. Vui lòng thử lại!");
@@ -196,22 +187,21 @@ export default function VideoInteractions({
     }
   };
 
-  // Debounced like handler để tránh click quá nhanh
-  const debouncedLikeToggle = useRef(null);
+  // Throttled like handler để tránh click quá nhanh
+  const lastClickTime = useRef(0);
+  const minClickInterval = 500; // 500ms giữa các click
   
   const handleLikeClick = () => {
-    // Clear timeout cũ
-    if (debouncedLikeToggle.current) {
-      clearTimeout(debouncedLikeToggle.current);
+    const now = Date.now();
+    
+    // Nếu click quá nhanh, bỏ qua
+    if (now - lastClickTime.current < minClickInterval) {
+      console.log("Click quá nhanh, bỏ qua");
+      return;
     }
     
-    // Thực hiện ngay lập tức optimistic update
+    lastClickTime.current = now;
     handleLikeToggle();
-    
-    // Set timeout để prevent spam clicking
-    debouncedLikeToggle.current = setTimeout(() => {
-      debouncedLikeToggle.current = null;
-    }, 300);
   };
 
   const openShareModal = () => setShareOpen(true);
@@ -224,9 +214,6 @@ export default function VideoInteractions({
     return () => {
       if (pendingLikeRequest.current) {
         pendingLikeRequest.current.abort();
-      }
-      if (debouncedLikeToggle.current) {
-        clearTimeout(debouncedLikeToggle.current);
       }
     };
   }, []);
