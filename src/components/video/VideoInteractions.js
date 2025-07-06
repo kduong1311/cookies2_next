@@ -32,11 +32,12 @@ export default function VideoInteractions({
           if (response.ok) {
             const data = await response.json();
             const postData = data.data;
-                        console.log(postData)
+            console.log("id", user.user_id)
             
             setLikeCount(postData.likes_count ?? 0);
             setLiked(
-              postData.likes?.some((like) => like.user_id === user.user_id) || false
+              postData.likes?.some((like) => like.user_id ===
+               user.user_id) || false
             );
             
             // Cập nhật post data cho component cha nếu có callback
