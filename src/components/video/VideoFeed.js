@@ -25,11 +25,9 @@ export default function VideoFeed({
         const data = await response.json();
 
         if (data.status === 'success') {
-          // Xáo trộn danh sách videos
           const shuffledPosts = shuffleArray(data.data);
           setPosts(shuffledPosts);
 
-          // Fetch user data cho danh sách đã shuffle
           const userPromises = shuffledPosts.map(async (post) => {
             try {
               const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`);
@@ -48,7 +46,6 @@ export default function VideoFeed({
           });
           setUsers(usersMap);
 
-          // Chọn index ban đầu ngẫu nhiên trong danh sách đã shuffle
           if (shuffledPosts.length > 0) {
             const randomIndex = Math.floor(Math.random() * shuffledPosts.length);
             setCurrentPostIndex(randomIndex);
@@ -99,6 +96,15 @@ export default function VideoFeed({
   const currentPost = posts[currentPostIndex];
   const currentUser = users[currentPost?.user_id];
 
+  // ✅ Hàm cập nhật 1 post trong danh sách sau khi like/unlike
+  const updatePostInList = (updatedPost) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.post_id === updatedPost.post_id ? updatedPost : post
+      )
+    );
+  };
+
   return (
     <>
       {loading && <Loading />}
@@ -106,7 +112,6 @@ export default function VideoFeed({
       <div className="flex justify-center items-center w-full h-screen bg-black">
         {posts.length > 0 && (
           <div className="flex items-center justify-center transition-all duration-300 relative">
-            {/* Fixed 9:16 Video Container */}
             <div
               className={`bg-black rounded-lg overflow-hidden transition-all duration-300 ${
                 isRecipeOpen || isCommentOpen
@@ -122,7 +127,6 @@ export default function VideoFeed({
               />
             </div>
 
-            {/* Video Interactions - dính bên phải video */}
             <VideoInteractions
               currentPost={currentPost}
               currentUser={currentUser}
@@ -134,11 +138,11 @@ export default function VideoFeed({
                 setIsCommentOpen(!isCommentOpen);
                 if (!isCommentOpen) setIsRecipeOpen(false);
               }}
+              onUpdatePost={updatePostInList} // 🟢 Truyền callback cập nhật post
             />
           </div>
         )}
 
-        {/* Navigation Controls */}
         {posts.length > 0 && (
           <div className="fixed right-6 top-1/2 -translate-y-1/2 z-30">
             <div className="flex flex-col justify-center items-center space-y-4">
@@ -167,7 +171,7 @@ export default function VideoFeed({
   );
 }
 
-// Hàm xáo trộn chuẩn Fisher-Yates
+// Fisher-Yates shuffle
 function shuffleArray(array) {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
