@@ -96,12 +96,21 @@ export default function VideoFeed({
   const currentPost = posts[currentPostIndex];
   const currentUser = users[currentPost?.user_id];
 
-  // ✅ Hàm cập nhật 1 post trong danh sách sau khi like/unlike
+  // ✅ FIX: Cập nhật post trong danh sách khi có thay đổi
   const updatePostInList = (updatedPost) => {
     setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.post_id === updatedPost.post_id ? updatedPost : post
-      )
+      prevPosts.map((post) => {
+        if (post.post_id === updatedPost.post_id) {
+          // Đảm bảo likes_count không âm và merge đúng data
+          return {
+            ...post,
+            ...updatedPost,
+            likes_count: Math.max(0, updatedPost.likes_count ?? post.likes_count ?? 0),
+            likes: updatedPost.likes || post.likes || []
+          };
+        }
+        return post;
+      })
     );
   };
 
@@ -138,7 +147,7 @@ export default function VideoFeed({
                 setIsCommentOpen(!isCommentOpen);
                 if (!isCommentOpen) setIsRecipeOpen(false);
               }}
-              onUpdatePost={updatePostInList} // 🟢 Truyền callback cập nhật post
+              onUpdatePost={updatePostInList} // 🟢 Truyền callback cập nhật post đã fix
             />
           </div>
         )}
