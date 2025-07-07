@@ -22,8 +22,6 @@ export default function VideoInteractions({
 
   const lastServerLikeState = useRef(null);
   const pendingLikeRequest = useRef(null);
-  const lastFetchedPostId = useRef(null);
-  const isInitialized = useRef(false);
   const lastClickTime = useRef(0);
 
   // Memoize các giá trị
@@ -32,64 +30,25 @@ export default function VideoInteractions({
   const commentCount = useMemo(() => currentPost?.comments_count ?? 0, [currentPost?.comments_count]);
   const shareCount = useMemo(() => currentPost?.shares_count ?? 0, [currentPost?.shares_count]);
 
-  // Khởi tạo dữ liệu post
-  const initializePostData = useCallback(async () => {
-    if (!postId || !userId) return;
-
-    // Nếu đã khởi tạo cho post này rồi thì không làm gì
-    if (isInitialized.current && lastFetchedPostId.current === postId) {
-      return;
-    }
-
-    // Reset state khi chuyển post
-    if (lastFetchedPostId.current !== postId) {
-      setLiked(false);
-      setLikeCount(0);
-      lastServerLikeState.current = null;
-      isInitialized.current = false;
-    }
-
-    try {
-      // Kiểm tra dữ liệu like từ currentPost trước
-      const serverLiked = currentPost.likes?.some(like => like.user_id === userId) || false;
-      const serverLikeCount = Math.max(0, currentPost.likes_count ?? 0);
-
-      setLikeCount(serverLikeCount);
-      setLiked(serverLiked);
-      lastServerLikeState.current = serverLiked;
-      lastFetchedPostId.current = postId;
-      isInitialized.current = true;
-
-      // Cập nhật lại component cha nếu cần
-      if (onUpdatePost) {
-        onUpdatePost({
-          ...currentPost,
-          likes_count: serverLikeCount
-        });
-      }
-    } catch (error) {
-      console.error("Error initializing post data:", error);
-      // Fallback về giá trị mặc định
-      setLikeCount(Math.max(0, currentPost?.likes_count ?? 0));
-      setLiked(false);
-      lastServerLikeState.current = false;
-      lastFetchedPostId.current = postId;
-      isInitialized.current = true;
-    }
-  }, [postId, userId, currentPost, onUpdatePost]);
-
+  // Khởi tạo dữ liệu từ currentPost
   useEffect(() => {
-    if (postId && userId) {
-      initializePostData();
-    }
-  }, [postId, userId, initializePostData]);
+    if (!currentPost || !userId) return;
+
+    const serverLiked = currentPost.likes?.some(like => like.user_id === userId) || false;
+    const serverLikeCount = Math.max(0, currentPost.likes_count ?? 0);
+
+    setLikeCount(serverLikeCount);
+    setLiked(serverLiked);
+    lastServerLikeState.current = serverLiked;
+  }, [currentPost, userId]);
 
   // Xử lý like/unlike
   const handleLikeToggle = useCallback(async () => {
     if (!postId || !userId || loadingLike) return;
 
+    // Throttle click
     const now = Date.now();
-    if (now - lastClickTime.current < 300) return; // Throttle 300ms
+    if (now - lastClickTime.current < 300) return;
     lastClickTime.current = now;
 
     setLoadingLike(true);
@@ -145,13 +104,8 @@ export default function VideoInteractions({
       lastServerLikeState.current = newLiked;
 
       // Cập nhật dữ liệu mới nhất từ server
-      if (responseData.data) {
-        const updatedPost = responseData.data;
-        setLikeCount(Math.max(0, updatedPost.likes_count ?? newLikeCount));
-        
-        if (onUpdatePost) {
-          onUpdatePost(updatedPost);
-        }
+      if (responseData.data && onUpdatePost) {
+        onUpdatePost(responseData.data);
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
@@ -186,6 +140,7 @@ export default function VideoInteractions({
         className="flex flex-col items-center disabled:cursor-not-allowed transition-transform active:scale-95"
         onClick={handleLikeToggle}
         disabled={loadingLike}
+        aria-label={liked ? "Unlike this post" : "Like this post"}
       >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <Heart
@@ -195,7 +150,7 @@ export default function VideoInteractions({
             }`}
           />
           <span className="absolute -bottom-5 text-xs text-white font-semibold">
-            {likeCount}
+            {likeCount.toLocaleString()}
           </span>
         </div>
       </button>
@@ -204,11 +159,12 @@ export default function VideoInteractions({
       <button 
         className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={onCommentClick}
+        aria-label="View comments"
       >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <FaCommentDots className="w-7 h-7 text-white" />
           <span className="absolute -bottom-5 text-xs text-white font-semibold">
-            {commentCount}
+            {commentCount.toLocaleString()}
           </span>
         </div>
       </button>
@@ -217,6 +173,7 @@ export default function VideoInteractions({
       <button 
         className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={onRecipeClick}
+        aria-label="View recipe"
       >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg">
           <FaBook className="w-6.5 h-6.5 text-white" />
@@ -227,16 +184,21 @@ export default function VideoInteractions({
       <button 
         className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={openShareModal}
+        aria-label="Share this post"
       >
         <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <FaShareAltSquare className="w-7 h-7 text-white" />
           <span className="absolute -bottom-5 text-xs text-white font-semibold">
-            {shareCount}
+            {shareCount.toLocaleString()}
           </span>
         </div>
       </button>
 
-      <ShareModal open={shareOpen} onOpenChange={closeShareModal} />
+      <ShareModal 
+        open={shareOpen} 
+        onOpenChange={closeShareModal} 
+        postId={postId}
+      />
     </div>
   );
 }
