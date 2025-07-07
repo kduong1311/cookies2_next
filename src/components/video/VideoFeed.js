@@ -178,31 +178,26 @@ export default function VideoFeed({
   }, [currentPostIndex, posts, setCurrentPostId, fetchPostDetail]);
 
   // Cập nhật dữ liệu post khi có thay đổi từ interactions
-  const updatePostData = useCallback((updatedPost) => {
-    if (!updatedPost?.post_id) return;
+const updatePostData = useCallback((updatedPost) => {
+  if (!updatedPost?.post_id) return;
 
-    // Cập nhật cache
-    postDetailsCache.current.set(updatedPost.post_id, updatedPost);
+  // ✅ Cập nhật cache
+  postDetailsCache.current.set(updatedPost.post_id, updatedPost);
 
-    // Cập nhật currentPostDetail nếu đang hiển thị post này
-    if (currentPostDetail?.post_id === updatedPost.post_id) {
-      setCurrentPostDetail(updatedPost);
-    }
+  // ✅ Nếu đang là post hiện tại thì cập nhật
+  if (currentPostDetail?.post_id === updatedPost.post_id) {
+    setCurrentPostDetail(updatedPost);
+  }
 
-    // Cập nhật danh sách posts để giữ đồng bộ
-    setPosts(prevPosts =>
-      prevPosts.map(post => 
-        post.post_id === updatedPost.post_id 
-          ? { 
-              ...post, 
-              likes_count: updatedPost.likes_count,
-              comments_count: updatedPost.comments_count,
-              shares_count: updatedPost.shares_count
-            } 
-          : post
-      )
-    );
-  }, [currentPostDetail?.post_id]);
+  // ✅ Cập nhật mảng posts để giữ đồng bộ
+  setPosts(prevPosts =>
+    prevPosts.map(post =>
+      post.post_id === updatedPost.post_id
+        ? { ...post, ...updatedPost }
+        : post
+    )
+  );
+}, [currentPostDetail?.post_id]);
 
   // Navigation handlers với optimizations
   const handlePrevious = useCallback(() => {
@@ -286,6 +281,7 @@ export default function VideoFeed({
               }}
               onUpdatePost={updatePostData}
             />
+
           </div>
         )}
 

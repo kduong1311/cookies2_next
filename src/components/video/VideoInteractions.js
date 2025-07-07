@@ -66,91 +66,95 @@ export default function VideoInteractions({
   }, [postId, userId, calculateLikeCount, onUpdatePost]);
 
   const handleLikeToggle = useCallback(async () => {
-    if (!postId || !userId || loadingLike) return;
+  if (!postId || !userId || loadingLike) return;
 
-    const now = Date.now();
-    if (now - lastClickTime.current < 500) return;
-    lastClickTime.current = now;
+  const now = Date.now();
+  if (now - lastClickTime.current < 500) return;
+  lastClickTime.current = now;
 
-    setLoadingLike(true);
-    const currentLiked = liked;
-    const currentLikeCount = likeCount;
+  setLoadingLike(true);
+  const currentLiked = liked;
+  const currentLikeCount = likeCount;
 
-    const newLiked = !currentLiked;
-    const newLikeCount = newLiked
-      ? currentLikeCount + 1
-      : Math.max(0, currentLikeCount - 1);
+  const newLiked = !currentLiked;
+  const newLikeCount = newLiked
+    ? currentLikeCount + 1
+    : Math.max(0, currentLikeCount - 1);
 
-    setLiked(newLiked);
-    setLikeCount(newLikeCount);
+  // Tạm thời cập nhật UI
+  setLiked(newLiked);
+  setLikeCount(newLikeCount);
 
-    if (newLiked && heartRef.current) {
-      gsap.fromTo(
-        heartRef.current,
-        { scale: 1, rotation: 0 },
-        {
-          scale: 1.3,
-          rotation: 15,
-          duration: 0.1,
-          ease: "power2.out",
-          onComplete: () => {
-            gsap.to(heartRef.current, {
-              scale: 1,
-              rotation: 0,
-              duration: 0.2,
-              ease: "elastic.out(1, 0.5)",
-            });
-          },
-        }
-      );
+  if (newLiked && heartRef.current) {
+    gsap.fromTo(
+      heartRef.current,
+      { scale: 1, rotation: 0 },
+      {
+        scale: 1.3,
+        rotation: 15,
+        duration: 0.1,
+        ease: "power2.out",
+        onComplete: () => {
+          gsap.to(heartRef.current, {
+            scale: 1,
+            rotation: 0,
+            duration: 0.2,
+            ease: "elastic.out(1, 0.5)",
+          });
+        },
+      }
+    );
+  }
+
+  try {
+    if (pendingLikeRequest.current) {
+      pendingLikeRequest.current.abort();
     }
 
-    try {
-      if (pendingLikeRequest.current) {
-        pendingLikeRequest.current.abort();
+    const controller = new AbortController();
+    pendingLikeRequest.current = controller;
+
+    const response = await fetch(
+      `http://103.253.145.7:3001/api/posts/${postId}/like`,
+      {
+        method: newLiked ? "POST" : "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
       }
+    );
 
-      const controller = new AbortController();
-      pendingLikeRequest.current = controller;
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const response = await fetch(
-        `http://103.253.145.7:3001/api/posts/${postId}/like`,
-        {
-          method: newLiked ? "POST" : "DELETE",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          signal: controller.signal,
-        }
-      );
+    // ✅ Gọi lại API để lấy dữ liệu post mới nhất
+    const refreshRes = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
+      credentials: "include",
+    });
+    const refreshData = await refreshRes.json();
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    if (refreshData.status === "success" && refreshData.data) {
+      const updatedPost = refreshData.data;
+      const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
+      const serverLikeCount = calculateLikeCount(updatedPost);
 
-      const result = await response.json();
-      if (result.status === "success" && result.data) {
-        const updatedPost = result.data;
-        const serverLikeCount = calculateLikeCount(updatedPost);
-        const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
+      setLiked(serverLiked);
+      setLikeCount(serverLikeCount);
 
-        setLiked(serverLiked);
-        setLikeCount(serverLikeCount);
-
-        if (onUpdatePost) {
-          onUpdatePost(updatedPost);
-        }
+      if (onUpdatePost) {
+        onUpdatePost(updatedPost); // ⚠️ Rất quan trọng để VideoFeed cập nhật lại state
       }
-    } catch (error) {
-      if (error.name !== "AbortError") {
-        console.error("Like error:", error);
-        setLiked(currentLiked);
-        setLikeCount(currentLikeCount);
-      }
-    } finally {
-      setLoadingLike(false);
-      pendingLikeRequest.current = null;
     }
-  }, [postId, userId, liked, likeCount, loadingLike, onUpdatePost, calculateLikeCount]);
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.error("Like error:", error);
+      setLiked(currentLiked);
+      setLikeCount(currentLikeCount);
+    }
+  } finally {
+    setLoadingLike(false);
+    pendingLikeRequest.current = null;
+  }
+}, [postId, userId, liked, likeCount, loadingLike, onUpdatePost, calculateLikeCount]);
 
   const formatCount = useCallback((count) => {
     if (count >= 1_000_000) return (count / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
