@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import VideoPlayer from './VideoPlayer';
 import VideoInteractions from './VideoInteractions';
 import Loading from '../Loading';
@@ -19,6 +19,10 @@ export default function VideoFeed({
   const [currentPostDetail, setCurrentPostDetail] = useState(null);
   const [loadingPost, setLoadingPost] = useState(false);
   const { user } = useAuth();
+
+  // Cache để lưu trữ chi tiết posts đã fetch
+  const postDetailsCache = useRef(new Map());
+  const fetchingPosts = useRef(new Set());
 
   // Fetch danh sách posts ban đầu
   useEffect(() => {
@@ -70,6 +74,42 @@ export default function VideoFeed({
     fetchInitialPosts();
   }, []);
 
+  // Fetch chi tiết post với caching
+  const fetchPostDetail = useCallback(async (postId, force = false) => {
+    // Kiểm tra cache trước
+    if (!force && postDetailsCache.current.has(postId)) {
+      return postDetailsCache.current.get(postId);
+    }
+
+    // Tránh fetch duplicate
+    if (fetchingPosts.current.has(postId)) {
+      return null;
+    }
+
+    try {
+      fetchingPosts.current.add(postId);
+      
+      const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        // Lưu vào cache
+        postDetailsCache.current.set(postId, data.data);
+        return data.data;
+      } else {
+        console.error('Failed to fetch post detail:', data.message);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching post detail:', error);
+      return null;
+    } finally {
+      fetchingPosts.current.delete(postId);
+    }
+  }, []);
+
   // Fetch chi tiết post khi currentPostIndex thay đổi
   useEffect(() => {
     if (posts.length === 0 || currentPostIndex === -1) return;
@@ -77,63 +117,119 @@ export default function VideoFeed({
     const currentPostId = posts[currentPostIndex]?.post_id;
     if (!currentPostId) return;
 
-    const fetchPostDetail = async () => {
+    const loadPostDetail = async () => {
       try {
         setLoadingPost(true);
-        const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
-          credentials: 'include'
-        });
-        const data = await response.json();
         
-        if (data.status === 'success') {
-          setCurrentPostDetail(data.data);
+        // Kiểm tra cache trước
+        if (postDetailsCache.current.has(currentPostId)) {
+          const cachedPost = postDetailsCache.current.get(currentPostId);
+          setCurrentPostDetail(cachedPost);
           setCurrentPostId(currentPostId);
-        } else {
-          console.error('Failed to fetch post detail:', data.message);
+          setLoadingPost(false);
+          
+          // Fetch background để cập nhật dữ liệu mới nhất
+          fetchPostDetail(currentPostId, true).then(updatedPost => {
+            if (updatedPost && updatedPost.post_id === currentPostId) {
+              setCurrentPostDetail(updatedPost);
+            }
+          });
+          return;
+        }
+
+        // Fetch mới nếu không có cache
+        const postDetail = await fetchPostDetail(currentPostId);
+        if (postDetail) {
+          setCurrentPostDetail(postDetail);
+          setCurrentPostId(currentPostId);
         }
       } catch (error) {
-        console.error('Error fetching post detail:', error);
+        console.error('Error loading post detail:', error);
       } finally {
         setLoadingPost(false);
       }
     };
 
-    fetchPostDetail();
-  }, [currentPostIndex, posts, setCurrentPostId]);
+    loadPostDetail();
+
+    // Prefetch posts xung quanh để tải nhanh hơn
+    const prefetchNearbyPosts = async () => {
+      const prefetchIndices = [];
+      
+      // Prefetch post trước và sau
+      if (currentPostIndex > 0) {
+        prefetchIndices.push(currentPostIndex - 1);
+      }
+      if (currentPostIndex < posts.length - 1) {
+        prefetchIndices.push(currentPostIndex + 1);
+      }
+
+      for (const index of prefetchIndices) {
+        const postId = posts[index]?.post_id;
+        if (postId && !postDetailsCache.current.has(postId)) {
+          fetchPostDetail(postId);
+        }
+      }
+    };
+
+    // Prefetch sau 500ms để không ảnh hưởng đến hiệu suất
+    const prefetchTimer = setTimeout(prefetchNearbyPosts, 500);
+    return () => clearTimeout(prefetchTimer);
+  }, [currentPostIndex, posts, setCurrentPostId, fetchPostDetail]);
 
   // Cập nhật dữ liệu post khi có thay đổi từ interactions
   const updatePostData = useCallback((updatedPost) => {
-    setCurrentPostDetail(prev => ({
-      ...prev,
-      ...updatedPost,
-      likes_count: Math.max(0, updatedPost.likes_count ?? 0),
-      likes: updatedPost.likes || prev?.likes || []
-    }));
+    if (!updatedPost?.post_id) return;
 
-    // Cập nhật cả danh sách posts để giữ đồng bộ
+    // Cập nhật cache
+    postDetailsCache.current.set(updatedPost.post_id, updatedPost);
+
+    // Cập nhật currentPostDetail nếu đang hiển thị post này
+    if (currentPostDetail?.post_id === updatedPost.post_id) {
+      setCurrentPostDetail(updatedPost);
+    }
+
+    // Cập nhật danh sách posts để giữ đồng bộ
     setPosts(prevPosts =>
       prevPosts.map(post => 
         post.post_id === updatedPost.post_id 
-          ? { ...post, likes_count: updatedPost.likes_count } 
+          ? { 
+              ...post, 
+              likes_count: updatedPost.likes_count,
+              comments_count: updatedPost.comments_count,
+              shares_count: updatedPost.shares_count
+            } 
           : post
       )
     );
-  }, []);
+  }, [currentPostDetail?.post_id]);
 
-  // Navigation handlers
+  // Navigation handlers với optimizations
   const handlePrevious = useCallback(() => {
-    if (posts.length === 0) return;
-    setCurrentPostIndex(prev => (prev === 0 ? posts.length - 1 : prev - 1));
-  }, [posts.length]);
+    if (posts.length === 0 || loadingPost) return;
+    setCurrentPostIndex(prev => {
+      const newIndex = prev === 0 ? posts.length - 1 : prev - 1;
+      return newIndex;
+    });
+  }, [posts.length, loadingPost]);
 
   const handleNext = useCallback(() => {
-    if (posts.length === 0) return;
-    setCurrentPostIndex(prev => (prev === posts.length - 1 ? 0 : prev + 1));
-  }, [posts.length]);
+    if (posts.length === 0 || loadingPost) return;
+    setCurrentPostIndex(prev => {
+      const newIndex = prev === posts.length - 1 ? 0 : prev + 1;
+      return newIndex;
+    });
+  }, [posts.length, loadingPost]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e) => {
+      // Chỉ xử lý khi không có modal/input đang focus
+      if (document.activeElement?.tagName === 'INPUT' || 
+          document.activeElement?.tagName === 'TEXTAREA') {
+        return;
+      }
+
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         handlePrevious();
@@ -146,6 +242,14 @@ export default function VideoFeed({
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleNext, handlePrevious]);
+
+  // Cleanup cache khi component unmount
+  useEffect(() => {
+    return () => {
+      postDetailsCache.current.clear();
+      fetchingPosts.current.clear();
+    };
+  }, []);
 
   const currentUser = users[currentPostDetail?.user_id];
 
@@ -185,13 +289,19 @@ export default function VideoFeed({
           </div>
         )}
 
+        {/* Navigation buttons */}
         {posts.length > 0 && (
           <div className="fixed right-6 top-1/2 -translate-y-1/2 z-30">
             <div className="flex flex-col justify-center items-center space-y-4">
               <button
                 onClick={handlePrevious}
-                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 flex items-center justify-center transition-colors backdrop-blur-sm"
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm ${
+                  loadingPost 
+                    ? 'bg-gray-800/50 cursor-not-allowed' 
+                    : 'bg-gray-800/80 hover:bg-orange-500 active:scale-95'
+                }`}
                 disabled={loadingPost}
+                aria-label="Previous post"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -200,13 +310,29 @@ export default function VideoFeed({
 
               <button
                 onClick={handleNext}
-                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 flex items-center justify-center transition-colors backdrop-blur-sm"
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm ${
+                  loadingPost 
+                    ? 'bg-gray-800/50 cursor-not-allowed' 
+                    : 'bg-gray-800/80 hover:bg-orange-500 active:scale-95'
+                }`}
                 disabled={loadingPost}
+                aria-label="Next post"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Post indicator */}
+        {posts.length > 0 && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
+            <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-white text-sm">
+                {currentPostIndex + 1} / {posts.length}
+              </span>
             </div>
           </div>
         )}
