@@ -52,7 +52,8 @@ export default function VideoInteractions({
     try {
       // Kiểm tra dữ liệu like từ currentPost trước
       const serverLiked = currentPost.likes?.some(like => like.user_id === userId) || false;
-      const serverLikeCount = Math.max(0, currentPost.likes_count ?? 0);
+      const serverLikeCount = currentPost.likes.length();
+      console.log("count", currentPost.likes.length())
 
       setLikeCount(serverLikeCount);
       setLiked(serverLiked);

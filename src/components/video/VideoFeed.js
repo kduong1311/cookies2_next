@@ -37,6 +37,7 @@ export default function VideoFeed({
           const postDetailPromises = shuffledPosts.map(async (post) => {
             try {
               const res = await fetch(`http://103.253.145.7:3001/api/posts/${post.post_id}`, {
+                method: "GET",
                 credentials: 'include'
               });
               return res.json();
