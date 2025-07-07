@@ -20,152 +20,157 @@ export default function VideoInteractions({
   const [shareOpen, setShareOpen] = useState(false);
   const { user } = useAuth();
 
-  const lastClickTime = useRef(0);
+  const lastServerLikeState = useRef(null);
   const pendingLikeRequest = useRef(null);
+  const lastFetchedPostId = useRef(null);
+  const isInitialized = useRef(false);
+  const lastClickTime = useRef(0);
 
+  // Memoize các giá trị
   const postId = useMemo(() => currentPost?.post_id, [currentPost?.post_id]);
   const userId = useMemo(() => user?.user_id, [user?.user_id]);
   const commentCount = useMemo(() => currentPost?.comments_count ?? 0, [currentPost?.comments_count]);
   const shareCount = useMemo(() => currentPost?.shares_count ?? 0, [currentPost?.shares_count]);
 
-  const calculateLikeCount = useCallback((post) => {
-    const countFromServer = post.likes_count;
-    const countFromArray = post.likes ? post.likes.length : 0;
-    return Math.max(countFromServer ?? 0, countFromArray);
-  }, []);
+  // Khởi tạo dữ liệu post
+  const initializePostData = useCallback(async () => {
+    if (!postId || !userId) return;
 
-  // Fetch chi tiết bài viết nếu cần
-  useEffect(() => {
-    const fetchPostDetails = async () => {
-      if (!postId || !userId) return;
-
-      try {
-        const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
-          credentials: "include",
-        });
-        const result = await response.json();
-
-        if (result.status === "success" && result.data) {
-          const updatedPost = result.data;
-          const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
-          const serverLikeCount = calculateLikeCount(updatedPost);
-
-          setLiked(serverLiked);
-          setLikeCount(serverLikeCount);
-
-          if (onUpdatePost) {
-            onUpdatePost(updatedPost);
-          }
-        }
-      } catch (error) {
-        console.error("Lỗi khi fetch chi tiết bài viết:", error);
-      }
-    };
-
-    fetchPostDetails();
-  }, [postId, userId, calculateLikeCount, onUpdatePost]);
-
-  const handleLikeToggle = useCallback(async () => {
-  if (!postId || !userId || loadingLike) return;
-
-  const now = Date.now();
-  if (now - lastClickTime.current < 500) return;
-  lastClickTime.current = now;
-
-  setLoadingLike(true);
-  const currentLiked = liked;
-  const currentLikeCount = likeCount;
-
-  const newLiked = !currentLiked;
-  const newLikeCount = newLiked
-    ? currentLikeCount + 1
-    : Math.max(0, currentLikeCount - 1);
-
-  // Tạm thời cập nhật UI
-  setLiked(newLiked);
-  setLikeCount(newLikeCount);
-
-  if (newLiked && heartRef.current) {
-    gsap.fromTo(
-      heartRef.current,
-      { scale: 1, rotation: 0 },
-      {
-        scale: 1.3,
-        rotation: 15,
-        duration: 0.1,
-        ease: "power2.out",
-        onComplete: () => {
-          gsap.to(heartRef.current, {
-            scale: 1,
-            rotation: 0,
-            duration: 0.2,
-            ease: "elastic.out(1, 0.5)",
-          });
-        },
-      }
-    );
-  }
-
-  try {
-    if (pendingLikeRequest.current) {
-      pendingLikeRequest.current.abort();
+    // Nếu đã khởi tạo cho post này rồi thì không làm gì
+    if (isInitialized.current && lastFetchedPostId.current === postId) {
+      return;
     }
 
-    const controller = new AbortController();
-    pendingLikeRequest.current = controller;
+    // Reset state khi chuyển post
+    if (lastFetchedPostId.current !== postId) {
+      setLiked(false);
+      setLikeCount(0);
+      lastServerLikeState.current = null;
+      isInitialized.current = false;
+    }
 
-    const response = await fetch(
-      `http://103.253.145.7:3001/api/posts/${postId}/like`,
-      {
-        method: newLiked ? "POST" : "DELETE",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-      }
-    );
+    try {
+      // Kiểm tra dữ liệu like từ currentPost trước
+      const serverLiked = currentPost.likes?.some(like => like.user_id === userId) || false;
+      const serverLikeCount = Math.max(0, currentPost.likes_count ?? 0);
 
-    console.log(response)
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-    // ✅ Gọi lại API để lấy dữ liệu post mới nhất
-    const refreshRes = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
-      credentials: "include",
-    });
-    const refreshData = await refreshRes.json();
-
-    if (refreshData.status === "success" && refreshData.data) {
-      const updatedPost = refreshData.data;
-      const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
-      const serverLikeCount = calculateLikeCount(updatedPost);
-
-      setLiked(serverLiked);
       setLikeCount(serverLikeCount);
+      setLiked(serverLiked);
+      lastServerLikeState.current = serverLiked;
+      lastFetchedPostId.current = postId;
+      isInitialized.current = true;
 
+      // Cập nhật lại component cha nếu cần
       if (onUpdatePost) {
-        onUpdatePost(updatedPost); // ⚠️ Rất quan trọng để VideoFeed cập nhật lại state
+        onUpdatePost({
+          ...currentPost,
+          likes_count: serverLikeCount
+        });
       }
+    } catch (error) {
+      console.error("Error initializing post data:", error);
+      // Fallback về giá trị mặc định
+      setLikeCount(Math.max(0, currentPost?.likes_count ?? 0));
+      setLiked(false);
+      lastServerLikeState.current = false;
+      lastFetchedPostId.current = postId;
+      isInitialized.current = true;
     }
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      console.error("Like error:", error);
-      setLiked(currentLiked);
-      setLikeCount(currentLikeCount);
-    }
-  } finally {
-    setLoadingLike(false);
-    pendingLikeRequest.current = null;
-  }
-}, [postId, userId, liked, likeCount, loadingLike, onUpdatePost, calculateLikeCount]);
+  }, [postId, userId, currentPost, onUpdatePost]);
 
-  const formatCount = useCallback((count) => {
-    if (count >= 1_000_000) return (count / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (count >= 1_000) return (count / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
-    return count.toString();
-  }, []);
+  useEffect(() => {
+    if (postId && userId) {
+      initializePostData();
+    }
+  }, [postId, userId, initializePostData]);
+
+  // Xử lý like/unlike
+  const handleLikeToggle = useCallback(async () => {
+    if (!postId || !userId || loadingLike) return;
+
+    const now = Date.now();
+    if (now - lastClickTime.current < 300) return; // Throttle 300ms
+    lastClickTime.current = now;
+
+    setLoadingLike(true);
+    const currentLiked = liked;
+    const currentLikeCount = likeCount;
+
+    // Optimistic update
+    const newLiked = !currentLiked;
+    const newLikeCount = newLiked ? Math.max(0, currentLikeCount) + 1 : Math.max(0, currentLikeCount - 1);
+
+    setLiked(newLiked);
+    setLikeCount(newLikeCount);
+
+    // Animation
+    if (newLiked && heartRef.current) {
+      gsap.fromTo(
+        heartRef.current,
+        { scale: 1 },
+        { 
+          scale: 1.4, 
+          duration: 0.15, 
+          yoyo: true, 
+          repeat: 1, 
+          ease: "power2.out" 
+        }
+      );
+    }
+
+    try {
+      // Hủy request cũ nếu có
+      if (pendingLikeRequest.current) {
+        pendingLikeRequest.current.abort();
+      }
+
+      const controller = new AbortController();
+      pendingLikeRequest.current = controller;
+
+      const response = await fetch(
+        `http://103.253.145.7:3001/api/posts/${postId}/like`,
+        { 
+          method: newLiked ? "POST" : "DELETE",
+          credentials: "include",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          signal: controller.signal
+        }
+      );
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const responseData = await response.json();
+      lastServerLikeState.current = newLiked;
+
+      // Cập nhật dữ liệu mới nhất từ server
+      if (responseData.data) {
+        const updatedPost = responseData.data;
+        setLikeCount(Math.max(0, updatedPost.likes_count ?? newLikeCount));
+        
+        if (onUpdatePost) {
+          onUpdatePost(updatedPost);
+        }
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error("Like error:", error);
+        // Rollback
+        setLiked(currentLiked);
+        setLikeCount(currentLikeCount);
+        lastServerLikeState.current = currentLiked;
+      }
+    } finally {
+      setLoadingLike(false);
+      pendingLikeRequest.current = null;
+    }
+  }, [postId, userId, liked, likeCount, loadingLike, onUpdatePost]);
 
   const openShareModal = useCallback(() => setShareOpen(true), []);
   const closeShareModal = useCallback(() => setShareOpen(false), []);
 
+  // Cleanup
   useEffect(() => {
     return () => {
       if (pendingLikeRequest.current) {
@@ -178,76 +183,60 @@ export default function VideoInteractions({
     <div className="flex flex-col items-center space-y-6 ml-4 mr-4">
       {/* Like button */}
       <button
-        className={`flex flex-col items-center transition-all duration-200 ${
-          loadingLike ? "cursor-not-allowed opacity-70" : "active:scale-95"
-        }`}
+        className="flex flex-col items-center disabled:cursor-not-allowed transition-transform active:scale-95"
         onClick={handleLikeToggle}
         disabled={loadingLike}
-        aria-label={liked ? "Unlike this post" : "Like this post"}
       >
-        <div
-          className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg relative transition-all duration-200 ${
-            liked ? "bg-pink-500" : "bg-gray-700 hover:bg-gray-600"
-          }`}
-        >
+        <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
           <Heart
             ref={heartRef}
-            className={`w-7 h-7 transition-all duration-200 ${
-              liked ? "text-white fill-white" : "text-white"
+            className={`w-7 h-7 transition-colors duration-200 ${
+              liked ? "text-red-500 fill-red-500" : "text-white"
             }`}
           />
-          {loadingLike && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
+          <span className="absolute -bottom-5 text-xs text-white font-semibold">
+            {likeCount}
+          </span>
         </div>
-        <span className="text-xs text-white font-medium mt-1">
-          {formatCount(likeCount)}
-        </span>
       </button>
 
       {/* Comment button */}
-      <button
-        className="flex flex-col items-center transition-transform active:scale-95"
+      <button 
+        className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={onCommentClick}
-        aria-label="View comments"
       >
-        <div className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center shadow-lg transition-colors duration-200">
-          <FaCommentDots className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
+          <FaCommentDots className="w-7 h-7 text-white" />
+          <span className="absolute -bottom-5 text-xs text-white font-semibold">
+            {commentCount}
+          </span>
         </div>
-        <span className="text-xs text-white font-medium mt-1">
-          {formatCount(commentCount)}
-        </span>
       </button>
 
       {/* Recipe button */}
-      <button
-        className="flex flex-col items-center transition-transform active:scale-95"
+      <button 
+        className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={onRecipeClick}
-        aria-label="View recipe"
       >
-        <div className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center shadow-lg transition-colors duration-200">
-          <FaBook className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg">
+          <FaBook className="w-6.5 h-6.5 text-white" />
         </div>
-        <span className="text-xs text-white font-medium mt-1">Recipe</span>
       </button>
 
       {/* Share button */}
-      <button
-        className="flex flex-col items-center transition-transform active:scale-95"
+      <button 
+        className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={openShareModal}
-        aria-label="Share this post"
       >
-        <div className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center shadow-lg transition-colors duration-200">
-          <FaShareAltSquare className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-full bg-orange flex items-center justify-center shadow-lg relative">
+          <FaShareAltSquare className="w-7 h-7 text-white" />
+          <span className="absolute -bottom-5 text-xs text-white font-semibold">
+            {shareCount}
+          </span>
         </div>
-        <span className="text-xs text-white font-medium mt-1">
-          {formatCount(shareCount)}
-        </span>
       </button>
 
-      <ShareModal open={shareOpen} onOpenChange={closeShareModal} postId={postId} />
+      <ShareModal open={shareOpen} onOpenChange={closeShareModal} />
     </div>
   );
 }

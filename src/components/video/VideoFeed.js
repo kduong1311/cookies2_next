@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import VideoPlayer from './VideoPlayer';
 import VideoInteractions from './VideoInteractions';
 import Loading from '../Loading';
@@ -14,19 +14,14 @@ export default function VideoFeed({
 }) {
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState({});
-  const [currentPostIndex, setCurrentPostIndex] = useState(-1);
+  const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [currentPostDetail, setCurrentPostDetail] = useState(null);
-  const [loadingPost, setLoadingPost] = useState(false);
+  const [postData, setPostData] = useState({}); // Lưu toàn bộ dữ liệu post chi tiết
   const { user } = useAuth();
 
-  // Cache để lưu trữ chi tiết posts đã fetch
-  const postDetailsCache = useRef(new Map());
-  const fetchingPosts = useRef(new Set());
-
-  // Fetch danh sách posts ban đầu
+  // Fetch posts và user data
   useEffect(() => {
-    const fetchInitialPosts = async () => {
+    const fetchPosts = async () => {
       try {
         setLoading(true);
         const response = await fetch('http://103.253.145.7:3001/api/posts', {
@@ -38,7 +33,29 @@ export default function VideoFeed({
           const shuffledPosts = shuffleArray(data.data);
           setPosts(shuffledPosts);
 
-          // Fetch thông tin user cho tất cả posts
+          // Fetch chi tiết từng post để lấy thông tin like
+          const postDetailPromises = shuffledPosts.map(async (post) => {
+            try {
+              const res = await fetch(`http://103.253.145.7:3001/api/posts/${post.post_id}`, {
+                credentials: 'include'
+              });
+              return res.json();
+            } catch (error) {
+              console.error('Error fetching post details:', error);
+              return { status: 'error', data: post }; // Fallback về data cơ bản nếu có lỗi
+            }
+          });
+
+          const postDetails = await Promise.all(postDetailPromises);
+          const newPostData = {};
+          postDetails.forEach(detail => {
+            if (detail.status === 'success') {
+              newPostData[detail.data.post_id] = detail.data;
+            }
+          });
+          setPostData(newPostData);
+
+          // Fetch user data
           const userPromises = shuffledPosts.map(async (post) => {
             try {
               const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`, {
@@ -65,166 +82,82 @@ export default function VideoFeed({
           }
         }
       } catch (error) {
-        console.error('Error fetching initial posts:', error);
+        console.error('Error fetching posts:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInitialPosts();
+    fetchPosts();
   }, []);
 
-  // Fetch chi tiết post với caching
-  const fetchPostDetail = useCallback(async (postId, force = false) => {
-    // Kiểm tra cache trước
-    if (!force && postDetailsCache.current.has(postId)) {
-      return postDetailsCache.current.get(postId);
-    }
-
-    // Tránh fetch duplicate
-    if (fetchingPosts.current.has(postId)) {
-      return null;
-    }
-
-    try {
-      fetchingPosts.current.add(postId);
-      
-      const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
-        credentials: 'include'
-      });
-      const data = await response.json();
-      
-      if (data.status === 'success') {
-        // Lưu vào cache
-        postDetailsCache.current.set(postId, data.data);
-        return data.data;
-      } else {
-        console.error('Failed to fetch post detail:', data.message);
-        return null;
-      }
-    } catch (error) {
-      console.error('Error fetching post detail:', error);
-      return null;
-    } finally {
-      fetchingPosts.current.delete(postId);
-    }
-  }, []);
-
-  // Fetch chi tiết post khi currentPostIndex thay đổi
+  // Polling để cập nhật dữ liệu post hiện tại
   useEffect(() => {
-    if (posts.length === 0 || currentPostIndex === -1) return;
+    if (posts.length === 0) return;
 
     const currentPostId = posts[currentPostIndex]?.post_id;
     if (!currentPostId) return;
 
-    const loadPostDetail = async () => {
+    const intervalId = setInterval(async () => {
       try {
-        setLoadingPost(true);
+        const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
+          credentials: 'include'
+        });
+        const data = await response.json();
         
-        // Kiểm tra cache trước
-        if (postDetailsCache.current.has(currentPostId)) {
-          const cachedPost = postDetailsCache.current.get(currentPostId);
-          setCurrentPostDetail(cachedPost);
-          setCurrentPostId(currentPostId);
-          setLoadingPost(false);
-          
-          // Fetch background để cập nhật dữ liệu mới nhất
-          fetchPostDetail(currentPostId, true).then(updatedPost => {
-            if (updatedPost && updatedPost.post_id === currentPostId) {
-              setCurrentPostDetail(updatedPost);
-            }
-          });
-          return;
-        }
-
-        // Fetch mới nếu không có cache
-        const postDetail = await fetchPostDetail(currentPostId);
-        if (postDetail) {
-          setCurrentPostDetail(postDetail);
-          setCurrentPostId(currentPostId);
+        if (data.status === 'success') {
+          setPostData(prev => ({
+            ...prev,
+            [currentPostId]: data.data
+          }));
         }
       } catch (error) {
-        console.error('Error loading post detail:', error);
-      } finally {
-        setLoadingPost(false);
+        console.error('Error polling post data:', error);
       }
-    };
+    }, 15000); // Cập nhật mỗi 15 giây
 
-    loadPostDetail();
+    return () => clearInterval(intervalId);
+  }, [currentPostIndex, posts]);
 
-    // Prefetch posts xung quanh để tải nhanh hơn
-    const prefetchNearbyPosts = async () => {
-      const prefetchIndices = [];
-      
-      // Prefetch post trước và sau
-      if (currentPostIndex > 0) {
-        prefetchIndices.push(currentPostIndex - 1);
-      }
-      if (currentPostIndex < posts.length - 1) {
-        prefetchIndices.push(currentPostIndex + 1);
-      }
-
-      for (const index of prefetchIndices) {
-        const postId = posts[index]?.post_id;
-        if (postId && !postDetailsCache.current.has(postId)) {
-          fetchPostDetail(postId);
+  // Cập nhật post trong danh sách
+  const updatePostInList = useCallback((updatedPost) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => {
+        if (post.post_id === updatedPost.post_id) {
+          return {
+            ...post,
+            likes_count: Math.max(0, updatedPost.likes_count ?? post.likes_count ?? 0),
+            comments_count: updatedPost.comments_count ?? post.comments_count ?? 0,
+            shares_count: updatedPost.shares_count ?? post.shares_count ?? 0
+          };
         }
+        return post;
+      })
+    );
+
+    setPostData(prev => ({
+      ...prev,
+      [updatedPost.post_id]: {
+        ...prev[updatedPost.post_id],
+        ...updatedPost,
+        likes_count: Math.max(0, updatedPost.likes_count ?? 0),
+        likes: updatedPost.likes || prev[updatedPost.post_id]?.likes || []
       }
-    };
+    }));
+  }, []);
 
-    // Prefetch sau 500ms để không ảnh hưởng đến hiệu suất
-    const prefetchTimer = setTimeout(prefetchNearbyPosts, 500);
-    return () => clearTimeout(prefetchTimer);
-  }, [currentPostIndex, posts, setCurrentPostId, fetchPostDetail]);
+  // Navigation handlers
+  const handlePrevious = () => {
+    setCurrentPostIndex((prev) => (prev === 0 ? posts.length - 1 : prev - 1));
+  };
 
-  // Cập nhật dữ liệu post khi có thay đổi từ interactions
-const updatePostData = useCallback((updatedPost) => {
-  if (!updatedPost?.post_id) return;
-
-  // ✅ Cập nhật cache
-  postDetailsCache.current.set(updatedPost.post_id, updatedPost);
-
-  // ✅ Nếu đang là post hiện tại thì cập nhật
-  if (currentPostDetail?.post_id === updatedPost.post_id) {
-    setCurrentPostDetail(updatedPost);
-  }
-
-  // ✅ Cập nhật mảng posts để giữ đồng bộ
-  setPosts(prevPosts =>
-    prevPosts.map(post =>
-      post.post_id === updatedPost.post_id
-        ? { ...post, ...updatedPost }
-        : post
-    )
-  );
-}, [currentPostDetail?.post_id]);
-
-  // Navigation handlers với optimizations
-  const handlePrevious = useCallback(() => {
-    if (posts.length === 0 || loadingPost) return;
-    setCurrentPostIndex(prev => {
-      const newIndex = prev === 0 ? posts.length - 1 : prev - 1;
-      return newIndex;
-    });
-  }, [posts.length, loadingPost]);
-
-  const handleNext = useCallback(() => {
-    if (posts.length === 0 || loadingPost) return;
-    setCurrentPostIndex(prev => {
-      const newIndex = prev === posts.length - 1 ? 0 : prev + 1;
-      return newIndex;
-    });
-  }, [posts.length, loadingPost]);
+  const handleNext = () => {
+    setCurrentPostIndex((prev) => (prev === posts.length - 1 ? 0 : prev + 1));
+  };
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Chỉ xử lý khi không có modal/input đang focus
-      if (document.activeElement?.tagName === 'INPUT' || 
-          document.activeElement?.tagName === 'TEXTAREA') {
-        return;
-      }
-
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         handlePrevious();
@@ -236,30 +169,33 @@ const updatePostData = useCallback((updatedPost) => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleNext, handlePrevious]);
+  }, [posts.length]);
 
-  // Cleanup cache khi component unmount
   useEffect(() => {
-    return () => {
-      postDetailsCache.current.clear();
-      fetchingPosts.current.clear();
-    };
-  }, []);
+    if (posts.length > 0 && currentPostIndex >= 0) {
+      const currentPost = posts[currentPostIndex];
+      setCurrentPostId(currentPost?.post_id);
+    }
+  }, [currentPostIndex, posts, setCurrentPostId]);
 
-  const currentUser = users[currentPostDetail?.user_id];
+  const currentPost = posts[currentPostIndex];
+  const currentPostDetail = postData[currentPost?.post_id] || currentPost;
+  const currentUser = users[currentPost?.user_id];
 
   return (
     <>
-      {(loading || loadingPost) && <Loading />}
+      {loading && <Loading />}
 
       <div className="flex justify-center items-center w-full h-screen bg-black">
-        {currentPostDetail && (
+        {posts.length > 0 && (
           <div className="flex items-center justify-center transition-all duration-300 relative">
-            <div className={`bg-black rounded-lg overflow-hidden transition-all duration-300 ${
-              isRecipeOpen || isCommentOpen
-                ? 'h-[90vh] max-w-[600px] w-auto'
-                : 'h-[90vh] max-w-[600px] w-auto'
-            }`}>
+            <div
+              className={`bg-black rounded-lg overflow-hidden transition-all duration-300 ${
+                isRecipeOpen || isCommentOpen
+                  ? 'h-[90vh] max-w-[600px] w-auto'
+                  : 'h-[90vh] max-w-[600px] w-auto'
+              }`}
+            >
               <VideoPlayer
                 currentPost={currentPostDetail}
                 currentUser={currentUser}
@@ -269,7 +205,6 @@ const updatePostData = useCallback((updatedPost) => {
             </div>
 
             <VideoInteractions
-              key={currentPostDetail?.post_id}
               currentPost={currentPostDetail}
               currentUser={currentUser}
               onRecipeClick={() => {
@@ -280,25 +215,17 @@ const updatePostData = useCallback((updatedPost) => {
                 setIsCommentOpen(!isCommentOpen);
                 if (!isCommentOpen) setIsRecipeOpen(false);
               }}
-              onUpdatePost={updatePostData}
+              onUpdatePost={updatePostInList}
             />
-
           </div>
         )}
 
-        {/* Navigation buttons */}
         {posts.length > 0 && (
           <div className="fixed right-6 top-1/2 -translate-y-1/2 z-30">
             <div className="flex flex-col justify-center items-center space-y-4">
               <button
                 onClick={handlePrevious}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm ${
-                  loadingPost 
-                    ? 'bg-gray-800/50 cursor-not-allowed' 
-                    : 'bg-gray-800/80 hover:bg-orange-500 active:scale-95'
-                }`}
-                disabled={loadingPost}
-                aria-label="Previous post"
+                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 flex items-center justify-center transition-colors backdrop-blur-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -307,13 +234,7 @@ const updatePostData = useCallback((updatedPost) => {
 
               <button
                 onClick={handleNext}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm ${
-                  loadingPost 
-                    ? 'bg-gray-800/50 cursor-not-allowed' 
-                    : 'bg-gray-800/80 hover:bg-orange-500 active:scale-95'
-                }`}
-                disabled={loadingPost}
-                aria-label="Next post"
+                className="w-12 h-12 rounded-full bg-gray-800/80 hover:bg-orange-500 flex items-center justify-center transition-colors backdrop-blur-sm"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
