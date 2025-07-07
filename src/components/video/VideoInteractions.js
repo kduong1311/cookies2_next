@@ -124,6 +124,7 @@ export default function VideoInteractions({
       }
     );
 
+    console.log(response)
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     // ✅ Gọi lại API để lấy dữ liệu post mới nhất
