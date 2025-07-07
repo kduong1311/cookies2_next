@@ -325,17 +325,6 @@ export default function VideoFeed({
             </div>
           </div>
         )}
-
-        {/* Post indicator */}
-        {posts.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30">
-            <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
-              <span className="text-white text-sm">
-                {currentPostIndex + 1} / {posts.length}
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

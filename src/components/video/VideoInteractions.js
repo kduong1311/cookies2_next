@@ -20,57 +20,54 @@ export default function VideoInteractions({
   const [shareOpen, setShareOpen] = useState(false);
   const { user } = useAuth();
 
-  // Refs để theo dõi trạng thái và tránh race conditions
-  const lastPostId = useRef(null);
-  const pendingLikeRequest = useRef(null);
   const lastClickTime = useRef(0);
-  const isUpdatingFromServer = useRef(false);
+  const pendingLikeRequest = useRef(null);
 
-  // Memoize các giá trị
   const postId = useMemo(() => currentPost?.post_id, [currentPost?.post_id]);
   const userId = useMemo(() => user?.user_id, [user?.user_id]);
   const commentCount = useMemo(() => currentPost?.comments_count ?? 0, [currentPost?.comments_count]);
   const shareCount = useMemo(() => currentPost?.shares_count ?? 0, [currentPost?.shares_count]);
 
-  // Tính toán like count chính xác từ cả likes_count và likes array
   const calculateLikeCount = useCallback((post) => {
-    if (!post) return 0;
-    
-    // Ưu tiên likes_count từ server, fallback sang đếm likes array
     const countFromServer = post.likes_count;
     const countFromArray = post.likes ? post.likes.length : 0;
-    
-    // Sử dụng giá trị lớn hơn để đảm bảo tính chính xác
     return Math.max(countFromServer ?? 0, countFromArray);
   }, []);
 
-  // Khởi tạo và cập nhật dữ liệu từ currentPost
+  // Fetch chi tiết bài viết nếu cần
   useEffect(() => {
-    if (!currentPost || !userId) {
-      // Reset state khi không có post hoặc user
-      setLiked(false);
-      setLikeCount(0);
-      lastPostId.current = null;
-      return;
-    }
+    const fetchPostDetails = async () => {
+      if (!postId || !userId) return;
 
-    // Chỉ cập nhật khi post thay đổi hoặc khi không đang cập nhật từ server
-    if (currentPost.post_id !== lastPostId.current || !isUpdatingFromServer.current) {
-      const serverLiked = currentPost.likes?.some(like => like.user_id === userId) || false;
-      const serverLikeCount = calculateLikeCount(currentPost);
+      try {
+        const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
+          credentials: "include",
+        });
+        const result = await response.json();
 
-      setLiked(serverLiked);
-      setLikeCount(serverLikeCount);
-      lastPostId.current = currentPost.post_id;
-      isUpdatingFromServer.current = false;
-    }
-  }, [currentPost, userId, calculateLikeCount]);
+        if (result.status === "success" && result.data) {
+          const updatedPost = result.data;
+          const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
+          const serverLikeCount = calculateLikeCount(updatedPost);
 
-  // Xử lý like/unlike với optimistic updates
+          setLiked(serverLiked);
+          setLikeCount(serverLikeCount);
+
+          if (onUpdatePost) {
+            onUpdatePost(updatedPost);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi fetch chi tiết bài viết:", error);
+      }
+    };
+
+    fetchPostDetails();
+  }, [postId, userId, calculateLikeCount, onUpdatePost]);
+
   const handleLikeToggle = useCallback(async () => {
     if (!postId || !userId || loadingLike) return;
 
-    // Throttle để tránh spam click
     const now = Date.now();
     if (now - lastClickTime.current < 500) return;
     lastClickTime.current = now;
@@ -79,22 +76,20 @@ export default function VideoInteractions({
     const currentLiked = liked;
     const currentLikeCount = likeCount;
 
-    // Optimistic update
     const newLiked = !currentLiked;
-    const newLikeCount = newLiked 
-      ? currentLikeCount + 1 
+    const newLikeCount = newLiked
+      ? currentLikeCount + 1
       : Math.max(0, currentLikeCount - 1);
 
     setLiked(newLiked);
     setLikeCount(newLikeCount);
 
-    // Animation khi like
     if (newLiked && heartRef.current) {
       gsap.fromTo(
         heartRef.current,
         { scale: 1, rotation: 0 },
-        { 
-          scale: 1.3, 
+        {
+          scale: 1.3,
           rotation: 15,
           duration: 0.1,
           ease: "power2.out",
@@ -103,15 +98,14 @@ export default function VideoInteractions({
               scale: 1,
               rotation: 0,
               duration: 0.2,
-              ease: "elastic.out(1, 0.5)"
+              ease: "elastic.out(1, 0.5)",
             });
-          }
+          },
         }
       );
     }
 
     try {
-      // Hủy request cũ nếu có
       if (pendingLikeRequest.current) {
         pendingLikeRequest.current.abort();
       }
@@ -121,53 +115,36 @@ export default function VideoInteractions({
 
       const response = await fetch(
         `http://103.253.145.7:3001/api/posts/${postId}/like`,
-        { 
+        {
           method: newLiked ? "POST" : "DELETE",
           credentials: "include",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
-          signal: controller.signal
+          signal: controller.signal,
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const responseData = await response.json();
-
-      if (responseData.status === 'success' && responseData.data) {
-        // Cập nhật dữ liệu từ server
-        const updatedPost = responseData.data;
+      const result = await response.json();
+      if (result.status === "success" && result.data) {
+        const updatedPost = result.data;
         const serverLikeCount = calculateLikeCount(updatedPost);
         const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
 
-        // Cập nhật state với dữ liệu chính xác từ server
         setLiked(serverLiked);
         setLikeCount(serverLikeCount);
-        
-        // Đánh dấu đang cập nhật từ server để tránh conflict
-        isUpdatingFromServer.current = true;
-        
-        // Thông báo cho parent component cập nhật
+
         if (onUpdatePost) {
-          onUpdatePost({
-            ...updatedPost,
-            likes_count: serverLikeCount
-          });
+          onUpdatePost(updatedPost);
         }
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name !== "AbortError") {
         console.error("Like error:", error);
-        
-        // Rollback optimistic update
         setLiked(currentLiked);
         setLikeCount(currentLikeCount);
-        
-        // Có thể thêm toast notification ở đây
-        // toast.error('Có lỗi xảy ra khi like bài viết');
       }
     } finally {
       setLoadingLike(false);
@@ -175,21 +152,15 @@ export default function VideoInteractions({
     }
   }, [postId, userId, liked, likeCount, loadingLike, onUpdatePost, calculateLikeCount]);
 
-  // Format số lượng like giống TikTok
   const formatCount = useCallback((count) => {
-    if (count >= 1000000) {
-      return (count / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-    }
-    if (count >= 1000) {
-      return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    }
+    if (count >= 1_000_000) return (count / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (count >= 1_000) return (count / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
     return count.toString();
   }, []);
 
   const openShareModal = useCallback(() => setShareOpen(true), []);
   const closeShareModal = useCallback(() => setShareOpen(false), []);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (pendingLikeRequest.current) {
@@ -203,15 +174,17 @@ export default function VideoInteractions({
       {/* Like button */}
       <button
         className={`flex flex-col items-center transition-all duration-200 ${
-          loadingLike ? 'cursor-not-allowed opacity-70' : 'active:scale-95'
+          loadingLike ? "cursor-not-allowed opacity-70" : "active:scale-95"
         }`}
         onClick={handleLikeToggle}
         disabled={loadingLike}
         aria-label={liked ? "Unlike this post" : "Like this post"}
       >
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg relative transition-all duration-200 ${
-          liked ? 'bg-pink-500' : 'bg-gray-700 hover:bg-gray-600'
-        }`}>
+        <div
+          className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg relative transition-all duration-200 ${
+            liked ? "bg-pink-500" : "bg-gray-700 hover:bg-gray-600"
+          }`}
+        >
           <Heart
             ref={heartRef}
             className={`w-7 h-7 transition-all duration-200 ${
@@ -230,8 +203,8 @@ export default function VideoInteractions({
       </button>
 
       {/* Comment button */}
-      <button 
-        className="flex flex-col items-center transition-transform active:scale-95" 
+      <button
+        className="flex flex-col items-center transition-transform active:scale-95"
         onClick={onCommentClick}
         aria-label="View comments"
       >
@@ -244,22 +217,20 @@ export default function VideoInteractions({
       </button>
 
       {/* Recipe button */}
-      <button 
-        className="flex flex-col items-center transition-transform active:scale-95" 
+      <button
+        className="flex flex-col items-center transition-transform active:scale-95"
         onClick={onRecipeClick}
         aria-label="View recipe"
       >
         <div className="w-12 h-12 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center shadow-lg transition-colors duration-200">
           <FaBook className="w-6 h-6 text-white" />
         </div>
-        <span className="text-xs text-white font-medium mt-1">
-          Recipe
-        </span>
+        <span className="text-xs text-white font-medium mt-1">Recipe</span>
       </button>
 
       {/* Share button */}
-      <button 
-        className="flex flex-col items-center transition-transform active:scale-95" 
+      <button
+        className="flex flex-col items-center transition-transform active:scale-95"
         onClick={openShareModal}
         aria-label="Share this post"
       >
@@ -271,11 +242,7 @@ export default function VideoInteractions({
         </span>
       </button>
 
-      <ShareModal 
-        open={shareOpen} 
-        onOpenChange={closeShareModal} 
-        postId={postId}
-      />
+      <ShareModal open={shareOpen} onOpenChange={closeShareModal} postId={postId} />
     </div>
   );
 }
