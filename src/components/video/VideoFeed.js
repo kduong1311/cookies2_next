@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import VideoPlayer from './VideoPlayer';
 import VideoInteractions from './VideoInteractions';
 import Loading from '../Loading';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function VideoFeed({
   isRecipeOpen,
@@ -15,22 +16,51 @@ export default function VideoFeed({
   const [users, setUsers] = useState({});
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [postData, setPostData] = useState({}); // Lưu toàn bộ dữ liệu post chi tiết
+  const { user } = useAuth();
 
-  // Fetch posts and user data
+  // Fetch posts và user data
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://103.253.145.7:3001/api/posts');
+        const response = await fetch('http://103.253.145.7:3001/api/posts', {
+          credentials: 'include'
+        });
         const data = await response.json();
 
         if (data.status === 'success') {
           const shuffledPosts = shuffleArray(data.data);
           setPosts(shuffledPosts);
 
+          // Fetch chi tiết từng post để lấy thông tin like
+          const postDetailPromises = shuffledPosts.map(async (post) => {
+            try {
+              const res = await fetch(`http://103.253.145.7:3001/api/posts/${post.post_id}`, {
+                credentials: 'include'
+              });
+              return res.json();
+            } catch (error) {
+              console.error('Error fetching post details:', error);
+              return { status: 'error', data: post }; // Fallback về data cơ bản nếu có lỗi
+            }
+          });
+
+          const postDetails = await Promise.all(postDetailPromises);
+          const newPostData = {};
+          postDetails.forEach(detail => {
+            if (detail.status === 'success') {
+              newPostData[detail.data.post_id] = detail.data;
+            }
+          });
+          setPostData(newPostData);
+
+          // Fetch user data
           const userPromises = shuffledPosts.map(async (post) => {
             try {
-              const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`);
+              const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`, {
+                credentials: 'include'
+              });
               const userData = await userResponse.json();
               return { userId: post.user_id, userData };
             } catch (error) {
@@ -42,7 +72,7 @@ export default function VideoFeed({
           const userResults = await Promise.all(userPromises);
           const usersMap = {};
           userResults.forEach(({ userId, userData }) => {
-            usersMap[userId] = userData;
+            usersMap[userId] = userData?.data || null;
           });
           setUsers(usersMap);
 
@@ -59,6 +89,61 @@ export default function VideoFeed({
     };
 
     fetchPosts();
+  }, []);
+
+  // Polling để cập nhật dữ liệu post hiện tại
+  useEffect(() => {
+    if (posts.length === 0) return;
+
+    const currentPostId = posts[currentPostIndex]?.post_id;
+    if (!currentPostId) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setPostData(prev => ({
+            ...prev,
+            [currentPostId]: data.data
+          }));
+        }
+      } catch (error) {
+        console.error('Error polling post data:', error);
+      }
+    }, 15000); // Cập nhật mỗi 15 giây
+
+    return () => clearInterval(intervalId);
+  }, [currentPostIndex, posts]);
+
+  // Cập nhật post trong danh sách
+  const updatePostInList = useCallback((updatedPost) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => {
+        if (post.post_id === updatedPost.post_id) {
+          return {
+            ...post,
+            likes_count: Math.max(0, updatedPost.likes_count ?? post.likes_count ?? 0),
+            comments_count: updatedPost.comments_count ?? post.comments_count ?? 0,
+            shares_count: updatedPost.shares_count ?? post.shares_count ?? 0
+          };
+        }
+        return post;
+      })
+    );
+
+    setPostData(prev => ({
+      ...prev,
+      [updatedPost.post_id]: {
+        ...prev[updatedPost.post_id],
+        ...updatedPost,
+        likes_count: Math.max(0, updatedPost.likes_count ?? 0),
+        likes: updatedPost.likes || prev[updatedPost.post_id]?.likes || []
+      }
+    }));
   }, []);
 
   // Navigation handlers
@@ -94,25 +179,8 @@ export default function VideoFeed({
   }, [currentPostIndex, posts, setCurrentPostId]);
 
   const currentPost = posts[currentPostIndex];
+  const currentPostDetail = postData[currentPost?.post_id] || currentPost;
   const currentUser = users[currentPost?.user_id];
-
-  // ✅ FIX: Cập nhật post trong danh sách khi có thay đổi
-  const updatePostInList = (updatedPost) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => {
-        if (post.post_id === updatedPost.post_id) {
-          // Đảm bảo likes_count không âm và merge đúng data
-          return {
-            ...post,
-            ...updatedPost,
-            likes_count: Math.max(0, updatedPost.likes_count ?? post.likes_count ?? 0),
-            likes: updatedPost.likes || post.likes || []
-          };
-        }
-        return post;
-      })
-    );
-  };
 
   return (
     <>
@@ -129,7 +197,7 @@ export default function VideoFeed({
               }`}
             >
               <VideoPlayer
-                currentPost={currentPost}
+                currentPost={currentPostDetail}
                 currentUser={currentUser}
                 isRecipeOpen={isRecipeOpen}
                 isCommentOpen={isCommentOpen}
@@ -137,7 +205,7 @@ export default function VideoFeed({
             </div>
 
             <VideoInteractions
-              currentPost={currentPost}
+              currentPost={currentPostDetail}
               currentUser={currentUser}
               onRecipeClick={() => {
                 setIsRecipeOpen(!isRecipeOpen);
@@ -147,7 +215,7 @@ export default function VideoFeed({
                 setIsCommentOpen(!isCommentOpen);
                 if (!isCommentOpen) setIsRecipeOpen(false);
               }}
-              onUpdatePost={updatePostInList} // 🟢 Truyền callback cập nhật post đã fix
+              onUpdatePost={updatePostInList}
             />
           </div>
         )}
@@ -180,7 +248,6 @@ export default function VideoFeed({
   );
 }
 
-// Fisher-Yates shuffle
 function shuffleArray(array) {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
