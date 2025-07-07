@@ -269,6 +269,7 @@ const updatePostData = useCallback((updatedPost) => {
             </div>
 
             <VideoInteractions
+              key={currentPostDetail?.post_id}
               currentPost={currentPostDetail}
               currentUser={currentUser}
               onRecipeClick={() => {
