@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function TopNavbar() {
   const [showNotifications, setShowNotifications] = useState(false);
+  const {user} = useAuth();
   const [notifications] = useState([
     { id: 1, message: "Bạn có 1 tin nhắn mới", time: "2 phút trước" },
     { id: 2, message: "Video của bạn đã được like", time: "5 phút trước" },
@@ -80,7 +82,7 @@ export default function TopNavbar() {
         <div className="relative">
           <button className="w-15` h-15 rounded-full overflow-hidden border-2 border-orange hover:border-gray-400 transition-colors duration-200">
             <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+              src={user.avatar_url}
               alt="User Avatar"
               className="w-full h-full object-cover"
             />
