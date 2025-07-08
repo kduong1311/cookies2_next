@@ -80,15 +80,14 @@ export default function VideoInteractions({
     lastFetchedPostId.current = postId;
     isInitialized.current = true;
   }
-}, [postId, userId, currentPost, onUpdatePost]);
+}, [postId, userId, onUpdatePost]);
 
 useEffect(() => {
   if (postId && userId) {
     initializePostData();
-    // Sau khi fetch xong thì reset flag
     if (refreshPost) setRefreshPost(false);
   }
-}, [postId, userId, refreshPost, initializePostData]);
+}, [postId, userId, refreshPost]);
 
   // Xử lý like/unlike
   const handleLikeToggle = useCallback(async () => {
