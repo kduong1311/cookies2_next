@@ -36,6 +36,7 @@ export default function VideoInteractions({
 
   // Khởi tạo dữ liệu post
   const initializePostData = useCallback(async () => {
+  if (!postId || !userId) return;
 
   // Nếu đã khởi tạo cho post này rồi thì không làm gì
   if (isInitialized.current && lastFetchedPostId.current === postId) {
@@ -70,7 +71,7 @@ export default function VideoInteractions({
     isInitialized.current = true;
 
     if (onUpdatePost) {
-      onUpdatePost(postDetail);
+      onUpdatePost(postDetail); // cập nhật parent với dữ liệu mới nhất
     }
   } catch (error) {
     console.error("Error fetching post detail:", error);
@@ -80,14 +81,15 @@ export default function VideoInteractions({
     lastFetchedPostId.current = postId;
     isInitialized.current = true;
   }
-}, [postId, userId, onUpdatePost]);
+}, [postId, userId, currentPost, onUpdatePost]);
 
 useEffect(() => {
   if (postId && userId) {
     initializePostData();
+    // Sau khi fetch xong thì reset flag
     if (refreshPost) setRefreshPost(false);
   }
-}, [postId, userId, refreshPost]);
+}, [postId, userId, refreshPost, initializePostData]);
 
   // Xử lý like/unlike
   const handleLikeToggle = useCallback(async () => {

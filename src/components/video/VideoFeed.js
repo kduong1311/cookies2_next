@@ -116,7 +116,7 @@ export default function VideoFeed({
       } catch (error) {
         console.error('Error polling post data:', error);
       }
-    });
+    }, 5000); // Cập nhật mỗi 15 giây
 
     return () => clearInterval(intervalId);
   }, [currentPostIndex, posts]);
@@ -176,12 +176,7 @@ export default function VideoFeed({
   useEffect(() => {
     if (posts.length > 0 && currentPostIndex >= 0) {
       const currentPost = posts[currentPostIndex];
-      setCurrentPostId((prevId) => {
-      if (prevId !== currentPost?.post_id) {
-        setRefreshPost(true); // chỉ set lại khi postId thực sự khác
-      }
-      return currentPost?.post_id;
-    });
+      setCurrentPostId(currentPost?.post_id);
       setRefreshPost(true);
     }
   }, [currentPostIndex, posts, setCurrentPostId]);
