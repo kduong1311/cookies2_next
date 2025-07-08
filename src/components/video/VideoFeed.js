@@ -17,6 +17,7 @@ export default function VideoFeed({
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [postData, setPostData] = useState({}); // Lưu toàn bộ dữ liệu post chi tiết
+  const [refreshPost, setRefreshPost] = useState(false);
   const { user } = useAuth();
 
   // Fetch posts và user data
@@ -176,6 +177,7 @@ export default function VideoFeed({
     if (posts.length > 0 && currentPostIndex >= 0) {
       const currentPost = posts[currentPostIndex];
       setCurrentPostId(currentPost?.post_id);
+      setRefreshPost(true);
     }
   }, [currentPostIndex, posts, setCurrentPostId]);
 
@@ -206,18 +208,20 @@ export default function VideoFeed({
             </div>
 
             <VideoInteractions
-              currentPost={currentPostDetail}
-              currentUser={currentUser}
-              onRecipeClick={() => {
-                setIsRecipeOpen(!isRecipeOpen);
-                if (!isRecipeOpen) setIsCommentOpen(false);
-              }}
-              onCommentClick={() => {
-                setIsCommentOpen(!isCommentOpen);
-                if (!isCommentOpen) setIsRecipeOpen(false);
-              }}
-              onUpdatePost={updatePostInList}
-            />
+            currentPost={currentPostDetail}
+            currentUser={currentUser}
+            refreshPost={refreshPost}
+            setRefreshPost={setRefreshPost}
+            onRecipeClick={() => {
+              setIsRecipeOpen(!isRecipeOpen);
+              if (!isRecipeOpen) setIsCommentOpen(false);
+            }}
+            onCommentClick={() => {
+              setIsCommentOpen(!isCommentOpen);
+              if (!isCommentOpen) setIsRecipeOpen(false);
+            }}
+            onUpdatePost={updatePostInList}
+          />
           </div>
         )}
 
