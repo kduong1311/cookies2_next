@@ -100,6 +100,9 @@ export default function VideoFeed({
     const currentPostId = posts[currentPostIndex]?.post_id;
     if (!currentPostId) return;
 
+    console.log(`Fetching data for post ${currentPostId} at ${new Date().toLocaleTimeString()}`);
+
+
     const intervalId = setInterval(async () => {
       try {
         const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
@@ -116,7 +119,7 @@ export default function VideoFeed({
       } catch (error) {
         console.error('Error polling post data:', error);
       }
-    }, 5000); // Cập nhật mỗi 15 giây
+    }, 5000); // Cập nhật mỗi 3 giây
 
     return () => clearInterval(intervalId);
   }, [currentPostIndex, posts]);
