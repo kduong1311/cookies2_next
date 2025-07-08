@@ -10,9 +10,7 @@ export default function VideoFeed({
   isCommentOpen,
   setIsCommentOpen,
   setIsProfileOpen,
-  setCurrentPostId,
-  refreshPost,
-  setRefreshPost
+  setCurrentPostId
 }) {
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState({});

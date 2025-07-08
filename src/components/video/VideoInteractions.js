@@ -12,6 +12,8 @@ export default function VideoInteractions({
   onRecipeClick,
   onCommentClick,
   onUpdatePost,
+  refreshPost,
+  setRefreshPost
 }) {
   const heartRef = useRef(null);
   const [liked, setLiked] = useState(false);
@@ -81,11 +83,13 @@ export default function VideoInteractions({
   }
 }, [postId, userId, currentPost, onUpdatePost]);
 
-  useEffect(() => {
-    if (postId && userId && refreshPost) {
-      initializePostData();
-    }
-  }, [postId, userId, refreshPost, initializePostData]);
+useEffect(() => {
+  if (postId && userId) {
+    initializePostData();
+    // Sau khi fetch xong thì reset flag
+    if (refreshPost) setRefreshPost(false);
+  }
+}, [postId, userId, refreshPost, initializePostData]);
 
   // Xử lý like/unlike
   const handleLikeToggle = useCallback(async () => {
