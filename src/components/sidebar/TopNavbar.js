@@ -13,12 +13,15 @@ export default function TopNavbar() {
 
   // Fetch notifications từ API
   const fetchNotifications = async () => {
-    if (!user?.id) return;
+    if (!user?.user_id) return;
     
     setLoading(true);
     try {
       const response = await fetch(
-        `http://103.253.145.7:3005/api/notifications?user_id=${user.id}&limit=20&offset=0`
+        `http://103.253.145.7:3005/api/notifications?user_id=${user.user_id}&limit=20&offset=0`, {
+          method: "GET",
+          credentials: "include"
+        }
       );
       const data = await response.json();
       setNotifications(data.notifications || []);
@@ -32,7 +35,7 @@ export default function TopNavbar() {
   // Fetch notifications khi component mount
   useEffect(() => {
     fetchNotifications();
-  }, [user?.id]);
+  }, [user?.user_id]);
 
   // Format thời gian
   const formatTime = (timestamp) => {
@@ -48,8 +51,8 @@ export default function TopNavbar() {
 
   // Xử lý click vào avatar để chuyển sang profile
   const handleAvatarClick = () => {
-    if (user?.id) {
-      router.push(`/profile/${user.id}`);
+    if (user?.user_id) {
+      router.push(`/profile/${user.user_id}`);
     }
   };
 
