@@ -18,10 +18,7 @@ export default function TopNavbar() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://103.253.145.7:3005/api/notifications?user_id=${user.user_id}&limit=20&offset=0`, {
-          method: "GET",
-          credentials: "include"
-        }
+        `http://103.253.145.7:3005/api/notifications?user_id=${user.user_id}&limit=20&offset=0`
       );
       const data = await response.json();
       setNotifications(data.notifications || []);
