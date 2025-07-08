@@ -41,18 +41,23 @@ export default function VideoFeed({
                 method: "GET",
                 credentials: 'include'
               });
-              return res.json();
+              const detail = await res.json();
+              return { postId: post.post_id, detail };
             } catch (error) {
               console.error('Error fetching post details:', error);
-              return { status: 'error', data: post }; // Fallback về data cơ bản nếu có lỗi
+              return { postId: post.post_id, detail: { status: 'error', data: post } };
             }
           });
 
           const postDetails = await Promise.all(postDetailPromises);
           const newPostData = {};
-          postDetails.forEach(detail => {
+          postDetails.forEach(({ postId, detail }) => {
             if (detail.status === 'success') {
-              newPostData[detail.data.post_id] = detail.data;
+              newPostData[postId] = {
+                ...detail.data,
+                likes_count: Math.max(0, detail.data.likes_count ?? 0),
+                likes: detail.data.likes || []
+              };
             }
           });
           setPostData(newPostData);
@@ -110,7 +115,11 @@ export default function VideoFeed({
         if (data.status === 'success') {
           setPostData(prev => ({
             ...prev,
-            [currentPostId]: data.data
+            [currentPostId]: {
+              ...data.data,
+              likes_count: Math.max(0, data.data.likes_count ?? 0),
+              likes: data.data.likes || []
+            }
           }));
         }
       } catch (error) {
@@ -121,30 +130,33 @@ export default function VideoFeed({
     return () => clearInterval(intervalId);
   }, [currentPostIndex, posts]);
 
-  // Cập nhật post trong danh sách
+  // Cập nhật post trong danh sách và postData
   const updatePostInList = useCallback((updatedPost) => {
+    const normalizedPost = {
+      ...updatedPost,
+      likes_count: Math.max(0, updatedPost.likes_count ?? 0),
+      comments_count: Math.max(0, updatedPost.comments_count ?? 0),
+      shares_count: Math.max(0, updatedPost.shares_count ?? 0),
+      likes: updatedPost.likes || []
+    };
+
+    // Cập nhật posts array
     setPosts(prevPosts =>
       prevPosts.map(post => {
         if (post.post_id === updatedPost.post_id) {
           return {
             ...post,
-            likes_count: Math.max(0, updatedPost.likes_count ?? post.likes_count ?? 0),
-            comments_count: updatedPost.comments_count ?? post.comments_count ?? 0,
-            shares_count: updatedPost.shares_count ?? post.shares_count ?? 0
+            ...normalizedPost
           };
         }
         return post;
       })
     );
 
+    // Cập nhật postData
     setPostData(prev => ({
       ...prev,
-      [updatedPost.post_id]: {
-        ...prev[updatedPost.post_id],
-        ...updatedPost,
-        likes_count: Math.max(0, updatedPost.likes_count ?? 0),
-        likes: updatedPost.likes || prev[updatedPost.post_id]?.likes || []
-      }
+      [updatedPost.post_id]: normalizedPost
     }));
   }, []);
 
@@ -173,6 +185,7 @@ export default function VideoFeed({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [posts.length]);
 
+  // Cập nhật currentPostId và trigger refresh khi chuyển post
   useEffect(() => {
     if (posts.length > 0 && currentPostIndex >= 0) {
       const currentPost = posts[currentPostIndex];
@@ -208,20 +221,20 @@ export default function VideoFeed({
             </div>
 
             <VideoInteractions
-            currentPost={currentPostDetail}
-            currentUser={currentUser}
-            refreshPost={refreshPost}
-            setRefreshPost={setRefreshPost}
-            onRecipeClick={() => {
-              setIsRecipeOpen(!isRecipeOpen);
-              if (!isRecipeOpen) setIsCommentOpen(false);
-            }}
-            onCommentClick={() => {
-              setIsCommentOpen(!isCommentOpen);
-              if (!isCommentOpen) setIsRecipeOpen(false);
-            }}
-            onUpdatePost={updatePostInList}
-          />
+              currentPost={currentPostDetail}
+              currentUser={currentUser}
+              refreshPost={refreshPost}
+              setRefreshPost={setRefreshPost}
+              onRecipeClick={() => {
+                setIsRecipeOpen(!isRecipeOpen);
+                if (!isRecipeOpen) setIsCommentOpen(false);
+              }}
+              onCommentClick={() => {
+                setIsCommentOpen(!isCommentOpen);
+                if (!isCommentOpen) setIsRecipeOpen(false);
+              }}
+              onUpdatePost={updatePostInList}
+            />
           </div>
         )}
 
