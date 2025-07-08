@@ -25,6 +25,7 @@ export default function VideoInteractions({
   const lastServerLikeState = useRef(null);
   const pendingLikeRequest = useRef(null);
   const lastFetchedPostId = useRef(null);
+  const isInitialized = useRef(false);
   const lastClickTime = useRef(0);
 
   // Memoize các giá trị
@@ -33,91 +34,61 @@ export default function VideoInteractions({
   const commentCount = useMemo(() => currentPost?.comments_count ?? 0, [currentPost?.comments_count]);
   const shareCount = useMemo(() => currentPost?.shares_count ?? 0, [currentPost?.shares_count]);
 
-  // Reset state khi chuyển post
-  useEffect(() => {
-    if (postId && lastFetchedPostId.current !== postId) {
-      setLiked(false);
-      setLikeCount(0);
-      setLoadingLike(false);
-      lastServerLikeState.current = null;
-      lastFetchedPostId.current = postId;
-      
-      // Hủy request cũ nếu có
-      if (pendingLikeRequest.current) {
-        pendingLikeRequest.current.abort();
-        pendingLikeRequest.current = null;
-      }
-    }
-  }, [postId]);
-
   // Khởi tạo dữ liệu post
   const initializePostData = useCallback(async () => {
-    if (!postId || !userId) return;
 
-    try {
-      const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
-        method: "GET",
-        credentials: "include",
-      });
+  // Nếu đã khởi tạo cho post này rồi thì không làm gì
+  if (isInitialized.current && lastFetchedPostId.current === postId) {
+    return;
+  }
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const result = await response.json();
+  // Reset state khi chuyển post
+  if (lastFetchedPostId.current !== postId) {
+    setLiked(false);
+    setLikeCount(0);
+    lastServerLikeState.current = null;
+    isInitialized.current = false;
+  }
 
-      const postDetail = result.data;
-      const serverLiked = postDetail.likes?.some(like => like.user_id === userId) || false;
-      const serverLikeCount = Math.max(0, postDetail.likes_count ?? 0);
+  try {
+    const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
+      method: "GET",
+      credentials: "include",
+    });
 
-      setLikeCount(serverLikeCount);
-      setLiked(serverLiked);
-      lastServerLikeState.current = serverLiked;
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const result = await response.json();
 
-      // Cập nhật parent với dữ liệu server mới nhất
-      if (onUpdatePost) {
-        onUpdatePost({
-          ...postDetail,
-          likes_count: serverLikeCount,
-          likes: postDetail.likes || []
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching post detail:", error);
-      // Fallback về dữ liệu từ currentPost
-      const fallbackLikeCount = Math.max(0, currentPost?.likes_count ?? 0);
-      const fallbackLiked = currentPost?.likes?.some(like => like.user_id === userId) || false;
-      
-      setLikeCount(fallbackLikeCount);
-      setLiked(fallbackLiked);
-      lastServerLikeState.current = fallbackLiked;
+    const postDetail = result.data;
+    const serverLiked = postDetail.likes?.some(like => like.user_id === userId) || false;
+    const serverLikeCount = postDetail.likes_count ?? 0;
+
+    setLikeCount(serverLikeCount);
+    setLiked(serverLiked);
+    lastServerLikeState.current = serverLiked;
+    lastFetchedPostId.current = postId;
+    isInitialized.current = true;
+
+    if (onUpdatePost) {
+      onUpdatePost(postDetail);
     }
-  }, [postId, userId, currentPost, onUpdatePost]);
+  } catch (error) {
+    console.error("Error fetching post detail:", error);
+    setLikeCount(Math.max(0, currentPost?.likes_count ?? 0));
+    setLiked(false);
+    lastServerLikeState.current = false;
+    lastFetchedPostId.current = postId;
+    isInitialized.current = true;
+  }
+}, [postId, userId, currentPost, onUpdatePost]);
 
-  // Khởi tạo khi có refreshPost hoặc post mới
-  useEffect(() => {
-    if (postId && userId && (refreshPost || lastFetchedPostId.current !== postId)) {
-      initializePostData();
-      if (refreshPost && setRefreshPost) {
-        setRefreshPost(false);
-      }
-    }
-  }, [postId, userId, refreshPost, initializePostData, setRefreshPost]);
-
-  // Sync với currentPost data khi có thay đổi từ bên ngoài
-  useEffect(() => {
-    if (!postId || !userId || !currentPost) return;
-    
-    // Chỉ sync nếu không có pending request
-    if (!pendingLikeRequest.current) {
-      const currentLiked = currentPost.likes?.some(like => like.user_id === userId) || false;
-      const currentLikeCount = Math.max(0, currentPost.likes_count ?? 0);
-      
-      // Chỉ cập nhật nếu có sự khác biệt
-      if (currentLiked !== liked || currentLikeCount !== likeCount) {
-        setLiked(currentLiked);
-        setLikeCount(currentLikeCount);
-        lastServerLikeState.current = currentLiked;
-      }
-    }
-  }, [currentPost?.likes, currentPost?.likes_count, postId, userId, liked, likeCount]);
+useEffect(() => {
+  if (postId && userId) {
+    initializePostData();
+    // Sau khi fetch xong thì reset flag
+    if (refreshPost) setRefreshPost(false);
+  }
+}, [postId, userId, refreshPost, initializePostData]);
 
   // Xử lý like/unlike
   const handleLikeToggle = useCallback(async () => {
@@ -133,7 +104,7 @@ export default function VideoInteractions({
 
     // Optimistic update
     const newLiked = !currentLiked;
-    const newLikeCount = newLiked ? currentLikeCount + 1 : Math.max(0, currentLikeCount - 1);
+    const newLikeCount = newLiked ? Math.max(0, currentLikeCount) + 1 : Math.max(0, currentLikeCount - 1);
 
     setLiked(newLiked);
     setLikeCount(newLikeCount);
@@ -177,28 +148,21 @@ export default function VideoInteractions({
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const responseData = await response.json();
-      const updatedPost = responseData.data;
-      
-      // Cập nhật state với dữ liệu thực từ server
-      const serverLikeCount = Math.max(0, updatedPost.likes_count ?? 0);
-      const serverLiked = updatedPost.likes?.some(like => like.user_id === userId) || false;
-      
-      setLikeCount(serverLikeCount);
-      setLiked(serverLiked);
-      lastServerLikeState.current = serverLiked;
+      lastServerLikeState.current = newLiked;
 
-      // Cập nhật parent với dữ liệu server
-      if (onUpdatePost) {
-        onUpdatePost({
-          ...updatedPost,
-          likes_count: serverLikeCount,
-          likes: updatedPost.likes || []
-        });
+      // Cập nhật dữ liệu mới nhất từ server
+      if (responseData.data) {
+        const updatedPost = responseData.data;
+        setLikeCount(Math.max(0, updatedPost.likes_count ?? newLikeCount));
+        
+        if (onUpdatePost) {
+          onUpdatePost(updatedPost);
+        }
       }
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error("Like error:", error);
-        // Rollback về trạng thái trước đó
+        // Rollback
         setLiked(currentLiked);
         setLikeCount(currentLikeCount);
         lastServerLikeState.current = currentLiked;
