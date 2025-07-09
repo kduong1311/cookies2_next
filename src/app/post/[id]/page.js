@@ -36,7 +36,7 @@ export default function PostDetailPage() {
         const data = await res.json();
         if (data.status === "success") {
           setPost(data.data);
-          setCurrentPostId(data.data.id); // Set current post ID for panels
+          setCurrentPostId(data.data.post_id); // Set current post ID for panels
 
           const userRes = await fetch(`http://103.253.145.7:3000/api/users/${data.data.user_id}`, {
             credentials: "include",
@@ -58,15 +58,16 @@ export default function PostDetailPage() {
   const handleRecipeClick = () => {
     setIsRecipeOpen(true);
     setIsCommentOpen(false);
-    setCurrentPostId(post.id);
+    setCurrentPostId(post.post_id);
   };
 
   // Handle comment click - giống MainLayout
   const handleCommentClick = () => {
     setIsCommentOpen(true);
     setIsRecipeOpen(false);
-    setCurrentPostId(post.id);
+    setCurrentPostId(post.post_id);
   };
+
 
   if (loading || !post) return <Loading />;
 
@@ -102,7 +103,7 @@ export default function PostDetailPage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 400, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="w-[800px] bg-gray-800 text-black p-6 overflow-y-auto shadow-lg hide-scrollbar"
+              className="w-[800px] h-[100vh] bg-gray-800 text-black p-6 overflow-y-auto shadow-lg hide-scrollbar rounded-lg"
             >
               <RecipePage postId={currentPostId} />
             </motion.div>
@@ -115,7 +116,7 @@ export default function PostDetailPage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 400, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="w-[800px] bg-gray-800 text-white p-6 overflow-y-auto shadow-lg hide-scrollbar"
+              className="w-[800px] h-[100vh] bg-gray-800 text-black p-6 overflow-y-auto shadow-lg hide-scrollbar rounded-lg"
             >
               <CommentPage postId={currentPostId} />
             </motion.div>
