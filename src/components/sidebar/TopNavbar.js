@@ -145,25 +145,21 @@ export default function TopNavbar() {
 
   // Mark all as read
   const markAllAsRead = async () => {
-    const unreadNotifications = notifications.filter(n => !n.is_read);
-    
-    try {
-      await Promise.all(
-        unreadNotifications.map(notif => 
-          fetch(`http://103.253.145.7:3005/api/notifications/${notif.notification_id}/read`, {
-            method: 'PUT',
-          })
-        )
-      );
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, is_read: true }))
-      );
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-    }
-  };
+  try {
+    await fetch("http://103.253.145.7:3005/api/notifications/read-all", {
+      method: "PATCH",
+      credentials: "include"
+    });
+
+    // Cập nhật trạng thái local
+    setNotifications(prev =>
+      prev.map(notif => ({ ...notif, is_read: true }))
+    );
+  } catch (error) {
+    console.error("Lỗi khi đánh dấu tất cả thông báo là đã đọc:", error);
+  }
+};
+
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const defaultAvatar = "https://img.freepik.com/premium-photo/male-female-profile-avatar-user-avatars-gender-icons_1020867-75099.jpg";
