@@ -147,12 +147,17 @@ export default function TopNavbar() {
   // Mark all as read
   const markAllAsRead = async () => {
   try {
+    if (!user?.user_id) return;
+
     await fetch("http://103.253.145.7:3005/api/notifications/read-all", {
       method: 'PATCH',
-      credentials: "include", // Nếu bạn dùng cookie để xác thực
+      credentials: "include",
       headers: {
         "Content-Type": "application/json"
-      }
+      },
+      body: JSON.stringify({
+        user_id: user.user_id
+      })
     });
 
     // Cập nhật local state
