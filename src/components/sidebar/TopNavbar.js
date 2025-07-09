@@ -146,25 +146,22 @@ export default function TopNavbar() {
 
   // Mark all as read
   const markAllAsRead = async () => {
-    const unreadNotifications = notifications.filter(n => !n.is_read);
-    
-    try {
-      await Promise.all(
-        unreadNotifications.map(notif => 
-          fetch(`http://103.253.145.7:3005/api/notifications/read-all`, {
-            method: 'PATCH',
-            credentials: "include"
-          })
-        )
-      );
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notif => ({ ...notif, is_read: true }))
-      );
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-    }
+  try {
+    await fetch("http://103.253.145.7:3005/api/notifications/read-all", {
+      method: 'PATCH',
+      credentials: "include", // Nếu bạn dùng cookie để xác thực
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    // Cập nhật local state
+    setNotifications(prev =>
+      prev.map(notif => ({ ...notif, is_read: true }))
+    );
+  } catch (error) {
+    console.error("Error marking all notifications as read:", error);
+  }
   };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
