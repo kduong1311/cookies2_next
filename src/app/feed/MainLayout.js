@@ -23,7 +23,12 @@ export default function MainLayout({ children }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [currentPostId, setCurrentPostId] = useState(null);
 
-const isCustomPage = pathname.startsWith("/shop") || pathname.startsWith("/upload") || pathname.startsWith("/about") || pathname.startsWith("/profile") || pathname.startsWith("/search");
+const isCustomPage = pathname.startsWith("/shop") 
+|| pathname.startsWith("/upload") 
+|| pathname.startsWith("/about") 
+|| pathname.startsWith("/profile") 
+|| pathname.startsWith("/search")
+|| pathname.startsWith("/post");
 
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
 

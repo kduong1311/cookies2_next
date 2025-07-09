@@ -119,7 +119,7 @@ export default function VideoFeed({
       } catch (error) {
         console.error('Error polling post data:', error);
       }
-    }, 5000); // Cập nhật mỗi 3 giây
+    }, 15000);
 
     return () => clearInterval(intervalId);
   }, [currentPostIndex, posts]);
