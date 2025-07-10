@@ -102,7 +102,6 @@ export default function VideoFeed({
 
     console.log(`Fetching data for post ${currentPostId} at ${new Date().toLocaleTimeString()}`);
 
-
     const intervalId = setInterval(async () => {
       try {
         const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
@@ -184,10 +183,12 @@ export default function VideoFeed({
     }
   }, [currentPostIndex, posts, setCurrentPostId]);
 
-  const currentPost = posts[currentPostIndex];
-  const currentPostDetail = postData[currentPost?.post_id] || currentPost;
+  const currentPost = posts.length > 0 ? posts[currentPostIndex] : null;
+  const currentPostDetail = currentPost ? (postData[currentPost.post_id] || currentPost) : null;
+  const currentUserData = currentPost ? users[currentPost.user_id] : null;
 
-  console.log("faf", currentPost.user_id)
+  console.log('Current Post Detail:', currentPostDetail);
+  console.log('Current User Data:', currentUserData);
 
   return (
     <>
@@ -205,26 +206,26 @@ export default function VideoFeed({
             >
               <VideoPlayer
                 currentPost={currentPostDetail}
-                currentUser={currentPost.user_id}
+                currentUser={currentUserData}
                 isRecipeOpen={isRecipeOpen}
                 isCommentOpen={isCommentOpen}
               />
             </div>
 
             <VideoInteractions
-            currentPost={currentPostDetail}
-            refreshPost={refreshPost}
-            setRefreshPost={setRefreshPost}
-            onRecipeClick={() => {
-              setIsRecipeOpen(!isRecipeOpen);
-              if (!isRecipeOpen) setIsCommentOpen(false);
-            }}
-            onCommentClick={() => {
-              setIsCommentOpen(!isCommentOpen);
-              if (!isCommentOpen) setIsRecipeOpen(false);
-            }}
-            onUpdatePost={updatePostInList}
-          />
+              currentPost={currentPostDetail}
+              refreshPost={refreshPost}
+              setRefreshPost={setRefreshPost}
+              onRecipeClick={() => {
+                setIsRecipeOpen(!isRecipeOpen);
+                if (!isRecipeOpen) setIsCommentOpen(false);
+              }}
+              onCommentClick={() => {
+                setIsCommentOpen(!isCommentOpen);
+                if (!isCommentOpen) setIsRecipeOpen(false);
+              }}
+              onUpdatePost={updatePostInList}
+            />
           </div>
         )}
 

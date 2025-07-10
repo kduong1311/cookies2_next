@@ -1,31 +1,9 @@
-import { useEffect, useState } from "react";
-import { ChefHat, Eye, Clock, ConstructionIcon } from "lucide-react";
+import { ChefHat, Eye, Clock } from "lucide-react";
 import CustomVideo from './CustomVideo';
 
 export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, isCommentOpen }) {
-  const [userData, setUserData] = useState(null);
-
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`http://103.253.145.7:3000/api/users/${currentUser}`, {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        if (data.status === 'success') {
-          setUserData(data.data);
-        } else {
-          console.warn("User fetch failed:", data.message);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-      }
-    };
-
-    fetchUser();
-  }, [currentUser]);
+  console.log("Current User Data:", currentUser);
+  console.log("Current Post:", currentPost);
 
   if (!currentPost || !currentPost.media || currentPost.media.length === 0) {
     return (
@@ -46,18 +24,20 @@ export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, is
           {/* User Info */}
           <div className="flex items-center space-x-2">
             <img 
-              src={userData?.avatar_url || 'https://via.placeholder.com/28'} 
-              alt={userData?.username || 'User'}
+              src={currentUser?.avatar_url || 'https://via.placeholder.com/28'} 
+              alt={currentUser?.username || 'User'}
               className="w-7 h-7 rounded-full border border-white object-cover flex-shrink-0"
             />
-            <span className="font-semibold text-sm truncate">@{userData?.username || 'Unknown'}</span>
+            <span className="font-semibold text-sm truncate">
+              @{currentUser?.username || 'Unknown'}
+            </span>
 
-            {userData?.is_verified && (
+            {currentUser?.is_verified && (
               <div className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-xs">✓</span>
               </div>
             )}
-            {userData?.is_chef && (
+            {currentUser?.is_chef && (
               <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <ChefHat size={10} className="text-white" />
               </div>
