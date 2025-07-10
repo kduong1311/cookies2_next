@@ -55,28 +55,7 @@ export default function VideoFeed({
               newPostData[detail.data.post_id] = detail.data;
             }
           });
-          setPostData(newPostData);
-
-          // Fetch user data
-          const userPromises = shuffledPosts.map(async (post) => {
-            try {
-              const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`, {
-                credentials: 'include'
-              });
-              const userData = await userResponse.json();
-              return { userId: post.user_id, userData };
-            } catch (error) {
-              console.error('Error fetching user:', error);
-              return { userId: post.user_id, userData: null };
-            }
-          });
-
-          const userResults = await Promise.all(userPromises);
-          const usersMap = {};
-          userResults.forEach(({ userId, userData }) => {
-            usersMap[userId] = userData?.data || null;
-          });
-          setUsers(usersMap);
+          setPostData(newPostData);         
 
           if (shuffledPosts.length > 0) {
             const randomIndex = Math.floor(Math.random() * shuffledPosts.length);
@@ -186,7 +165,8 @@ export default function VideoFeed({
 
   const currentPost = posts[currentPostIndex];
   const currentPostDetail = postData[currentPost?.post_id] || currentPost;
-  const currentUser = users[currentPost?.user_id];
+
+  console.log(currentPost.user_id)
 
   return (
     <>
@@ -204,7 +184,7 @@ export default function VideoFeed({
             >
               <VideoPlayer
                 currentPost={currentPostDetail}
-                currentUser={currentUser}
+                currentUser={currentPost.user_id}
                 isRecipeOpen={isRecipeOpen}
                 isCommentOpen={isCommentOpen}
               />
@@ -212,7 +192,6 @@ export default function VideoFeed({
 
             <VideoInteractions
             currentPost={currentPostDetail}
-            currentUser={currentUser}
             refreshPost={refreshPost}
             setRefreshPost={setRefreshPost}
             onRecipeClick={() => {
