@@ -5,7 +5,6 @@ import CustomVideo from './CustomVideo';
 export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, isCommentOpen }) {
   const [userData, setUserData] = useState(null);
 
-  console.log("id", currentUser)
   useEffect(() => {
     if (!currentUser) return;
 
