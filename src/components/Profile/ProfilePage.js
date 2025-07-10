@@ -8,7 +8,7 @@ import ProfileTabs from './ProfileTabs';
 import VideoGrid from './VideoGrid';
 import RecipeGrid from './RecipeGrid';
 import SavedGrid from './SaveGrid';
-import { AlertOctagon, ArrowLeft } from 'lucide-react';
+import { AlertOctagon, ArrowLeft, UserPlus, UserMinus, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const ProfilePage = ({ userId }) => {
@@ -31,6 +31,11 @@ const ProfilePage = ({ userId }) => {
   const [recipesLoading, setRecipesLoading] = useState(false);
   const [savedLoading, setSavedLoading] = useState(false);
 
+  // Follow states
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+
   const handleBack = () => router.back();
 
   useEffect(() => {
@@ -45,6 +50,10 @@ const ProfilePage = ({ userId }) => {
         setLoading(true);
         const res = await axios.get(`http://103.253.145.7:3000/api/users/${userId}`, { withCredentials: true });
         setProfileUser(res.data);
+        
+        // Initialize follow states
+        setIsFollowing(res.data.isFollowing || false);
+        setFollowersCount(res.data.followersCount || 0);
       } catch (err) {
         setError(err.response?.data?.message || err.message);
       } finally {
@@ -55,18 +64,92 @@ const ProfilePage = ({ userId }) => {
     if (userId) fetchUser();
   }, [userId]);
 
-  // const fetchUserVideos = async () => {
-  //   try {
-  //     setVideosLoading(true);
-  //     const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}/videos`);
-  //     const data = res.ok ? await res.json() : [];
-  //     setUserVideos(data);
-  //   } catch {
-  //     setUserVideos([]);
-  //   } finally {
-  //     setVideosLoading(false);
-  //   }
-  // };
+  // Follow handler
+  const handleFollow = async () => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      setFollowLoading(true);
+      
+      // Optimistic update
+      const wasFollowing = isFollowing;
+      setIsFollowing(!wasFollowing);
+      setFollowersCount(prev => wasFollowing ? prev - 1 : prev + 1);
+
+      await axios.post(
+        `http://103.253.145.7:3000/api/users/${userId}/follow`,
+        {},
+        { withCredentials: true }
+      );
+      
+    } catch (err) {
+      // Revert on error
+      setIsFollowing(isFollowing);
+      setFollowersCount(followersCount);
+      console.error('Follow error:', err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  // Follow Button Component
+  const FollowButton = () => {
+    if (isOwner) return null;
+
+    return (
+      <button
+        onClick={handleFollow}
+        disabled={followLoading}
+        className={`
+          relative px-6 py-2.5 rounded-full font-medium text-sm
+          transition-all duration-300 ease-out transform hover:scale-105
+          disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100
+          ${isFollowing 
+            ? 'bg-transparent border-2 border-gray-500 text-gray-300 hover:bg-gray-700 hover:border-gray-400' 
+            : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 border-2 border-transparent'
+          }
+          shadow-lg hover:shadow-xl
+        `}
+      >
+        {followLoading ? (
+          <div className="flex items-center justify-center">
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            <span>{isFollowing ? 'Unfollowing' : 'Following'}</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center">
+            {isFollowing ? (
+              <>
+                <UserMinus className="w-4 h-4 mr-2" />
+                <span>Following</span>
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-4 h-4 mr-2" />
+                <span>Follow</span>
+              </>
+            )}
+          </div>
+        )}
+      </button>
+    );
+  };
+
+  const fetchUserVideos = async () => {
+    try {
+      setVideosLoading(true);
+      const res = await fetch(`http://103.253.145.7:3001/api/posts/user/${userId}`);
+      const data = res.ok ? await res.json() : [];
+      setUserVideos(data);
+    } catch {
+      setUserVideos([]);
+    } finally {
+      setVideosLoading(false);
+    }
+  };
 
   // const fetchUserRecipes = async () => {
   //   try {
@@ -97,12 +180,12 @@ const ProfilePage = ({ userId }) => {
   //   }
   // };
 
-  // useEffect(() => {
-  //   if (!profileUser) return;
-  //   if (activeTab === 'videos' && userVideos.length === 0) fetchUserVideos();
-  //   if (activeTab === 'recipes' && userRecipes.length === 0) fetchUserRecipes();
-  //   if (activeTab === 'saved' && isOwner && userSavedItems.length === 0) fetchUserSavedItems();
-  // }, [activeTab, profileUser]);
+  useEffect(() => {
+    if (!profileUser) return;
+    if (activeTab === 'videos' && userVideos.length === 0) fetchUserVideos();
+    if (activeTab === 'recipes' && userRecipes.length === 0) fetchUserRecipes();
+    if (activeTab === 'saved' && isOwner && userSavedItems.length === 0) fetchUserSavedItems();
+  }, [activeTab, profileUser]);
 
   if (loading) {
     return (
@@ -176,7 +259,15 @@ const ProfilePage = ({ userId }) => {
         <h2 className="text-lg font-semibold text-white">Profile</h2>
       </div>
 
-      <ProfileHeader userProfile={profileUser} />
+      {/* Add Follow Button to ProfileHeader */}
+      <div className="relative">
+        <ProfileHeader userProfile={profileUser} />
+        {!isOwner && (
+          <div className="absolute top-4 right-4">
+            <FollowButton />
+          </div>
+        )}
+      </div>
 
       <ProfileTabs
         activeTab={activeTab}

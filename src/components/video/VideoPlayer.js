@@ -1,9 +1,8 @@
 import { ChefHat, Eye, Clock } from "lucide-react";
 import CustomVideo from './CustomVideo';
+import Link from "next/link";
 
 export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, isCommentOpen }) {
-  console.log("Current User Data:", currentUser);
-  console.log("Current Post:", currentPost);
 
   if (!currentPost || !currentPost.media || currentPost.media.length === 0) {
     return (
@@ -23,11 +22,13 @@ export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, is
         <div className="space-y-2">
           {/* User Info */}
           <div className="flex items-center space-x-2">
+            <Link href={`/profile/${currentUser?.user_id || ''}`}>
             <img 
-              src={currentUser?.avatar_url || 'https://via.placeholder.com/28'} 
+              src={currentUser?.avatar_url || 'https://image.pngaaa.com/603/5170603-middle.png'} 
               alt={currentUser?.username || 'User'}
-              className="w-7 h-7 rounded-full border border-white object-cover flex-shrink-0"
+              className="w-7 h-7 rounded-full border border-white object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition"
             />
+          </Link>
             <span className="font-semibold text-sm truncate">
               @{currentUser?.username || 'Unknown'}
             </span>

@@ -20,6 +20,15 @@ export default function VideoFeed({
   const [refreshPost, setRefreshPost] = useState(false);
   const { user } = useAuth();
 
+  function shuffleArray(array) {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
   // Fetch posts và user data
   useEffect(() => {
     const fetchPosts = async () => {
@@ -74,7 +83,7 @@ export default function VideoFeed({
           const userResults = await Promise.all(userPromises);
           const usersMap = {};
           userResults.forEach(({ userId, userData }) => {
-            usersMap[userId] = userData?.data || null;
+            usersMap[userId] = userData || null;
           });
           setUsers(usersMap);
 
@@ -187,9 +196,6 @@ export default function VideoFeed({
   const currentPostDetail = currentPost ? (postData[currentPost.post_id] || currentPost) : null;
   const currentUserData = currentPost ? users[currentPost.user_id] : null;
 
-  console.log('Current Post Detail:', currentPostDetail);
-  console.log('Current User Data:', currentUserData);
-
   return (
     <>
       {loading && <Loading />}
@@ -255,13 +261,4 @@ export default function VideoFeed({
       </div>
     </>
   );
-}
-
-function shuffleArray(array) {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
 }
