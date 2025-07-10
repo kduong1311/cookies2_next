@@ -188,7 +188,7 @@ export default function CreateShopPage({ onBack }) {
         cover_photo_url: uploadedUrls.cover_photo_url || null
       };
 
-      const response = await fetch('http://localhost:3002/api/shops/', {
+      const response = await fetch('http://103.253.145.7:3002/api/shops/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
