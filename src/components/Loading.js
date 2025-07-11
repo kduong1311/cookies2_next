@@ -12,7 +12,7 @@ const Loading = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-10">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-10">
       <div style={{ width: 300, height: 300 }}>
         <dotlottie-player
           src="https://lottie.host/9e6c6d6d-aacb-4dd7-91bc-01bbce33dcdc/zpybIeINtR.lottie"
