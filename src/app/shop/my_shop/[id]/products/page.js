@@ -1,73 +1,91 @@
 // app/shop/dashboard/products/page.js
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "iPhone 15 Pro Max",
-      category: "Điện thoại",
-      price: 29990000,
-      stock: 25,
-      status: "Còn hàng",
-      image: "📱",
-      description: "iPhone 15 Pro Max 256GB Titan Tự Nhiên"
-    },
-    {
-      id: 2,
-      name: "MacBook Pro M3",
-      category: "Laptop",
-      price: 52990000,
-      stock: 12,
-      status: "Còn hàng",
-      image: "💻",
-      description: "MacBook Pro 14 inch M3 Pro 512GB"
-    },
-    {
-      id: 3,
-      name: "AirPods Pro 2",
-      category: "Phụ kiện",
-      price: 6490000,
-      stock: 0,
-      status: "Hết hàng",
-      image: "🎧",
-      description: "AirPods Pro thế hệ 2 với USB-C"
-    },
-    {
-      id: 4,
-      name: "iPad Air M2",
-      category: "Tablet",
-      price: 16990000,
-      stock: 8,
-      status: "Sắp hết",
-      image: "📱",
-      description: "iPad Air 11 inch M2 WiFi 128GB"
-    }
-  ]);
-
-  const test = async ()=> {
-    try{
-      const response = await fetch('http://103.253.145.7:3002/api/products/shop/1bbc5ccf-cef8-4ea1-919f-beb595f9b4e9', {
-        credentials: "include"
-      });
-      const data = await response.json();
-      console.log("gaf", data)
-      if (data.status === 'success') {
-        setCategories(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  }
-
-  test(); 
-
+  const params = useParams();
+  const shopId = params.id; // Lấy shop_id từ URL params
+  
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`);
+        const result = await response.json();
+        
+        console.log("API Response:", result.data);
+        
+        if (result.status === "success") {
+          // Transform API data to match our component structure
+          const transformedProducts = result.data.map(product => ({
+            id: product.product_id,
+            name: product.name,
+            category: getCategoryFromProduct(product), // Helper function to determine category
+            price: parseFloat(product.price),
+            stock: product.stock_quantity,
+            status: getStatusFromStock(product.stock_quantity),
+            image: product.images && product.images.length > 0 ? product.images[0].image_url : "📦",
+            description: product.description,
+            rating: parseFloat(product.rating),
+            total_sales: product.total_sales,
+            currency: product.currency,
+            sale_price: product.sale_price,
+            is_featured: product.is_featured,
+            created_at: product.created_at
+          }));
+          
+          setProducts(transformedProducts);
+        } else {
+          setError("Không thể tải danh sách sản phẩm");
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Lỗi kết nối API");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (shopId) {
+      fetchProducts();
+    }
+  }, [shopId]);
+
+  // Helper function to determine category based on product name/description
+  const getCategoryFromProduct = (product) => {
+    const name = product.name.toLowerCase();
+    const description = product.description.toLowerCase();
+    
+    if (name.includes('phone') || name.includes('iphone') || name.includes('điện thoại')) {
+      return 'Điện thoại';
+    } else if (name.includes('laptop') || name.includes('macbook') || name.includes('computer')) {
+      return 'Laptop';
+    } else if (name.includes('tablet') || name.includes('ipad')) {
+      return 'Tablet';
+    } else if (name.includes('scale') || name.includes('bowl') || name.includes('kitchen')) {
+      return 'Nhà bếp';
+    } else {
+      return 'Phụ kiện';
+    }
+  };
+
+  // Helper function to determine status based on stock
+  const getStatusFromStock = (stock) => {
+    if (stock === 0) return "Hết hàng";
+    if (stock < 10) return "Sắp hết";
+    return "Còn hàng";
+  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -90,12 +108,38 @@ export default function ProductsPage() {
     }
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', { 
-      style: 'currency', 
-      currency: 'VND' 
-    }).format(price);
+  const formatPrice = (price, currency = "USD") => {
+    if (currency === "VND") {
+      return new Intl.NumberFormat('vi-VN', { 
+        style: 'currency', 
+        currency: 'VND' 
+      }).format(price);
+    } else {
+      return new Intl.NumberFormat('en-US', { 
+        style: 'currency', 
+        currency: 'USD' 
+      }).format(price);
+    }
   };
+
+  // Get unique categories for filter dropdown
+  const categories = [...new Set(products.map(p => p.category))];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
+        <div className="text-white text-xl">Đang tải danh sách sản phẩm...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
+        <div className="text-red-400 text-xl">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
@@ -109,7 +153,7 @@ export default function ProductsPage() {
           <p className="text-gray-400">Thêm, sửa, xóa và quản lý sản phẩm</p>
         </div>
         <Link
-          href="/shop/dashboard" 
+          href={`/shop/my_shop/${shopId}`}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
           ← Về Dashboard
@@ -153,10 +197,9 @@ export default function ProductsPage() {
               className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
             >
               <option value="all">Tất cả danh mục</option>
-              <option value="Điện thoại">Điện thoại</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Tablet">Tablet</option>
-              <option value="Phụ kiện">Phụ kiện</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
             </select>
           </div>
           <button
@@ -184,47 +227,81 @@ export default function ProductsPage() {
                 <th className="text-left text-white font-medium p-4">Giá</th>
                 <th className="text-left text-white font-medium p-4">Tồn kho</th>
                 <th className="text-left text-white font-medium p-4">Trạng thái</th>
+                <th className="text-left text-white font-medium p-4">Đánh giá</th>
                 <th className="text-left text-white font-medium p-4">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((product) => (
-                <tr key={product.id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{product.image}</span>
-                      <div>
-                        <div className="text-white font-medium">{product.name}</div>
-                        <div className="text-gray-400 text-sm">{product.description}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-300">{product.category}</td>
-                  <td className="p-4 text-white font-medium">{formatPrice(product.price)}</td>
-                  <td className="p-4 text-gray-300">{product.stock}</td>
-                  <td className="p-4">
-                    <span className={`${getStatusColor(product.status)} text-white px-3 py-1 rounded-full text-sm`}>
-                      {product.status}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setEditingProduct(product)}
-                        className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                      >
-                        ✏️ Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                      >
-                        🗑️ Xóa
-                      </button>
-                    </div>
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center text-gray-400 py-8">
+                    Không tìm thấy sản phẩm nào
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredProducts.map((product) => (
+                  <tr key={product.id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {typeof product.image === 'string' && product.image.startsWith('http') ? (
+                          <img 
+                            src={product.image} 
+                            alt={product.name}
+                            className="w-12 h-12 object-cover rounded-lg"
+                          />
+                        ) : (
+                          <span className="text-2xl">📦</span>
+                        )}
+                        <div>
+                          <div className="text-white font-medium">{product.name}</div>
+                          <div className="text-gray-400 text-sm">{product.description}</div>
+                          {product.is_featured && (
+                            <span className="inline-block bg-yellow-500 text-yellow-900 px-2 py-1 rounded text-xs font-medium mt-1">
+                              Nổi bật
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 text-gray-300">{product.category}</td>
+                    <td className="p-4">
+                      <div className="text-white font-medium">{formatPrice(product.price, product.currency)}</div>
+                      {product.sale_price && (
+                        <div className="text-green-400 text-sm">
+                          Giảm: {formatPrice(product.sale_price, product.currency)}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4 text-gray-300">{product.stock}</td>
+                    <td className="p-4">
+                      <span className={`${getStatusColor(product.status)} text-white px-3 py-1 rounded-full text-sm`}>
+                        {product.status}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-yellow-400">
+                        ⭐ {product.rating} ({product.total_sales} bán)
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingProduct(product)}
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                        >
+                          ✏️ Sửa
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                        >
+                          🗑️ Xóa
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -250,17 +327,21 @@ export default function ProductsPage() {
                 className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
                 defaultValue={editingProduct?.description || ""}
               />
-              <select className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
-                <option value="Điện thoại">Điện thoại</option>
-                <option value="Laptop">Laptop</option>
-                <option value="Tablet">Tablet</option>
-                <option value="Phụ kiện">Phụ kiện</option>
+              <select 
+                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                defaultValue={editingProduct?.category || ""}
+              >
+                <option value="">Chọn danh mục</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
               </select>
               <input
                 type="number"
-                placeholder="Giá (VND)"
+                placeholder="Giá (USD)"
                 className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
                 defaultValue={editingProduct?.price || ""}
+                step="0.01"
               />
               <input
                 type="number"
