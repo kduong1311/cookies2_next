@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Loading from "@/components/Loading";
 
 export default function DashboardPage() {
   const params = useParams();
@@ -41,14 +42,7 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4">⏳</div>
-          <p className="text-white text-lg">Đang tải thông tin shop...</p>
-        </div>
-      </div>
-    );
+    return <Loading/> 
   }
 
   if (error) {
