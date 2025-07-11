@@ -47,6 +47,23 @@ export default function ProductsPage() {
     }
   ]);
 
+  const test = async ()=> {
+    try{
+      const response = await fetch('http://103.253.145.7:3002/api/products/shop/1bbc5ccf-cef8-4ea1-919f-beb595f9b4e9', {
+        credentials: "include"
+      });
+      const data = await response.json();
+      console.log("gaf", data)
+      if (data.status === 'success') {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }
+
+  test(); 
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
