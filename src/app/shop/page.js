@@ -6,6 +6,7 @@ import SearchBar from "@/components/shop/SearchBar";
 import ProductList from "@/components/shop/ProductList";
 import ProductCart from "@/components/shop/ProductCart";
 import { fetchProducts } from "@/api_services/product";
+import Loading from "@/components/Loading";
 
 export default function ShopPage() {
   const [activeShopView, setActiveShopView] = useState("productList");
@@ -41,8 +42,8 @@ export default function ShopPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-white">Loading products...</div>
+      <div className="flex relative justify-center items-center min-h-screen">
+        <Loading/>
       </div>
     );
   }
