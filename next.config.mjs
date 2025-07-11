@@ -7,6 +7,10 @@ const nextConfig = {
       'marketplace.canva.com',
       'https://api.cloudinary.com/v1_1/da9rooi9r/auto/upload',
       'res.cloudinary.com',
+      'https://www.santos',
+      'https://stellar.co.uk',
+      'https://images.thdstatic.com',
+      'https://havamall.com',
     ],
   },
   
