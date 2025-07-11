@@ -30,7 +30,7 @@ export default function ProductsPage() {
         
         if (result.status === "success") {
           // Transform API data to match our component structure
-          const transformedProducts = result.data.map(product => ({
+          const transformedProducts = result.data.data.map(product => ({
             id: product.product_id,
             name: product.name,
             category: getCategoryFromProduct(product), // Helper function to determine category
