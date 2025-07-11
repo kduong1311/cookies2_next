@@ -21,7 +21,9 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`);
+        const response = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`, {
+          credentials: "include",
+        });
         const result = await response.json();
         
         console.log("API Response:", result.data);
