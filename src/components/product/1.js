@@ -310,7 +310,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
               <div className="bg-slate-800/50 p-6 rounded-lg border border-purple-500/20 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-purple-300 mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Tag className="w-4 h-4" />
                       Product Name *
                     </label>
@@ -324,7 +324,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-purple-300 mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Layers className="w-4 h-4" />
                       Category ID *
                     </label>
@@ -338,7 +338,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-purple-300 mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <DollarSign className="w-4 h-4" />
                       Price *
                     </label>
@@ -354,7 +354,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-purple-300 mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Percent className="w-4 h-4" />
                       Sale Price
                     </label>
@@ -369,7 +369,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-purple-300 mb-2 block flex items-center gap-2">
+                    <label className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                       <Box className="w-4 h-4" />
                       Stock Quantity *
                     </label>
@@ -385,7 +385,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-purple-300 mb-2 block flex items-center gap-2">
+                  <label className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                     <Info className="w-4 h-4" />
                     Description
                   </label>
@@ -649,6 +649,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
               Reset Form
             </Button>
             <Button
+              onClick={handleSubmit}
               type="submit"
               className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium"
               disabled={status === "loading"}
