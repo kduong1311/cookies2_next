@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import CreateProductModal from "@/components/product/1";
+import Link from "next/link";
 
 export default function ProductsPage() {
   const params = useParams();
