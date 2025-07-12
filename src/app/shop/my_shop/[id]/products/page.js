@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import CreateProductModal from "@/components/product/addProduct";
+import CreateProductModal from "@/components/product/1";
 
 export default function ProductsPage() {
   const params = useParams();
