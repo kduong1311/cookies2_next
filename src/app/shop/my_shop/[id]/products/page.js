@@ -207,13 +207,13 @@ export default function ProductsPage() {
               ))}
             </select>
           </div>
-          <Button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Thêm sản phẩm
-        </Button>
+        <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <span>➕</span>
+            Thêm sản phẩm
+          </button>
 
         </div>
       </div>
