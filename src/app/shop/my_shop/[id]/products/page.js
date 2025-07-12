@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import CreateProductModal from "@/components/product/1";
+import AddProductModal from "@/components/product/1";
 import Link from "next/link";
 
 export default function ProductsPage() {
@@ -214,6 +214,16 @@ export default function ProductsPage() {
             <span>➕</span>
             Thêm sản phẩm
           </button>
+
+          <AddProductModal
+          open={showCreateModal}
+          onOpenChange={setShowCreateModal}
+          shopId={shopId}
+          onSuccess={(newProduct) => {
+            console.log("Product created:", newProduct);
+            // optional: refresh list
+          }}
+        />
 
         </div>
       </div>
