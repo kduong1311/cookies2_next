@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
+import CreateProductModal from "@/components/product/AddProductModal";
 
 export default function ProductsPage() {
   const params = useParams();
@@ -15,6 +15,8 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
 
   // Fetch products from API
   useEffect(() => {
@@ -204,13 +206,14 @@ export default function ProductsPage() {
               ))}
             </select>
           </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
-          >
-            <span>➕</span>
-            Thêm sản phẩm
-          </button>
+          <Button
+          onClick={() => setShowCreateModal(true)}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          <Plus className="w-4 h-4 mr-1" />
+          Thêm sản phẩm
+        </Button>
+
         </div>
       </div>
 
@@ -375,4 +378,15 @@ export default function ProductsPage() {
       )}
     </div>
   );
+
+  <CreateProductModal
+  isOpen={showCreateModal}
+  onClose={() => setShowCreateModal(false)}
+  shopId={shopId}
+  onSuccess={(newProduct) => {
+    setShowCreateModal(false);
+  }}
+/>
 }
+
+
