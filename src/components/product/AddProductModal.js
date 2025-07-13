@@ -204,6 +204,9 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
             Thêm sản phẩm mới
           </DialogTitle>
+          <DialogDescription>
+                {formMode === "Add Product"}
+              </DialogDescription>
         </DialogHeader>
 
         {/* Progress Steps */}
