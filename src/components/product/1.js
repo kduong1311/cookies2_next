@@ -42,8 +42,8 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
   // Basic product info
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [salePrice, setSalePrice] = useState("");
+  const [price, setPrice] = useState(0);
+  const [salePrice, setSalePrice] = useState(0);
   const [categoryId, setCategoryId] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
 
@@ -89,7 +89,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
     const formData = new FormData();
     
     // Basic product info
-    formData.append("name", name.trim().toString);
+    formData.append("name", name.trim());
     formData.append("description", description);
     formData.append("price", parseFloat(price));
     formData.append("category_id", categoryId);
