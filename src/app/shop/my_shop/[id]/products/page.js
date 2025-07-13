@@ -17,7 +17,7 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
-
+  const [categoriesData, setCategoriesData] = useState([]);
 
   // Fetch products from API
   useEffect(() => {
@@ -146,6 +146,22 @@ export default function ProductsPage() {
     );
   }
 
+  useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("http://103.253.145.7:3003/api/categories");
+      const result = await res.json();
+      if (result.status === "success") {
+        setCategoriesData(result.data); // Lưu vào state
+      }
+    } catch (error) {
+      console.error("Lỗi tải danh mục:", error);
+    }
+  };
+
+  fetchCategories();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
       {/* Header */}
@@ -257,7 +273,7 @@ export default function ProductsPage() {
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
+                  <tr key={product.product_id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {typeof product.image === 'string' && product.image.startsWith('http') ? (
@@ -349,8 +365,8 @@ export default function ProductsPage() {
                 defaultValue={editingProduct?.category || ""}
               >
                 <option value="">Chọn danh mục</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                {categoriesData.map(category => (
+                  <option key={category.category_id} value={category.name}>{category.name}</option>
                 ))}
               </select>
               <input
