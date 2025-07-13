@@ -38,7 +38,7 @@ import {
   ChevronUp
 } from "lucide-react";
 
-export default function AddProductModal({ open, onOpenChange, shopId, onSuccess }) {
+export default function AddProductModal1({ open, onOpenChange, shopId, onSuccess }) {
   // Basic product info
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");

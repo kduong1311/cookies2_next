@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import AddProductModal from "@/components/product/1";
+import AddProductModal from "@/components/product/AddProductModal";
 import Link from "next/link";
 
 export default function ProductsPage() {
@@ -221,6 +221,7 @@ export default function ProductsPage() {
           shopId={shopId}
           onSuccess={(newProduct) => {
             console.log("Product created:", newProduct);
+            setProducts([...products, newProduct]);
             // optional: refresh list
           }}
         />
@@ -389,15 +390,6 @@ export default function ProductsPage() {
       )}
     </div>
   );
-
-  <CreateProductModal
-  isOpen={showCreateModal}
-  onClose={() => setShowCreateModal(false)}
-  shopId={shopId}
-  onSuccess={(newProduct) => {
-    setShowCreateModal(false);
-  }}
-/>
 }
 
 
