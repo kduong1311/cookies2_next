@@ -206,8 +206,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
             Thêm sản phẩm mới
           </DialogTitle>
           <DialogDescription>
-                {formMode === "Add Product"}
-              </DialogDescription>
+            </DialogDescription>
         </DialogHeader>
 
         {/* Progress Steps */}
