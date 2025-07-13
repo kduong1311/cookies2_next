@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { uploadToCloudinary } from "../upload/uploadCloudinary";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -99,42 +100,49 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
     }
 
     // Main product images
-    const imagesData = images.map((image, index) => ({
-      file: image,
-      position: index,
-      is_primary: index === 0,
-      alt_text: `${name} image ${index + 1}`
-    }));
-    
-    formData.append("images", JSON.stringify(imagesData));
-    
-    // Add image files
-    images.forEach((image, index) => {
-      formData.append(`image_${index}`, image);
-    });
+    const uploadedImageUrls = [];
+    for (const image of images) {
+      const url = await uploadToCloudinary(image);
+      uploadedImageUrls.push(url);
+    }
+
+      const imagesData = uploadedImageUrls.map((url, index) => ({
+        url,
+        position: index,
+        is_primary: index === 0,
+        alt_text: `${name} image ${index + 1}`,
+      }));
+
+      formData.append("images", JSON.stringify(imagesData));
+
 
     // Variants
-    const variantsData = variants.map((variant, variantIndex) => ({
-      sku: variant.sku,
-      price: parseFloat(variant.price) || parseFloat(price),
-      stock_quantity: parseInt(variant.stock_quantity),
-      color: variant.color,
-      size: variant.size,
-      material: variant.material,
-      images: variant.images.map((img, imgIndex) => ({
-        position: imgIndex,
-        alt_text: `${variant.color} ${variant.size} variant`
-      }))
-    }));
-    
-    formData.append("variants", JSON.stringify(variantsData));
-    
-    // Add variant image files
-    variants.forEach((variant, variantIndex) => {
-      variant.images.forEach((image, imageIndex) => {
-        formData.append(`variant_${variantIndex}_image_${imageIndex}`, image);
+    const variantsData = [];
+
+    for (const [variantIndex, variant] of variants.entries()) {
+      const uploadedVariantImageUrls = [];
+      for (const image of variant.images) {
+        const url = await uploadToCloudinary(image);
+        uploadedVariantImageUrls.push(url);
+      }
+
+      variantsData.push({
+        sku: variant.sku,
+        price: parseFloat(variant.price) || parseFloat(price),
+        stock_quantity: parseInt(variant.stock_quantity),
+        color: variant.color,
+        size: variant.size,
+        material: variant.material,
+        images: uploadedVariantImageUrls.map((url, imgIndex) => ({
+          url,
+          position: imgIndex,
+          alt_text: `${variant.color} ${variant.size} variant`
+        }))
       });
-    });
+    }
+
+formData.append("variants", JSON.stringify(variantsData));
+
 
     try {
       const res = await fetch(
