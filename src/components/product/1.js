@@ -143,7 +143,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
 
 formData.append("variants", JSON.stringify(variantsData));
 
-console.log("formData", formData)
+console.log([...formData.entries()]);
 
 
     try {
