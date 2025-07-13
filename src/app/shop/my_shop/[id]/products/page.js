@@ -144,8 +144,6 @@ export default function ProductsPage() {
     }
   };
 
-  // Get unique categories for filter dropdown
-  const categories = [...new Set(products.map(p => p.category))];
 
   if (loading) {
     return (
@@ -214,15 +212,18 @@ export default function ProductsPage() {
               className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none flex-1"
             />
             <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-            >
-              <option value="all">Tất cả danh mục</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+          >
+            <option value="all">Tất cả danh mục</option>
+            {categoriesData.map(category => (
+              <option key={category.category_id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+
           </div>
         <button
             onClick={() => setShowCreateModal(true)}
@@ -274,7 +275,7 @@ export default function ProductsPage() {
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.product_id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
+                  <tr key={product.id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {typeof product.image === 'string' && product.image.startsWith('http') ? (
