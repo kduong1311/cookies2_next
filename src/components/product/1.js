@@ -109,7 +109,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
       const imagesData = uploadedImageUrls.map((url, index) => ({
         url,
         position: index,
-        is_primary: index === 0,
+        is_primary: true,
         alt_text: `${name} image ${index + 1}`,
       }));
 
