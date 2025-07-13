@@ -135,6 +135,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
 
       const response = await fetch("http://103.253.145.7:3003/api/products", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
