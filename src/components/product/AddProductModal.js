@@ -146,7 +146,6 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
         setSubmitStatus('success');
         setTimeout(() => {
           onSuccess?.();
-          onClose();
         }, 2000);
       } else {
         const errorData = await response.json();
