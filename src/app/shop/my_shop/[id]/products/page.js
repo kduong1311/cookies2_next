@@ -115,11 +115,32 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleDeleteProduct = (id) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      setProducts(products.filter(p => p.id !== id));
+  const handleDeleteProduct = async (id) => {
+  if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+    try {
+      const response = await fetch(`http://103.253.145.7:3003/api/products/${id}`, {
+        method: "DELETE",
+        credentials: "include", // Nếu API cần xác thực session/cookie
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.status === "success") {
+        // Xóa ở local state
+        setProducts(products.filter(p => p.id !== id));
+      } else {
+        alert("Xóa sản phẩm thất bại: " + result.message || "Unknown error");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+      alert("Có lỗi xảy ra khi xóa sản phẩm.");
     }
-  };
+  }
+};
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -187,15 +208,15 @@ export default function ProductsPage() {
           <div className="text-blue-100">Tổng sản phẩm</div>
         </div>
         <div className="bg-green-600 p-4 rounded-xl text-white">
-          <div className="text-2xl font-bold">{products.filter(p => p.status === "Còn hàng").length}</div>
+          <div className="text-2xl font-bold">{products.filter(p => p.status === "In Stock").length}</div>
           <div className="text-green-100">Còn hàng</div>
         </div>
         <div className="bg-yellow-600 p-4 rounded-xl text-white">
-          <div className="text-2xl font-bold">{products.filter(p => p.status === "Sắp hết").length}</div>
+          <div className="text-2xl font-bold">{products.filter(p => p.status === "Low Stock").length}</div>
           <div className="text-yellow-100">Sắp hết hàng</div>
         </div>
         <div className="bg-red-600 p-4 rounded-xl text-white">
-          <div className="text-2xl font-bold">{products.filter(p => p.status === "Hết hàng").length}</div>
+          <div className="text-2xl font-bold">{products.filter(p => p.status === "Out of Stock").length}</div>
           <div className="text-red-100">Hết hàng</div>
         </div>
       </div>
@@ -309,8 +330,8 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="p-4 text-gray-300">{product.stock}</td>
-                    <td className="p-4">
-                      <span className={`${getStatusColor(product.status)} text-white px-3 py-1 rounded-full text-sm`}>
+                    <td className="p-4 whitespace-nowrap">
+                      <span className={`${getStatusColor(product.status)} text-white px-2 py-0.5 rounded-full text-xs`}>
                         {product.status}
                       </span>
                     </td>
