@@ -46,6 +46,8 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
   const [salePrice, setSalePrice] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
+
+  console.log("shopID", shopId);
   
   // Images
   const [images, setImages] = useState([]);
@@ -109,13 +111,13 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
       const imagesData = uploadedImageUrls.map((url, index) => ({
         url,
         position: index,
-        is_primary: true,
+        is_primary: index === 0,
         alt_text: `${name} image ${index + 1}`,
       }));
 
       formData.append("images", JSON.stringify(imagesData));
 
-
+      console.log("image", imagesData);
     // Variants
     const variantsData = [];
 
