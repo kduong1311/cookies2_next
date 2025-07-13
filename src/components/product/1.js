@@ -301,7 +301,7 @@ formData.append("variants", JSON.stringify(variantsData));
         )}
 
         {/* Form */}
-        <div onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information Section */}
           <div className="space-y-4">
             <div 
@@ -659,7 +659,6 @@ formData.append("variants", JSON.stringify(variantsData));
               Reset Form
             </Button>
             <Button
-              onClick={handleSubmit}
               type="submit"
               className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium"
               disabled={status === "loading"}
@@ -677,7 +676,7 @@ formData.append("variants", JSON.stringify(variantsData));
               )}
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
