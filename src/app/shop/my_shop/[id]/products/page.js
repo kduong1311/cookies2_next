@@ -237,6 +237,7 @@ export default function ProductsPage() {
           open={showCreateModal}
           onOpenChange={setShowCreateModal}
           shopId={shopId}
+          onClose={() => setShowCreateModal(false)}
           onSuccess={(newProduct) => {
             console.log("Product created:", newProduct);
             setProducts([...products, newProduct]);
