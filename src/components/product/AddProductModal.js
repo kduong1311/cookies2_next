@@ -147,6 +147,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
         setSubmitStatus('success');
         setTimeout(() => {
           onSuccess?.(result.data);
+          onClose?.();
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -195,7 +196,9 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+    if (!isOpen) onClose?.();
+    }}>
       <DialogContent className="max-w-4xl max-h-[90vh] bg-gray-900 border-gray-700 text-white overflow-hidden flex flex-col">
         <DialogHeader className="border-b border-gray-700 pb-4">
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
