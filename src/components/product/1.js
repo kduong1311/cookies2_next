@@ -47,7 +47,6 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
   const [categoryId, setCategoryId] = useState("");
   const [stockQuantity, setStockQuantity] = useState("");
 
-  console.log("shopID", shopId);
   
   // Images
   const [images, setImages] = useState([]);
@@ -90,7 +89,7 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
     const formData = new FormData();
     
     // Basic product info
-    formData.append("name", name);
+    formData.append("name", name.trim().toString);
     formData.append("description", description);
     formData.append("price", parseFloat(price));
     formData.append("category_id", categoryId);
@@ -117,7 +116,6 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
 
       formData.append("images", JSON.stringify(imagesData));
 
-      console.log("image", imagesData);
     // Variants
     const variantsData = [];
 
@@ -144,6 +142,8 @@ export default function AddProductModal({ open, onOpenChange, shopId, onSuccess 
     }
 
 formData.append("variants", JSON.stringify(variantsData));
+
+console.log("formData", formData)
 
 
     try {
