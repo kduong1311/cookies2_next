@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
-  DialogHeader, 
+  DialogHeader,
+  DialogDescription,
   DialogTitle 
 } from "@/components/ui/dialog";
 import { 
