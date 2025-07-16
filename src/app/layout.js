@@ -3,6 +3,7 @@ import "../app/globals.css"
 import MainLayout from "./feed/MainLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
+import { CartProvider } from "@/contexts/CartContext";
 
 export const metadata = {
   title: "Foodie Platform",
@@ -14,9 +15,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
       <ConfirmProvider>
-        <AuthProvider>
-          <MainLayout>{children}</MainLayout>
-        </AuthProvider>
+        <CartProvider>
+          <AuthProvider>
+            <MainLayout>{children}</MainLayout>
+          </AuthProvider>
+        </CartProvider>
       </ConfirmProvider>
       </body>
     </html>

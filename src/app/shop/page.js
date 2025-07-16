@@ -1,4 +1,3 @@
-// app/shop/page.js
 "use client";
 import { useEffect, useState } from "react";
 import Banner from "@/components/shop/Banner";
@@ -11,6 +10,7 @@ import Loading from "@/components/Loading";
 export default function ShopPage() {
   const [activeShopView, setActiveShopView] = useState("productList");
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // 👉 giữ toàn bộ danh sách
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,16 +22,37 @@ export default function ShopPage() {
     setActiveShopView("productList");
   };
 
+  // ✅ Search local trong allProducts
+  const handleSearch = ({ query = "", category = "All"}) => {
+  const keyword = query.toLowerCase();
+  let filtered = [...allProducts];
+
+    if (category !== "All") {
+      filtered = filtered.filter((product) =>
+        product.category?.some((cat) =>
+          cat.toLowerCase().includes(category.toLowerCase())
+        )
+      );
+    }
+
+    filtered = filtered.filter((product) =>
+      product.name.toLowerCase().includes(keyword)
+    );
+
+    setProducts(filtered);
+  };
+
   useEffect(() => {
     const loadProducts = async () => {
       try {
         setLoading(true);
         const fetchedProducts = await fetchProducts();
-        setProducts(fetchedProducts);
+        setAllProducts(fetchedProducts); // 👉 lưu toàn bộ
+        setProducts(fetchedProducts);    // 👉 hiển thị ban đầu
         setError(null);
       } catch (err) {
-        setError('Failed to load products');
-        console.error('Error loading products:', err);
+        setError("Failed to load products");
+        console.error("Error loading products:", err);
       } finally {
         setLoading(false);
       }
@@ -43,7 +64,7 @@ export default function ShopPage() {
   if (loading) {
     return (
       <div className="flex relative justify-center items-center min-h-screen">
-        <Loading/>
+        <Loading />
       </div>
     );
   }
@@ -58,18 +79,16 @@ export default function ShopPage() {
 
   return (
     <>
-      {/* Banner và SearchBar chỉ hiển thị trên trang danh sách sản phẩm */}
       {activeShopView === "productList" && (
         <>
           <Banner />
-          <SearchBar />
+          <SearchBar onSearch={handleSearch} />
           <div className="mt-5">
             <ProductList products={products} />
           </div>
         </>
       )}
 
-      {/* ProductCart hiển thị khi activeShopView là "cart" */}
       {activeShopView === "cart" && (
         <ProductCart onBackToShopping={handleBackToShopping} />
       )}

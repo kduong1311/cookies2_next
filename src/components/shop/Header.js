@@ -3,10 +3,12 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { X, ShoppingCart, Heart, Search, ChevronDown, Home, Menu, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 
 export default function Header() {
   const router = useRouter();
   const { user } = useAuth(); // 👈 Lấy user đang đăng nhập
+  const {cartCount} = useCart();
 
   const handleShopClick = async () => {
     if (!user?.user_id) return;
@@ -33,6 +35,10 @@ export default function Header() {
     }
   };
 
+  const handleCartClick = () => {
+    router.push("/shop/cart")
+  }
+
   return (
     <header className="bg-gray-900 py-3 px-4 sticky top-2 p-3 z-10 rounded-2xl">
       <div className="flex justify-between items-center">
@@ -53,9 +59,10 @@ export default function Header() {
             <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">2</span>
           </button>
 
-          <button className="p-2 hover:text-yellow-500 transition-colors relative">
+          <button className="p-2 hover:text-yellow-500 transition-colors relative"
+            onClick={handleCartClick}>
             <ShoppingCart size={20} />
-            <span className="absolute -top-1 -right-1 bg-yellow-500 text-black rounded-full w-4 h-4 flex items-center justify-center text-xs">3</span>
+            <span className="absolute -top-1 -right-1 bg-yellow-500 text-black rounded-full w-4 h-4 flex items-center justify-center text-xs">{cartCount}</span>
           </button>
         </div>
       </div>

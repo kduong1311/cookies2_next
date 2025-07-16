@@ -11,7 +11,6 @@ export default function TopNavbar() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
-
   // Fetch user details từ API
   const fetchUserDetails = async () => {
     if (!user?.user_id) return;

@@ -30,6 +30,7 @@ const isCustomPage = pathname.startsWith("/shop")
 || pathname.startsWith("/search")
 || pathname.startsWith("/post");
 
+
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
 
   return (

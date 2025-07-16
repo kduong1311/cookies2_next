@@ -3,16 +3,18 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Heart, Star, ShoppingCart, Share2, Minus, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchProductById } from "@/api_services/product";
+import AddToCartModal from "./AddToCartModal";
+import { useCart } from "@/contexts/CartContext";
 
 export default function ProductDetail({ productId, onBack }) {
   const router = useRouter();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedColor, setSelectedColor] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
+  const { addToCart, setBuyNow} = useCart();
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -23,8 +25,6 @@ export default function ProductDetail({ productId, onBack }) {
         console.log(fetchedProduct);
         if (fetchedProduct) {
           setProduct(fetchedProduct);
-          setSelectedColor(fetchedProduct.colors?.[0] || "");
-          setSelectedSize(fetchedProduct.sizes?.[0] || "");
           setError(null);
         } else {
           setError("Product not found");
@@ -40,32 +40,64 @@ export default function ProductDetail({ productId, onBack }) {
     loadProduct();
   }, [productId]);
 
+  // Get total stock quantity from all variants
+  const getTotalStock = () => {
+    if (product?.variants && product.variants.length > 0) {
+      return product.variants.reduce((total, variant) => {
+        return total + (variant.stock_quantity || 0);
+      }, 0);
+    }
+    return product?.stock_quantity || 0;
+  };
+
+  // Get price range for display
+  const getPriceRange = () => {
+    if (!product?.variants || product.variants.length === 0) {
+      return {
+        minPrice: product?.price,
+        maxPrice: product?.price,
+        minSalePrice: product?.sale_price,
+        maxSalePrice: product?.sale_price
+      };
+    }
+
+    const prices = product.variants.map(v => parseFloat(v.price));
+    const salePrices = product.variants.map(v => v.sale_price ? parseFloat(v.sale_price) : null).filter(Boolean);
+
+    return {
+      minPrice: Math.min(...prices),
+      maxPrice: Math.max(...prices),
+      minSalePrice: salePrices.length > 0 ? Math.min(...salePrices) : null,
+      maxSalePrice: salePrices.length > 0 ? Math.max(...salePrices) : null
+    };
+  };
+
   const handleQuantityChange = (action) => {
-    if (action === "increase") {
+    const maxQuantity = getTotalStock();
+    if (action === "increase" && quantity < maxQuantity) {
       setQuantity(quantity + 1);
     } else if (action === "decrease" && quantity > 1) {
       setQuantity(quantity - 1);
     }
   };
 
-  const handleColorChange = (color) => setSelectedColor(color);
-  const handleSizeChange = (size) => setSelectedSize(size);
-
   const handleAddToCart = () => {
-    console.log("Thêm vào giỏ hàng:", {
-      productId: product.id,
-      name: product.name,
-      color: selectedColor,
-      size: selectedSize,
-      quantity: quantity,
-      price: product.sale_price || product.price,
-    });
+    setCartModalOpen(true);
+  };
+
+  const handleAddToCartConfirmed = (item) => {
+    addToCart(item);
+    setCartModalOpen(false);
     alert("Đã thêm vào giỏ hàng!");
   };
 
   const handleBuyNow = () => {
+    const totalStock = getTotalStock();
+    if (totalStock === 0) {
+      alert("Sản phẩm đã hết hàng!");
+      return;
+    }
     handleAddToCart();
-    alert("Chuyển đến trang thanh toán!");
   };
 
   if (loading) {
@@ -88,6 +120,9 @@ export default function ProductDetail({ productId, onBack }) {
     );
   }
 
+  const totalStock = getTotalStock();
+  const priceRange = getPriceRange();
+
   return (
     <div className="bg-black-cs text-white min-h-screen px-4 py-6">
       {/* Nút quay lại */}
@@ -101,7 +136,7 @@ export default function ProductDetail({ productId, onBack }) {
         <div className="lg:w-1/2">
           <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
             <img
-              src={product.images?.[selectedImage] || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png"}
+              src={product.images?.[selectedImage]?.image_url || product.images?.[selectedImage] || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png"}
               alt={product.name}
               className="w-full h-full object-cover"
             />
@@ -119,7 +154,7 @@ export default function ProductDetail({ productId, onBack }) {
                     selectedImage === index ? "border-white" : "border-transparent"
                   }`}
                 >
-                  <img src={image} alt={`${product.name} - ${index + 1}`} className="w-full h-full object-cover rounded" />
+                  <img src={image.image_url || image} alt={`${product.name} - ${index + 1}`} className="w-full h-full object-cover rounded" />
                 </div>
               ))
             ) : (
@@ -144,89 +179,132 @@ export default function ProductDetail({ productId, onBack }) {
                 />
               ))}
             </div>
-            <span className="text-sm text-gray-400">{product.rating} ({product.totalReviews || 0} reviews)</span>
+            <span className="text-sm text-gray-400">{product.rating} ({product.total_reviews || 0} reviews)</span>
           </div>
 
-          <div className="mb-6">
-            {product.sale_price ? (
-              <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold">{parseFloat(product.sale_price).toLocaleString("vi-VN")}₫</span>
-                <span className="text-lg text-gray-400 line-through">{parseFloat(product.price).toLocaleString("vi-VN")}₫</span>
-                <span className="bg-red-600 px-2 py-1 text-xs rounded">
-                  {Math.round((1 - parseFloat(product.sale_price) / parseFloat(product.price)) * 100)}% Sale
-                </span>
+          {/* Price Display */}
+          <div className="mb-4">
+            {product.variants && product.variants.length > 0 ? (
+              <div>
+                {priceRange.minSalePrice ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold">
+                      ${priceRange.minSalePrice.toFixed(2)}
+                      {priceRange.minSalePrice !== priceRange.maxSalePrice && ` - $${priceRange.maxSalePrice.toFixed(2)}`}
+                    </span>
+                    <span className="text-lg text-gray-400 line-through">
+                      ${priceRange.minPrice.toFixed(2)}
+                      {priceRange.minPrice !== priceRange.maxPrice && ` - $${priceRange.maxPrice.toFixed(2)}`}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-2xl font-bold">
+                    ${priceRange.minPrice.toFixed(2)}
+                    {priceRange.minPrice !== priceRange.maxPrice && ` - $${priceRange.maxPrice.toFixed(2)}`}
+                  </span>
+                )}
               </div>
             ) : (
-              <span className="text-2xl font-bold">{parseFloat(product.price).toLocaleString("vi-VN")}₫</span>
+              <div>
+                {product.sale_price ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold">${parseFloat(product.sale_price).toFixed(2)}</span>
+                    <span className="text-lg text-gray-400 line-through">${parseFloat(product.price).toFixed(2)}</span>
+                    <span className="bg-red-600 px-2 py-1 text-xs rounded">
+                      {Math.round((1 - parseFloat(product.sale_price) / parseFloat(product.price)) * 100)}% Sale
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-2xl font-bold">${parseFloat(product.price).toFixed(2)}</span>
+                )}
+              </div>
             )}
           </div>
 
+          {/* Stock Status */}
+          <div className="mb-4">
+            <span className={`text-sm font-medium ${totalStock > 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {totalStock > 0 ? `In Stock (${totalStock} available)` : 'Out of Stock'}
+            </span>
+          </div>
+
           <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Descriptions: </h3>
+            <h3 className="text-lg font-medium mb-2">Description:</h3>
             <p className="text-gray-300">{product.description}</p>
           </div>
 
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Color</h3>
-            <div className="flex flex-wrap gap-2">
-              {product.colors && product.colors.length > 0 ? (
-                product.colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => handleColorChange(color)}
-                    className={`px-4 py-2 rounded-md ${
-                      selectedColor === color ? "bg-orange-500 text-white font-medium" : "bg-gray-800 text-white"
-                    }`}
+          {/* Variants Preview */}
+          {product.variants && product.variants.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium mb-4">Available Options:</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {product.variants.slice(0, 4).map((variant) => (
+                  <div
+                    key={variant.variant_id}
+                    className="p-3 rounded-lg border border-gray-700 bg-gray-800"
                   >
-                    {color}
-                  </button>
-                ))
-              ) : (
-                <p className="text-gray-400">No colors available.</p>
-              )}
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap gap-2 mb-1">
+                          {variant.color && (
+                            <span className="text-xs bg-gray-700 px-2 py-1 rounded">
+                              {variant.color}
+                            </span>
+                          )}
+                          {variant.size && (
+                            <span className="text-xs bg-gray-700 px-2 py-1 rounded">
+                              {variant.size}
+                            </span>
+                          )}
+                          {variant.material && (
+                            <span className="text-xs bg-gray-700 px-2 py-1 rounded">
+                              {variant.material}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm font-medium">
+                          {variant.sale_price ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-orange-400">${parseFloat(variant.sale_price).toFixed(2)}</span>
+                              <span className="text-gray-400 line-through text-xs">${parseFloat(variant.price).toFixed(2)}</span>
+                            </div>
+                          ) : (
+                            <span>${parseFloat(variant.price).toFixed(2)}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-xs ${variant.stock_quantity > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {variant.stock_quantity > 0 ? `${variant.stock_quantity} in stock` : 'Out of stock'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {product.variants.length > 4 && (
+                  <div className="p-3 rounded-lg border border-gray-700 bg-gray-800 flex items-center justify-center">
+                    <span className="text-sm text-gray-400">+{product.variants.length - 4} more options</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Size</h3>
-            <div className="flex flex-wrap gap-2">
-              {product.sizes && product.sizes.length > 0 ? (
-                product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => handleSizeChange(size)}
-                    className={`px-4 py-2 rounded-md ${
-                      selectedSize === size ? "bg-orange-500 text-white font-medium" : "bg-gray-800 text-white"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))
-              ) : (
-                <p className="text-gray-400">No sizes available.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium mb-2">Quantity</h3>
-            <div className="flex items-center">
-              <button onClick={() => handleQuantityChange("decrease")} className="p-2 bg-gray-800 rounded-l-md hover:bg-gray-700">
-                <Minus size={16} />
-              </button>
-              <span className="px-6 py-2 bg-gray-800 border-l border-r border-gray-700">{quantity}</span>
-              <button onClick={() => handleQuantityChange("increase")} className="p-2 bg-gray-800 rounded-r-md hover:bg-gray-700">
-                <Plus size={16} />
-              </button>
-            </div>
-          </div>
-
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <button onClick={handleAddToCart} className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 py-3 px-6 rounded-lg flex-1">
+            <button 
+              onClick={handleAddToCart} 
+              className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 py-3 px-6 rounded-lg flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={totalStock === 0}
+            >
               <ShoppingCart size={20} />
               <span>Add to cart</span>
             </button>
-            <button onClick={handleBuyNow} className="bg-orange-500 text-white hover:bg-orange-600 py-3 px-6 rounded-lg font-medium flex-1">
+            <button 
+              onClick={handleBuyNow} 
+              className="bg-orange-500 text-white hover:bg-orange-600 py-3 px-6 rounded-lg font-medium flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={totalStock === 0}
+            >
               Buy Now
             </button>
           </div>
@@ -243,6 +321,17 @@ export default function ProductDetail({ productId, onBack }) {
           </div>
         </div>
       </div>
+
+      <AddToCartModal
+        open={cartModalOpen}
+        onClose={() => setCartModalOpen(false)}
+        product={product}
+        onAddToCart={(item) => addToCart(item)}
+        onBuyNow={(item) => {
+          setBuyNow(item);
+          router.push("/shop/order")
+        }}
+      />
     </div>
   );
 }

@@ -54,19 +54,43 @@ export const fetchProductById = async (id) => {
 
     return {
       id: product.product_id,
+      shop_id: product.shop_id,
       name: product.name,
       price: product.price,
       sale_price: product.sale_price,
       currency: product.currency,
       stock_quantity: product.stock_quantity,
-      images: images, // <-- Trả về mảng URL
       rating: product.rating,
       description: product.description,
       total_sale: product.total_sales,
+      images: images,
+      // ✅ Thêm các trường quan trọng
+      variants: product.variants || [],
+      categories: product.categories || [],
+      slug: product.slug,
+      sku: product.sku,
+      weight: product.weight,
+      weight_unit: product.weight_unit,
+      dimensions: product.dimensions,
+      condition_status: product.condition_status,
+      is_featured: product.is_featured,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
     };
   } catch (error) {
     console.error('Error fetching product:', error);
     return null;
   }
 };
+
+export const searchProducts = async (query) => {
+  const res = await fetch(`http://103.253.145.7:3003/api/products/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) {
+    throw new Error("Failed to search products");
+  }
+  const data = await res.json();
+  console.log("search:", data)
+  return data.data || []; // tuỳ vào cấu trúc trả về
+};
+
 

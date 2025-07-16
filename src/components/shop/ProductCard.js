@@ -8,13 +8,15 @@ export default function ProductCard({ data }) {
   return (
     <Link href={`/shop/${data.id}`}>
       <Card className="border-none cursor-pointer bg-gray-cs p-0">
+        <div className="relative w-full h-[320px]">
         <Image
           src={data.image}
-          alt={"image"}
-          width={300}
-          height={260}
-          className="w-full h-65 object-cover block rounded-t-lg"
+          alt="image"
+          fill
+          className="object-cover rounded-t-lg"
+          sizes="(max-width: 768px) 100vw, 300px"
         />
+      </div>
         <CardContent className="pb-4">
           <p className="text-gray-400">My shop</p>
           <h2 className="text-lg text-white font-semibold truncate">
