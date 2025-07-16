@@ -18,7 +18,7 @@ export const CartProvider = ({ children }) => {
     };
 
   const addToCart = (product) => {
-    const { id, name, price, sale_price, image, quantity = 1, variant } = product;
+    const { id, product_id, name, price, sale_price, image, quantity = 1, variant, shop_id} = product;
 
     setCartItems((prev) => {
       const existingItemIndex = prev.findIndex(
@@ -36,12 +36,14 @@ export const CartProvider = ({ children }) => {
         ...prev,
         {
           id,
+          product_id,
           name,
           price,
           sale_price,
           image,
           quantity,
           variant, // { variant_id, color, size, material, sku, image_url }
+          shop_id,
         },
       ];
     });
