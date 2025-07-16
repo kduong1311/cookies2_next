@@ -88,7 +88,7 @@ const OrderPage = () => {
       const orderData = {
         items: orderItems.map(item => ({
           product_id: item.product_id,
-          variant_id: item.variant_id,
+          variant_id: item.variant.variant_id,
           quantity: item.quantity,
           shop_id: item.shop_id
         })),
@@ -100,6 +100,8 @@ const OrderPage = () => {
         total_amount: total,
         shipping_address: shippingAddress
       };
+
+      console.log("variant_id", orderData)
 
       // Call API
       const response = await fetch('http://103.253.145.7:3003/api/orders', {
