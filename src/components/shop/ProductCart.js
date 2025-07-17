@@ -2,50 +2,6 @@
 import { useState } from "react";
 import { X, Plus, Minus } from "lucide-react";
 
-// Sample cart data - replace with your actual data source
-const sampleCartItems = [
-    {
-    id: 1,
-    name: "Nồi Inox 3 Đáy",
-    price: 45.99,
-    quantity: 1,
-    image: "/CookingImage/xo.png",
-    shopName: "Kitchen Pro"
-  },
-  {
-    id: 2,
-    name: "Chảo Chống Dính",
-    price: 32.50,
-    quantity: 2,
-    image: "/CookingImage/pan.jpg",
-    shopName: "CookSmart"
-  },
-  {
-    id: 3,
-    name: "Bộ Dao Nhà Bếp",
-    price: 25.00,
-    quantity: 1,
-    image: "/CookingImage/knifeCollection.jpg",
-    shopName: "SharpEdge"
-  },
-  {
-    id: 4,
-    name: "Thớt Tre Tự Nhiên",
-    price: 12.99,
-    quantity: 1,
-    image: "",
-    shopName: "Eco Kitchen"
-  },
-  {
-    id: 5,
-    name: "Máy Xay Sinh Tố Mini",
-    price: 59.99,
-    quantity: 1,
-    image: "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcR8jCEVoz5dTRQqWyTdk-04eGpG4JvvjxBIL3EMDfNJp_cz0n54Rn2BcwIU4fP4GA_f2cWQee7JTF1Gve5gWclsyBlhg5X4CrL2VdcFOYI9-PFLeD5DgNnufMM7nYzxIVeg4dyvrA&usqp=CAc",
-    shopName: "BlendIt"
-  }
-];
-
 export default function ProductCart({ onClose }) {
   const [cartItems, setCartItems] = useState(sampleCartItems);
 

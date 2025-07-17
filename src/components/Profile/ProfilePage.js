@@ -104,11 +104,11 @@ const ProfilePage = ({ userId }) => {
 
   // Navigation handlers
   const handleUpdateProfile = () => {
-    router.push("/edit_profile");
+    router.push(`/profile/${userId}/edit_profile`);
   };
 
   const handleMyOrders = () => {
-    router.push('/my-orders');
+    router.push(`/profile/${userId}/my_orders`);
   };
 
   // Profile Action Buttons (for owner)

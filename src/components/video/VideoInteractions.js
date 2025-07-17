@@ -16,7 +16,6 @@ export default function VideoInteractions({
   setRefreshPost
 }) {
 
-  console.log("aaa", currentPost)
   const heartRef = useRef(null);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
