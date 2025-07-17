@@ -126,7 +126,8 @@ const ProfilePage = ({ userId }) => {
             shadow-lg hover:shadow-xl hover:shadow-blue-500/25
             border border-transparent"
         >
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center"
+          onClick={() => {router.push("/edit_profile")}}>
             <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-6 transition-transform duration-200" />
             <span>Edit Profile</span>
           </div>

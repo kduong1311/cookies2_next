@@ -38,11 +38,11 @@ export default function PostDetailPage() {
           setPost(data.data);
           setCurrentPostId(data.data.post_id); // Set current post ID for panels
 
-          const userRes = await fetch(`http://103.253.145.7:3000/api/users/${data.user_id}`, {
+          const userRes = await fetch(`http://103.253.145.7:3000/api/users/${data.data.user_id}`, {
             credentials: "include",
           });
           const userData = await userRes.json();
-          setUserInfo(userData.data || null);
+          setUserInfo(userData || null);
         }
       } catch (err) {
         console.error("Error loading post:", err);
