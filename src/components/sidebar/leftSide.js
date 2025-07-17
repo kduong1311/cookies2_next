@@ -5,11 +5,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConfirm } from '@/contexts/ConfirmContext';
+import { usePathname } from 'next/navigation';
 import "@/app/css/loginButton.css";
 
 export default function LeftSidebar({ openShop, goToVideoFeed }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState("Featured");
   const router = useRouter();
   const { logout, user } = useAuth();
   const confirm = useConfirm();
@@ -29,6 +29,14 @@ export default function LeftSidebar({ openShop, goToVideoFeed }) {
       setIsLoginModalOpen(true);
     }
   };
+
+  const pathname = usePathname();
+const [activeItem, setActiveItem] = useState(() => {
+  if (pathname?.includes("search")) return "Search";
+  if (pathname?.includes("shop")) return "Shop";
+  if (pathname?.includes("upload")) return "Upload";
+  return "Featured";
+});
 
   const navItems = [
     { label: "Featured", icon: <Flame className="h-5 w-5" />, onClick: () => router.push("/") },
