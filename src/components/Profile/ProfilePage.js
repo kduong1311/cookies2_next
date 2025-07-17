@@ -104,7 +104,7 @@ const ProfilePage = ({ userId }) => {
 
   // Navigation handlers
   const handleUpdateProfile = () => {
-    router.push('/profile/update');
+    router.push("/edit_profile");
   };
 
   const handleMyOrders = () => {
@@ -126,8 +126,7 @@ const ProfilePage = ({ userId }) => {
             shadow-lg hover:shadow-xl hover:shadow-blue-500/25
             border border-transparent"
         >
-          <div className="flex items-center justify-center"
-          onClick={() => {router.push("/edit_profile")}}>
+          <div className="flex items-center justify-center">
             <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-6 transition-transform duration-200" />
             <span>Edit Profile</span>
           </div>
