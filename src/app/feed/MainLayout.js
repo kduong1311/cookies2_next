@@ -29,7 +29,7 @@ const isCustomPage = pathname.startsWith("/shop")
 || pathname.startsWith("/profile") 
 || pathname.startsWith("/search")
 || pathname.startsWith("/post")
-|| pathname.startsWith("/about");
+|| pathname.startsWith("/search");
 
 
 

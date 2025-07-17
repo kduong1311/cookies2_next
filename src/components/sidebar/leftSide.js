@@ -35,7 +35,7 @@ export default function LeftSidebar({ openShop, goToVideoFeed }) {
     { label: "Search", icon: <Search className="h-5 w-5" />, onClick: () => router.push("/search") },
     { label: "Shop", icon: <ShoppingBag className="h-5 w-5" />, onClick: () => router.push("/shop") },
     { label: "Upload", icon: <Upload className="h-5 w-5" />, onClick: () => router.push("/upload") },
-    { label: "About me", icon: <Info className="h-5 w-5" />, onclick: ()=> router.push("/about")},
+    { label: "About me", icon: <Info className="h-5 w-5" />, onClick: () => router.push("/about")},
   ];
 
   return (
