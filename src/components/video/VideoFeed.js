@@ -206,8 +206,8 @@ export default function VideoFeed({
             <div
               className={`bg-black rounded-lg overflow-hidden transition-all duration-300 ${
                 isRecipeOpen || isCommentOpen
-                  ? 'h-[90vh] max-w-[600px] w-auto'
-                  : 'h-[90vh] max-w-[600px] w-auto'
+                  ? 'h-[95vh] max-w-[600px] w-auto'
+                  : 'h-[95vh] max-w-[600px] w-auto'
               }`}
             >
               <VideoPlayer

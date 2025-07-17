@@ -92,13 +92,14 @@ export default function ModalVideoPlayer({ video, onClose }) {
                 transition={{ duration: 0.3 }}
                 className="w-[800px] h-[90vh] bg-gray-800 text-white p-6 overflow-y-auto shadow-lg hide-scrollbar"
               >
-                <CommentPage video={video} />
+                <CommentPage video={video.post_id} />
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* INTERACTIONS */}
           <VideoInteractions
+            currentPost={video}
             onRecipeClick={() => {
               setIsRecipeOpen(!isRecipeOpen);
               if (!isRecipeOpen) setIsCommentOpen(false);

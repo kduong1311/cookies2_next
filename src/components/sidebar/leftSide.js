@@ -33,11 +33,9 @@ export default function LeftSidebar({ openShop, goToVideoFeed }) {
   const navItems = [
     { label: "Featured", icon: <Flame className="h-5 w-5" />, onClick: () => router.push("/") },
     { label: "Search", icon: <Search className="h-5 w-5" />, onClick: () => router.push("/search") },
-    { label: "Followed", icon: <HeartPlus className="h-5 w-5" /> },
     { label: "Shop", icon: <ShoppingBag className="h-5 w-5" />, onClick: () => router.push("/shop") },
-    { label: "Notifications", icon: <BellRing className="h-5 w-5" /> },
     { label: "Upload", icon: <Upload className="h-5 w-5" />, onClick: () => router.push("/upload") },
-    { label: "About me", icon: <Info className="h-5 w-5" /> },
+    { label: "About me", icon: <Info className="h-5 w-5" />, onclick: ()=> router.push("/about")},
   ];
 
   return (

@@ -59,7 +59,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="h-screen bg-black text-white overflow-y-auto hide-scrollbar">
       {/* Header với Search Bar */}
       <div className="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-gray-800">
         <div className="max-w-4xl mx-auto p-4">

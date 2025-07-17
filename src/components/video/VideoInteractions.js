@@ -15,6 +15,8 @@ export default function VideoInteractions({
   refreshPost,
   setRefreshPost
 }) {
+
+  console.log("aaa", currentPost)
   const heartRef = useRef(null);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
@@ -71,7 +73,7 @@ export default function VideoInteractions({
     isInitialized.current = true;
 
     if (onUpdatePost) {
-      onUpdatePost(postDetail); // cập nhật parent với dữ liệu mới nhất
+      onUpdatePost(postDetail);
     }
   } catch (error) {
     console.error("Error fetching post detail:", error);

@@ -27,16 +27,6 @@ const ProfileTabs = ({ activeTab, setActiveTab, viewMode, setViewMode }) => {
             >
               Posted Recipes
             </button>
-            <button
-              onClick={() => setActiveTab('saved')}
-              className={`py-4 border-b-2 font-medium transition-colors ${
-                activeTab === 'saved'
-                  ? 'border-orange-500 text-orange'
-                  : 'border-transparent text-gray-600 hover:text-orange-500'
-              }`}
-            >
-              Saved
-            </button>
           </div>
 
           {/* View Toggle */}

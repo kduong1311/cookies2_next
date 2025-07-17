@@ -12,14 +12,15 @@ import Image from "next/image";
 export default function CookingUploadPage() {
 
   const {user} = useAuth();
-  const [file, setFile] = useState(null)
-  const [preview, setPreview] = useState(null)
-  const [title, setTitle] = useState("")
-  const [caption, setCaption] = useState("")
-  const [tags, setTags] = useState([])
-  const [currentTag, setCurrentTag] = useState("")
-  const [location, setLocation] = useState("")
-  const [hasRecipe, setHasRecipe] = useState(false)
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [title, setTitle] = useState("");
+  const [caption, setCaption] = useState("");
+  const [tags, setTags] = useState([]);
+  const [currentTag, setCurrentTag] = useState("");
+  const [location, setLocation] = useState("");
+  const [hasRecipe, setHasRecipe] = useState(false);
+  const [duration, setDuration] = useState(false);
   const [cuisine, setCuisine] = useState("");
   const [mealType, setMealType] = useState("");
   const [isPremium, setIsPremium] = useState(false);
@@ -155,7 +156,9 @@ export default function CookingUploadPage() {
 
     try {
       // Step 1: Upload file to Cloudinary
-      const uploadedUrl = await uploadToCloudinary(file);
+      const dataCloud = await uploadToCloudinary(file);
+
+      setDuration(dataCloud.duration);
 
       let recipeCoverUrl = "";
       if (hasRecipe && recipeCover) {
@@ -176,8 +179,9 @@ export default function CookingUploadPage() {
         status: "published",
         is_featured: false,
         media: [{
-          url: uploadedUrl,
-          type: file.type.startsWith("image") ? "image" : "video"
+          url: dataCloud.url,
+          type: file.type.startsWith("image") ? "image" : "video",
+          duration: duration,
         }]
       };
 
@@ -298,7 +302,7 @@ export default function CookingUploadPage() {
               <input
                 type="file"
                 id="file"
-                accept="image/*,video/*"
+                accept="video/*"
                 onChange={handleFileChange}
                 className="hidden"
               />
@@ -312,8 +316,8 @@ export default function CookingUploadPage() {
                       <Camera className="w-6 h-6 text-orange-500" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">Chọn ảnh hoặc video</p>
-                      <p className="text-xs text-gray-400">PNG, JPG, MP4 tối đa 50MB</p>
+                      <p className="text-sm font-medium text-white">Upload video</p>
+                      <p className="text-xs text-gray-400">MP4 maximum 50MB</p>
                     </div>
                   </>
                 ) : (

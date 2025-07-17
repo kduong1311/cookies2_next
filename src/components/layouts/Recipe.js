@@ -86,7 +86,7 @@ export default function RecipePage({ postId, onBack }) {
   }
 
   const difficulty = getDifficultyLevel(recipe.cooking_time);
-  const totalTime = recipe.total_time || (recipe.preparation_time + recipe.cooking_time);
+  const totalTime = recipe.preparation_time + recipe.cooking_time;
 
   return (
     <div className="bg-gray-800 min-h-screen pb-12">

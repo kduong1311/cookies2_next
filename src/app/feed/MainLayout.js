@@ -28,7 +28,9 @@ const isCustomPage = pathname.startsWith("/shop")
 || pathname.startsWith("/about") 
 || pathname.startsWith("/profile") 
 || pathname.startsWith("/search")
-|| pathname.startsWith("/post");
+|| pathname.startsWith("/post")
+|| pathname.startsWith("/about");
+
 
 
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;

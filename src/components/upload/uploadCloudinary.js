@@ -1,9 +1,6 @@
-// lib/uploadToCloudinary.js
-
 export async function uploadToCloudinary(file) {
   const formData = new FormData();
   formData.append("file", file);
-
   formData.append("upload_preset", "Cookies_preset");
 
   const cloudName = "da9rooi9r";
@@ -17,8 +14,14 @@ export async function uploadToCloudinary(file) {
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || "Upload thất bại!");
+    console.log("duration:", data.duration)
 
-    return data.secure_url;
+    // ✅ Trả về nhiều thông tin hơn
+    return {
+      url: data.secure_url,
+      type: data.resource_type,
+      duration: data.duration || null,
+    };
   } catch (error) {
     console.error("Lỗi upload Cloudinary:", error);
     throw error;

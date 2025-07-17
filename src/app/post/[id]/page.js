@@ -78,7 +78,7 @@ export default function PostDetailPage() {
         {/* Video and interactions container */}
         <div className="flex-grow flex items-center justify-center">
           <div className="flex items-center justify-center">
-            <div className="h-[90vh] max-w-[600px] w-auto bg-black rounded-lg overflow-hidden">
+            <div className="h-[95vh] max-w-[600px] w-auto bg-black rounded-lg overflow-hidden">
               <VideoPlayer currentPost={post} currentUser={userInfo} />
             </div>
 
