@@ -209,7 +209,7 @@ export default function DashboardPage() {
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
         <nav className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
-            href={`/shop/my_shop/${shopId}/products`}
+            href={`/shop/my-shop/${shopId}/products`}
             className="group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">
@@ -222,7 +222,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link
-            href={`/shop/my_shop/${shopId}/orders`}
+            href={`/shop/my-shop/${shopId}/orders`}
             className="group bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">
@@ -235,7 +235,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link
-            href={`/shop/my_shop/${shopId}/confirm_order`}
+            href={`/shop/my-shop/${shopId}/confirm_order`}
             className="group bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">

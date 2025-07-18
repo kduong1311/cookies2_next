@@ -24,7 +24,7 @@ export default function Header() {
         const myShop = shops.find(shop => shop.user_id === user.user_id);
 
         if (myShop) {
-          router.push(`/shop/my_shop/${myShop.shop_id}`);
+          router.push(`/shop/my-shop/${myShop.shop_id}`);
         } else {
           router.push("/shop/create");
         }
