@@ -12,10 +12,10 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [userNames, setUserNames] = useState({});
 
   // Get shop ID from params or use default
   const shopId = params?.shopId;
-  const [userNames, setUserNames] = useState({});
 
 
   // Fetch orders from API
