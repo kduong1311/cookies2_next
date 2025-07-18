@@ -18,8 +18,7 @@ const EditProfilePage = () => {
     city: '',
     country: '',
     email: '',
-    phone: '',
-    website: '',
+    phone_number: '',
     avatar_url: '',
     cover_photo_url: '',
     is_chef: false,
@@ -46,8 +45,7 @@ const EditProfilePage = () => {
           city: 'Ho Chi Minh City',
           country: 'Vietnam',
           email: 'john@example.com',
-          phone: '+84 901 234 567',
-          website: 'https://johndoe.com',
+          phone_number: '+84 901 234 567',
           avatar_url: '/Logo.png',
           cover_photo_url: 'https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg',
           is_chef: true,
@@ -280,8 +278,8 @@ const EditProfilePage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
                 <input
                   type="tel"
-                  name="phone"
-                  value={formData.phone}
+                  name="phone_number"
+                  value={formData.phone_number}
                   onChange={handleInputChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your phone number"
@@ -327,17 +325,6 @@ const EditProfilePage = () => {
                   onChange={handleInputChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your country"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Website</label>
-                <input
-                  type="url"
-                  name="website"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
-                  placeholder="https://your-website.com"
                 />
               </div>
             </div>
