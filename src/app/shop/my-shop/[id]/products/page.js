@@ -25,7 +25,7 @@ export default function ProductsPage() {
       const res = await fetch("http://103.253.145.7:3003/api/categories");
       const result = await res.json();
       if (result.status === "success") {
-        setCategoriesData(result.data); // Lưu vào state
+        setCategoriesData(result.data); 
       }
     } catch (error) {
       console.error("Lỗi tải danh mục:", error);

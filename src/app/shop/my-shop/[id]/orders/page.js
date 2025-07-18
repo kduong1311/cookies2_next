@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function OrdersPage() {
   const params = useParams();
@@ -76,8 +77,7 @@ export default function OrdersPage() {
   }, [shopId]);
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          order.user_id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === "all" || order.order_status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -105,8 +105,6 @@ export default function OrdersPage() {
 
   const getShippingStatusColor = (status) => {
     switch (status) {
-      case "delivered": return "bg-green-500";
-      case "shipped": return "bg-blue-500";
       case "processing": return "bg-yellow-500";
       case "pending": return "bg-orange-500";
       default: return "bg-gray-500";
@@ -139,7 +137,7 @@ export default function OrdersPage() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://103.253.145.7:3002/api/orders/${orderId}/status`, {
+      const response = await fetch(`http://103.253.145.7:3003/api/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -167,6 +165,9 @@ export default function OrdersPage() {
       if (selectedOrder && selectedOrder.order_id === orderId) {
         setSelectedOrder(prev => ({ ...prev, order_status: newStatus }));
       }
+      
+      toast.success("Profile updated successfully!");
+
     } catch (err) {
       alert('Lỗi khi cập nhật trạng thái đơn hàng: ' + err.message);
     }
@@ -200,7 +201,7 @@ export default function OrdersPage() {
           <p className="text-gray-400">Xem và xử lý các đơn hàng</p>
         </div>
         <Link
-          href="/shop/dashboard"
+          href={`/shop/my_shop/${shopId}`}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
           ← Về Dashboard
@@ -234,7 +235,7 @@ export default function OrdersPage() {
         <div className="flex flex-col lg:flex-row gap-4 items-center">
           <input
             type="text"
-            placeholder="Tìm kiếm theo mã đơn hoặc ID khách hàng..."
+            placeholder="Tìm kiếm theo mã đơn..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none flex-1"
@@ -245,10 +246,8 @@ export default function OrdersPage() {
             className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
           >
             <option value="all">Tất cả trạng thái</option>
-            <option value="pending">Đang xử lý</option>
+            <option value="pending">Chưa xử lý</option>
             <option value="processing">Đang xử lý</option>
-            <option value="shipped">Đang giao</option>
-            <option value="delivered">Đã giao</option>
             <option value="completed">Hoàn thành</option>
             <option value="cancelled">Đã hủy</option>
           </select>
@@ -309,16 +308,8 @@ export default function OrdersPage() {
                         onClick={() => setSelectedOrder(order)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
                       >
-                        👁️ Xem
+                      Details
                       </button>
-                      {order.order_status === "pending" && (
-                        <button
-                          onClick={() => updateOrderStatus(order.order_id, "processing")}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                        >
-                          ✅ Duyệt
-                        </button>
-                      )}
                     </div>
                   </td>
                 </tr>
@@ -448,16 +439,8 @@ export default function OrdersPage() {
                   )}
                   {selectedOrder.order_status === "processing" && (
                     <button
-                      onClick={() => updateOrderStatus(selectedOrder.order_id, "shipped")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      📦 Chuyển sang Đang giao
-                    </button>
-                  )}
-                  {selectedOrder.order_status === "shipped" && (
-                    <button
                       onClick={() => updateOrderStatus(selectedOrder.order_id, "completed")}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
                       ✅ Hoàn thành
                     </button>
