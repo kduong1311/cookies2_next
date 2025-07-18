@@ -281,7 +281,7 @@ export default function OrdersPage() {
                     <div className="text-white font-medium">{order.order_number}</div>
                   </td>
                   <td className="p-4">
-                    <div className="text-white font-medium">{order.user_id}</div>
+                    <div className="text-white font-medium">{userNames[order.user_id] || order.user_id}</div>
                   </td>
                   <td className="p-4 text-white font-medium">
                     {formatPrice(order.total_amount, order.currency)}
