@@ -139,7 +139,7 @@ const OrdersPage = () => {
   return (
     <div className="h-screen bg-gray-900 p-4 overflow-y-auto hide-scrollbar">
       <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
+        <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4">
             <div className="p-3 bg-orange-500 rounded-xl">
               <ShoppingBag className="h-8 w-8 text-white" />
@@ -304,8 +304,8 @@ const OrdersPage = () => {
 
         {/* Order Details Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="w-[90vw] max-w-7xl h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white hidden-scrollbar">
-            <DialogHeader className="border-b border-gray-700 pb-4">
+          <DialogContent className="max-w-[95vw] w-full h-[95vh] overflow-y-auto bg-gray-800 border-gray-700 text-white p-0">
+            <DialogHeader className="border-b border-gray-700 pb-4 px-6 pt-6">
               <DialogTitle className="flex items-center space-x-3 text-2xl">
                 <div className="p-2 bg-orange-500 rounded-lg">
                   <Package className="h-6 w-6 text-white" />
@@ -315,7 +315,7 @@ const OrdersPage = () => {
             </DialogHeader>
 
             {selectedOrder && (
-              <div className="space-y-6 pt-6">
+              <div className="space-y-6 px-6 pb-6">
                 {loadingDetails && (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-600 border-t-orange-500"></div>
@@ -324,7 +324,7 @@ const OrdersPage = () => {
                 )}
 
                 {/* Tóm tắt thanh toán */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                   {/* Thông tin đơn hàng */}
                   <Card className="bg-gray-700 border-gray-600">
                     <CardHeader className="border-b border-gray-600">
@@ -419,15 +419,15 @@ const OrdersPage = () => {
                     <div className="space-y-4">
                       {selectedOrder.items.map((item) => (
                         <div key={item.order_item_id} className="flex items-center space-x-4 p-4 bg-gray-800 border border-gray-600 rounded-lg hover:border-orange-500 transition-colors">
-                          <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                            <Package className="h-8 w-8 text-white" />
+                          <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                            <Package className="h-10 w-10 text-white" />
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-white text-lg mb-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-white text-lg mb-2 truncate">
                               {item.product_name}
                             </h4>
                             <div className="space-y-1 text-sm text-gray-300">
-                              <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-4 flex-wrap">
                                 <span className="bg-gray-700 px-2 py-1 rounded">SKU: {item.sku}</span>
                                 <span>Màu: {item.color}</span>
                                 <span>Size: {item.size}</span>
@@ -443,12 +443,12 @@ const OrdersPage = () => {
                               </div>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex-shrink-0">
                             <p className="font-bold text-xl text-white mb-1">
                               {formatCurrency(item.price)}
                             </p>
                             <p className="text-gray-400 mb-2">
-                              Số lượng: {item.quantity}
+                              SL: {item.quantity}
                             </p>
                             <p className="text-lg font-bold text-green-400">
                               {formatCurrency(item.price * item.quantity)}
