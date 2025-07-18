@@ -20,7 +20,7 @@ export default function ConfirmOrdersPage() {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3002/api/orders`, {
+        const response = await fetch(`http://103.253.145.7:3002/api/orders/`, {
           credentials: "include"
         });
         
