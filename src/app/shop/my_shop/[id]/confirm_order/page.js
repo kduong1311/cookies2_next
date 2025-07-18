@@ -11,6 +11,8 @@ export default function ConfirmOrdersPage() {
   const [confirmingOrders, setConfirmingOrders] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [userNames, setUserNames] = useState({});
+
   const shopId = params?.shopId;
 
   // Fetch orders from API
@@ -264,7 +266,7 @@ export default function ConfirmOrdersPage() {
                     </td>
                     <td className="p-4">
                       <div className="text-white">{getPaymentMethodText(order.payment_method)}</div>
-                      <div className="text-yellow-400 text-sm">● Chờ thanh toán</div>
+                      <div className="text-yellow-400 text-sm">● pending</div>
                     </td>
                     <td className="p-4">
                       <div className="text-gray-300">{formatDate(order.created_at)}</div>
@@ -275,7 +277,7 @@ export default function ConfirmOrdersPage() {
                           onClick={() => setSelectedOrder(order)}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
                         >
-                          👁️ Xem
+                          Detail
                         </button>
                         <button
                           onClick={() => confirmOrder(order)}
@@ -286,7 +288,7 @@ export default function ConfirmOrdersPage() {
                               : 'bg-green-600 hover:bg-green-700 text-white'
                           }`}
                         >
-                          {confirmingOrders.has(order.order_id) ? '⏳ Đang xử lý...' : '✅ Xác nhận'}
+                          {confirmingOrders.has(order.order_id) ? '⏳ Processing' : '✅ Confirm'}
                         </button>
                       </div>
                     </td>

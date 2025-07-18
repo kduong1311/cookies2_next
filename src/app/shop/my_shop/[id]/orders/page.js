@@ -14,7 +14,9 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Get shop ID from params or use default
-  const shopId = params?.shopId || "d1aa87d9-7b59-4a5e-8d18-79b2f682f311";
+  const shopId = params?.shopId;
+  const [userNames, setUserNames] = useState({});
+
 
   // Fetch orders from API
   useEffect(() => {
@@ -32,10 +34,34 @@ export default function OrdersPage() {
         const data = await response.json();
         
         if (data.status === "success") {
-          setOrders(data.data);
-        } else {
-          throw new Error('Invalid response format');
-        }
+        const fetchedOrders = data.data;
+        setOrders(fetchedOrders);
+
+        // Lấy danh sách userId duy nhất
+        const uniqueUserIds = [...new Set(fetchedOrders.map(order => order.user_id))];
+
+        // Gọi API cho từng userId
+        const userResponses = await Promise.all(
+          uniqueUserIds.map(id =>
+            fetch(`http://103.253.145.7:3000/api/users/${id}`, { credentials: "include" })
+              .then(res => res.ok ? res.json() : null)
+              .catch(() => null)
+          )
+        );
+
+        // Tạo object userId → username
+        const nameMap = {};
+        userResponses.forEach((res, index) => {
+          if (res && res.username) {
+            nameMap[uniqueUserIds[index]] = res.username;
+          }
+        });
+
+        setUserNames(nameMap);
+      } else {
+        throw new Error('Invalid response format');
+      }
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -102,37 +128,11 @@ export default function OrdersPage() {
     });
   };
 
-  const getStatusText = (status) => {
-    const statusMap = {
-      "pending": "Đang xử lý",
-      "processing": "Đang xử lý",
-      "shipped": "Đang giao",
-      "delivered": "Đã giao",
-      "completed": "Hoàn thành",
-      "cancelled": "Đã hủy"
-    };
-    return statusMap[status] || status;
-  };
+  const getStatusText = (status) => status;
 
-  const getPaymentStatusText = (status) => {
-    const statusMap = {
-      "pending": "Chờ thanh toán",
-      "paid": "Đã thanh toán",
-      "failed": "Thất bại",
-      "refunded": "Đã hoàn tiền"
-    };
-    return statusMap[status] || status;
-  };
+  const getPaymentStatusText = (status) => status;
 
-  const getPaymentMethodText = (method) => {
-    const methodMap = {
-      "credit_card": "Thẻ tín dụng",
-      "e_wallet": "Ví điện tử",
-      "cod": "Thanh toán khi nhận hàng",
-      "bank_transfer": "Chuyển khoản ngân hàng"
-    };
-    return methodMap[method] || method;
-  };
+  const getPaymentMethodText = (method) => method;
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
@@ -350,7 +350,7 @@ export default function OrdersPage() {
                   </div>
                   <div>
                     <span className="text-gray-400">Khách hàng:</span>
-                    <span className="text-white ml-2">{selectedOrder.user_id}</span>
+                    <span className="text-white ml-2">{userNames[selectedOrder.user_id] || selectedOrder.user_id}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Ngày đặt:</span>
