@@ -304,7 +304,7 @@ const OrdersPage = () => {
 
         {/* Order Details Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="max-w-[95vw] w-full h-[95vh] overflow-y-auto bg-gray-800 border-gray-700 text-white p-0">
+          <DialogContent className="max-w-[95vh] w-full overflow-y-auto bg-gray-800 border-gray-700 text-white p-0">
             <DialogHeader className="border-b border-gray-700 pb-4 px-6 pt-6">
               <DialogTitle className="flex items-center space-x-3 text-2xl">
                 <div className="p-2 bg-orange-500 rounded-lg">
