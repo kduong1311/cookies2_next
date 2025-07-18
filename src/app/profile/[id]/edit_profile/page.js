@@ -123,6 +123,7 @@ useEffect(() => {
   };
 
   const handleSubmit = async () => {
+    
     setSaving(true);
     setMessage({ type: '', text: '' });
 
@@ -213,7 +214,7 @@ useEffect(() => {
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   type="button"
-                  onClick={() => handleImageUpload('cover')}
+                  onClick={() => handleImageUpload('cover_photo')}
                   className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
                 >
                   <Upload className="w-4 h-4" />
