@@ -22,7 +22,7 @@ const EditProfilePage = () => {
     avatar_url: '',
     cover_photo_url: '',
     is_chef: false,
-    birth_date: ''
+    date_of_birth: ''
   });
 
   const [previewImages, setPreviewImages] = useState({
@@ -49,7 +49,7 @@ const EditProfilePage = () => {
           avatar_url: '/Logo.png',
           cover_photo_url: 'https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg',
           is_chef: true,
-          birth_date: '1990-05-15'
+          date_of_birth: '1990-05-15'
         };
         
         setFormData(userData);
@@ -277,7 +277,7 @@ const EditProfilePage = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Phone</label>
                 <input
-                  type="tel"
+                  type="text"
                   name="phone_number"
                   value={formData.phone_number}
                   onChange={handleInputChange}
@@ -289,8 +289,8 @@ const EditProfilePage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Birth Date</label>
                 <input
                   type="date"
-                  name="birth_date"
-                  value={formData.birth_date}
+                  name="date_of_birth"
+                  value={formData.date_of_birth}
                   onChange={handleInputChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                 />
@@ -298,11 +298,11 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* Location & Website */}
+          {/* Location*/}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-orange-500" />
-              Location & Website
+              Location
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
