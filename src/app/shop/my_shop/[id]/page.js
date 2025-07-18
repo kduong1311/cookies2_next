@@ -235,7 +235,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link
-            href={`/shop/my_shop/${shopId}/pending`}
+            href={`/shop/my_shop/${shopId}/confirm_order`}
             className="group bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-6 py-4 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
           >
             <div className="flex items-center gap-3">

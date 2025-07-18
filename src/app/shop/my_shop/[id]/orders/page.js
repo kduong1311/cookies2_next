@@ -21,7 +21,9 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3002/api/orders/shop/${shopId}`);
+        const response = await fetch(`http://103.253.145.7:3002/api/orders/shop/${shopId}`,{
+          credentials: "include"
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch orders');
