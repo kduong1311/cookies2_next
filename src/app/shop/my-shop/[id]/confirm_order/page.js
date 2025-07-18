@@ -13,7 +13,7 @@ export default function ConfirmOrdersPage() {
 
   const [userNames, setUserNames] = useState({});
 
-  const shopId = params?.shopId;
+  const shopId = params?.id;
 
   // Fetch orders from API
   useEffect(() => {

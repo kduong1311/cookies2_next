@@ -14,7 +14,7 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Get shop ID from params or use default
-  const shopId = params?.shopId;
+  const shopId = params?.id;
 
 
 
