@@ -1,132 +1,187 @@
 // app/shop/dashboard/orders/page.js
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD001",
-      customer: "Nguyễn Văn An",
-      email: "an.nguyen@email.com",
-      phone: "0901234567",
-      products: [
-        { name: "iPhone 15 Pro Max", quantity: 1, price: 29990000 },
-        { name: "AirPods Pro 2", quantity: 1, price: 6490000 }
-      ],
-      total: 36480000,
-      status: "Đã giao",
-      paymentStatus: "Đã thanh toán",
-      orderDate: "2024-06-01",
-      deliveryDate: "2024-06-03",
-      address: "123 Nguyễn Huệ, Q1, TP.HCM"
-    },
-    {
-      id: "ORD002",
-      customer: "Trần Thị Bình",
-      email: "binh.tran@email.com",
-      phone: "0987654321",
-      products: [
-        { name: "MacBook Pro M3", quantity: 1, price: 52990000 }
-      ],
-      total: 52990000,
-      status: "Đang giao",
-      paymentStatus: "Đã thanh toán",
-      orderDate: "2024-06-02",
-      deliveryDate: null,
-      address: "456 Lê Lợi, Q3, TP.HCM"
-    },
-    {
-      id: "ORD003",
-      customer: "Lê Văn Cường",
-      email: "cuong.le@email.com",
-      phone: "0912345678",
-      products: [
-        { name: "iPad Air M2", quantity: 2, price: 16990000 }
-      ],
-      total: 33980000,
-      status: "Đang xử lý",
-      paymentStatus: "Chờ thanh toán",
-      orderDate: "2024-06-04",
-      deliveryDate: null,
-      address: "789 Võ Văn Tần, Q3, TP.HCM"
-    },
-    {
-      id: "ORD004",
-      customer: "Phạm Thị Dung",
-      email: "dung.pham@email.com",
-      phone: "0923456789",
-      products: [
-        { name: "iPhone 15 Pro Max", quantity: 1, price: 29990000 },
-        { name: "MacBook Pro M3", quantity: 1, price: 52990000 }
-      ],
-      total: 82980000,
-      status: "Đã hủy",
-      paymentStatus: "Đã hoàn tiền",
-      orderDate: "2024-06-01",
-      deliveryDate: null,
-      address: "321 Hai Bà Trưng, Q1, TP.HCM"
-    }
-  ]);
-
+  const params = useParams();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Get shop ID from params or use default
+  const shopId = params?.shopId || "d1aa87d9-7b59-4a5e-8d18-79b2f682f311";
+
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://103.253.145.7:3002/api/orders/shop/${shopId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === "success") {
+          setOrders(data.data);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [shopId]);
+
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          order.customer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || order.status === filterStatus;
+    const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          order.user_id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "all" || order.order_status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Đã giao": return "bg-green-500";
-      case "Đang giao": return "bg-blue-500";
-      case "Đang xử lý": return "bg-yellow-500";
-      case "Đã hủy": return "bg-red-500";
+      case "completed": return "bg-green-500";
+      case "shipped": return "bg-blue-500";
+      case "processing": return "bg-yellow-500";
+      case "pending": return "bg-orange-500";
+      case "cancelled": return "bg-red-500";
       default: return "bg-gray-500";
     }
   };
 
   const getPaymentStatusColor = (status) => {
     switch (status) {
-      case "Đã thanh toán": return "bg-green-500";
-      case "Chờ thanh toán": return "bg-yellow-500";
-      case "Đã hoàn tiền": return "bg-purple-500";
+      case "paid": return "bg-green-500";
+      case "pending": return "bg-yellow-500";
+      case "failed": return "bg-red-500";
+      case "refunded": return "bg-purple-500";
       default: return "bg-gray-500";
     }
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', {
+  const getShippingStatusColor = (status) => {
+    switch (status) {
+      case "delivered": return "bg-green-500";
+      case "shipped": return "bg-blue-500";
+      case "processing": return "bg-yellow-500";
+      case "pending": return "bg-orange-500";
+      default: return "bg-gray-500";
+    }
+  };
+
+  const formatPrice = (price, currency = "USD") => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'VND'
+      currency: currency
     }).format(price);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('vi-VN');
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    setOrders(orders.map(order => {
-      if (order.id === orderId) {
-        const updatedOrder = { ...order, status: newStatus };
-        if (newStatus === "Đã giao" && !updatedOrder.deliveryDate) {
-          updatedOrder.deliveryDate = new Date().toISOString().slice(0, 10); // Set current date as delivery date
-        }
-        return updatedOrder;
+  const getStatusText = (status) => {
+    const statusMap = {
+      "pending": "Đang xử lý",
+      "processing": "Đang xử lý",
+      "shipped": "Đang giao",
+      "delivered": "Đã giao",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    };
+    return statusMap[status] || status;
+  };
+
+  const getPaymentStatusText = (status) => {
+    const statusMap = {
+      "pending": "Chờ thanh toán",
+      "paid": "Đã thanh toán",
+      "failed": "Thất bại",
+      "refunded": "Đã hoàn tiền"
+    };
+    return statusMap[status] || status;
+  };
+
+  const getPaymentMethodText = (method) => {
+    const methodMap = {
+      "credit_card": "Thẻ tín dụng",
+      "e_wallet": "Ví điện tử",
+      "cod": "Thanh toán khi nhận hàng",
+      "bank_transfer": "Chuyển khoản ngân hàng"
+    };
+    return methodMap[method] || method;
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const response = await fetch(`http://103.253.145.7:3002/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order_status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
       }
-      return order;
-    }));
-    // Close modal if status changes and it's the selected order
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+
+      // Update local state
+      setOrders(orders.map(order => {
+        if (order.order_id === orderId) {
+          const updatedOrder = { ...order, order_status: newStatus };
+          if (newStatus === "completed" && !updatedOrder.completed_at) {
+            updatedOrder.completed_at = new Date().toISOString();
+          }
+          return updatedOrder;
+        }
+        return order;
+      }));
+
+      // Update selected order if it's the one being updated
+      if (selectedOrder && selectedOrder.order_id === orderId) {
+        setSelectedOrder(prev => ({ ...prev, order_status: newStatus }));
+      }
+    } catch (err) {
+      alert('Lỗi khi cập nhật trạng thái đơn hàng: ' + err.message);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
+        <div className="text-white text-xl">Đang tải dữ liệu...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
+        <div className="text-red-400 text-xl">Lỗi: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
@@ -154,16 +209,16 @@ export default function OrdersPage() {
           <div className="text-blue-100">Tổng đơn hàng</div>
         </div>
         <div className="bg-green-600 p-4 rounded-xl text-white">
-          <div className="text-2xl font-bold">{orders.filter(o => o.status === "Đã giao").length}</div>
-          <div className="text-green-100">Đã giao</div>
+          <div className="text-2xl font-bold">{orders.filter(o => o.order_status === "completed").length}</div>
+          <div className="text-green-100">Hoàn thành</div>
         </div>
         <div className="bg-yellow-600 p-4 rounded-xl text-white">
-          <div className="text-2xl font-bold">{orders.filter(o => o.status === "Đang xử lý").length}</div>
+          <div className="text-2xl font-bold">{orders.filter(o => o.order_status === "pending").length}</div>
           <div className="text-yellow-100">Đang xử lý</div>
         </div>
         <div className="bg-purple-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">
-            {formatPrice(orders.reduce((sum, order) => sum + order.total, 0))}
+            {formatPrice(orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0))}
           </div>
           <div className="text-purple-100">Tổng doanh thu</div>
         </div>
@@ -174,7 +229,7 @@ export default function OrdersPage() {
         <div className="flex flex-col lg:flex-row gap-4 items-center">
           <input
             type="text"
-            placeholder="Tìm kiếm theo mã đơn hoặc tên khách hàng..."
+            placeholder="Tìm kiếm theo mã đơn hoặc ID khách hàng..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none flex-1"
@@ -185,10 +240,12 @@ export default function OrdersPage() {
             className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
           >
             <option value="all">Tất cả trạng thái</option>
-            <option value="Đang xử lý">Đang xử lý</option>
-            <option value="Đang giao">Đang giao</option>
-            <option value="Đã giao">Đã giao</option>
-            <option value="Đã hủy">Đã hủy</option>
+            <option value="pending">Đang xử lý</option>
+            <option value="processing">Đang xử lý</option>
+            <option value="shipped">Đang giao</option>
+            <option value="delivered">Đã giao</option>
+            <option value="completed">Hoàn thành</option>
+            <option value="cancelled">Đã hủy</option>
           </select>
         </div>
       </div>
@@ -205,45 +262,42 @@ export default function OrdersPage() {
               <tr>
                 <th className="text-left text-white font-medium p-4">Mã đơn</th>
                 <th className="text-left text-white font-medium p-4">Khách hàng</th>
-                <th className="text-left text-white font-medium p-4">Sản phẩm</th>
                 <th className="text-left text-white font-medium p-4">Tổng tiền</th>
                 <th className="text-left text-white font-medium p-4">Trạng thái</th>
                 <th className="text-left text-white font-medium p-4">Thanh toán</th>
+                <th className="text-left text-white font-medium p-4">Giao hàng</th>
                 <th className="text-left text-white font-medium p-4">Ngày đặt</th>
                 <th className="text-left text-white font-medium p-4">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredOrders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
+                <tr key={order.order_id} className="border-b border-gray-700 hover:bg-gray-700/30 transition-colors">
                   <td className="p-4">
-                    <div className="text-white font-medium">{order.id}</div>
+                    <div className="text-white font-medium">{order.order_number}</div>
                   </td>
                   <td className="p-4">
-                    <div className="text-white font-medium">{order.customer}</div>
-                    <div className="text-gray-400 text-sm">{order.phone}</div>
+                    <div className="text-white font-medium">{order.user_id}</div>
+                  </td>
+                  <td className="p-4 text-white font-medium">
+                    {formatPrice(order.total_amount, order.currency)}
                   </td>
                   <td className="p-4">
-                    <div className="text-gray-300">
-                      {order.products.length} sản phẩm
-                    </div>
-                    <div className="text-gray-400 text-sm">
-                      {order.products[0]?.name}
-                      {order.products.length > 1 && ` +${order.products.length - 1} khác`}
-                    </div>
-                  </td>
-                  <td className="p-4 text-white font-medium">{formatPrice(order.total)}</td>
-                  <td className="p-4">
-                    <span className={`${getStatusColor(order.status)} text-white px-3 py-1 rounded-full text-sm`}>
-                      {order.status}
+                    <span className={`${getStatusColor(order.order_status)} text-white px-3 py-1 rounded-full text-sm`}>
+                      {getStatusText(order.order_status)}
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`${getPaymentStatusColor(order.paymentStatus)} text-white px-3 py-1 rounded-full text-sm`}>
-                      {order.paymentStatus}
+                    <span className={`${getPaymentStatusColor(order.payment_status)} text-white px-3 py-1 rounded-full text-sm`}>
+                      {getPaymentStatusText(order.payment_status)}
                     </span>
                   </td>
-                  <td className="p-4 text-gray-300">{formatDate(order.orderDate)}</td>
+                  <td className="p-4">
+                    <span className={`${getShippingStatusColor(order.shipping_status)} text-white px-3 py-1 rounded-full text-sm`}>
+                      {getStatusText(order.shipping_status)}
+                    </span>
+                  </td>
+                  <td className="p-4 text-gray-300">{formatDate(order.created_at)}</td>
                   <td className="p-4">
                     <div className="flex gap-2">
                       <button
@@ -252,9 +306,9 @@ export default function OrdersPage() {
                       >
                         👁️ Xem
                       </button>
-                      {order.status === "Đang xử lý" && (
+                      {order.order_status === "pending" && (
                         <button
-                          onClick={() => updateOrderStatus(order.id, "Đang giao")}
+                          onClick={() => updateOrderStatus(order.order_id, "processing")}
                           className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
                         >
                           ✅ Duyệt
@@ -274,7 +328,7 @@ export default function OrdersPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-white">Chi tiết đơn hàng {selectedOrder.id}</h3>
+              <h3 className="text-xl font-semibold text-white">Chi tiết đơn hàng {selectedOrder.order_number}</h3>
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -284,97 +338,128 @@ export default function OrdersPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Customer Info */}
+              {/* Order Info */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Thông tin khách hàng</h4>
+                <h4 className="text-white font-medium mb-3">Thông tin đơn hàng</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-400">Tên:</span>
-                    <span className="text-white ml-2">{selectedOrder.customer}</span>
+                    <span className="text-gray-400">Mã đơn:</span>
+                    <span className="text-white ml-2">{selectedOrder.order_number}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Email:</span>
-                    <span className="text-white ml-2">{selectedOrder.email}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Số điện thoại:</span>
-                    <span className="text-white ml-2">{selectedOrder.phone}</span>
+                    <span className="text-gray-400">Khách hàng:</span>
+                    <span className="text-white ml-2">{selectedOrder.user_id}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Ngày đặt:</span>
-                    <span className="text-white ml-2">{formatDate(selectedOrder.orderDate)}</span>
+                    <span className="text-white ml-2">{formatDate(selectedOrder.created_at)}</span>
                   </div>
+                  <div>
+                    <span className="text-gray-400">Phương thức thanh toán:</span>
+                    <span className="text-white ml-2">{getPaymentMethodText(selectedOrder.payment_method)}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Phương thức giao hàng:</span>
+                    <span className="text-white ml-2">{selectedOrder.shipping_method}</span>
+                  </div>
+                  {selectedOrder.tracking_number && (
+                    <div>
+                      <span className="text-gray-400">Mã vận đơn:</span>
+                      <span className="text-white ml-2">{selectedOrder.tracking_number}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-3">
-                  <span className="text-gray-400">Địa chỉ giao hàng:</span>
-                  <span className="text-white ml-2">{selectedOrder.address}</span>
-                </div>
+                {selectedOrder.notes && (
+                  <div className="mt-3">
+                    <span className="text-gray-400">Ghi chú:</span>
+                    <span className="text-white ml-2">{selectedOrder.notes}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Products */}
+              {/* Order Summary */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Sản phẩm đặt mua</h4>
-                <div className="space-y-3">
-                  {selectedOrder.products.map((product, index) => (
-                    <div key={index} className="flex justify-between items-center border-b border-gray-600 pb-2 last:border-b-0">
-                      <div>
-                        <div className="text-white">{product.name}</div>
-                        <div className="text-gray-400 text-sm">Số lượng: {product.quantity}</div>
-                      </div>
-                      <div className="text-white font-medium">{formatPrice(product.price * product.quantity)}</div>
+                <h4 className="text-white font-medium mb-3">Tổng kết đơn hàng</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Tạm tính:</span>
+                    <span className="text-white">{formatPrice(selectedOrder.subtotal, selectedOrder.currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Thuế:</span>
+                    <span className="text-white">{formatPrice(selectedOrder.tax_amount, selectedOrder.currency)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Phí giao hàng:</span>
+                    <span className="text-white">{formatPrice(selectedOrder.shipping_amount, selectedOrder.currency)}</span>
+                  </div>
+                  {parseFloat(selectedOrder.discount_amount) > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Giảm giá:</span>
+                      <span className="text-red-400">-{formatPrice(selectedOrder.discount_amount, selectedOrder.currency)}</span>
                     </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-3 border-t border-gray-600 flex justify-between items-center">
-                  <div className="text-white font-semibold text-lg">Tổng cộng:</div>
-                  <div className="text-green-400 font-bold text-lg">{formatPrice(selectedOrder.total)}</div>
+                  )}
+                  <div className="border-t border-gray-600 pt-2 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white font-semibold text-lg">Tổng cộng:</span>
+                      <span className="text-green-400 font-bold text-lg">{formatPrice(selectedOrder.total_amount, selectedOrder.currency)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Order Status & Actions */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Trạng thái đơn hàng</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <h4 className="text-white font-medium mb-3">Trạng thái & Thao tác</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                   <div>
-                    <span className="text-gray-400">Trạng thái:</span>
-                    <span className={`ml-2 px-3 py-1 rounded-full text-sm ${getStatusColor(selectedOrder.status)} text-white`}>
-                      {selectedOrder.status}
+                    <span className="text-gray-400">Trạng thái đơn:</span>
+                    <span className={`ml-2 px-3 py-1 rounded-full text-sm ${getStatusColor(selectedOrder.order_status)} text-white`}>
+                      {getStatusText(selectedOrder.order_status)}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-400">Thanh toán:</span>
-                    <span className={`ml-2 px-3 py-1 rounded-full text-sm ${getPaymentStatusColor(selectedOrder.paymentStatus)} text-white`}>
-                      {selectedOrder.paymentStatus}
+                    <span className={`ml-2 px-3 py-1 rounded-full text-sm ${getPaymentStatusColor(selectedOrder.payment_status)} text-white`}>
+                      {getPaymentStatusText(selectedOrder.payment_status)}
                     </span>
                   </div>
-                  {selectedOrder.deliveryDate && (
-                    <div>
-                      <span className="text-gray-400">Ngày giao hàng:</span>
-                      <span className="text-white ml-2">{formatDate(selectedOrder.deliveryDate)}</span>
-                    </div>
-                  )}
+                  <div>
+                    <span className="text-gray-400">Giao hàng:</span>
+                    <span className={`ml-2 px-3 py-1 rounded-full text-sm ${getShippingStatusColor(selectedOrder.shipping_status)} text-white`}>
+                      {getStatusText(selectedOrder.shipping_status)}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {selectedOrder.status === "Đang xử lý" && (
+                <div className="flex flex-wrap gap-3">
+                  {selectedOrder.order_status === "pending" && (
                     <button
-                      onClick={() => updateOrderStatus(selectedOrder.id, "Đang giao")}
+                      onClick={() => updateOrderStatus(selectedOrder.order_id, "processing")}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
-                      🚀 Chuyển sang Đang giao
+                      🚀 Xử lý đơn hàng
                     </button>
                   )}
-                  {selectedOrder.status === "Đang giao" && (
+                  {selectedOrder.order_status === "processing" && (
                     <button
-                      onClick={() => updateOrderStatus(selectedOrder.id, "Đã giao")}
+                      onClick={() => updateOrderStatus(selectedOrder.order_id, "shipped")}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      📦 Chuyển sang Đang giao
+                    </button>
+                  )}
+                  {selectedOrder.order_status === "shipped" && (
+                    <button
+                      onClick={() => updateOrderStatus(selectedOrder.order_id, "completed")}
                       className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
-                      ✅ Đánh dấu Đã giao
+                      ✅ Hoàn thành
                     </button>
                   )}
-                  {(selectedOrder.status === "Đang xử lý" || selectedOrder.status === "Đang giao") && (
+                  {(selectedOrder.order_status === "pending" || selectedOrder.order_status === "processing") && (
                     <button
-                      onClick={() => updateOrderStatus(selectedOrder.id, "Đã hủy")}
+                      onClick={() => updateOrderStatus(selectedOrder.order_id, "cancelled")}
                       className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
                       ❌ Hủy đơn hàng

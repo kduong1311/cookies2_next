@@ -144,7 +144,7 @@ const EditProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
           <p className="text-gray-300">Loading profile...</p>
@@ -154,7 +154,7 @@ const EditProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white overflow-y-auto hide-scrollbar">
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-6">
         <div className="max-w-4xl mx-auto">
