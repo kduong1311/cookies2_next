@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Camera, Save, X, Upload, User, MapPin, FileText, Globe, Mail, Phone, Calendar, CheckCircle, AlertCircle, Loader2} from 'lucide-react';
 import { uploadToCloudinary } from '@/components/upload/uploadCloudinary';
+import { useParams } from 'next/navigation';
+import toast from 'react-hot-toast';
+
 
 const EditProfilePage = () => {
-  // Giả sử userId được lấy từ params hoặc context
-  const userId = 'IbOwbDycCXVKGd2wlH0XrPYgwQ43';
+
+  const params = useParams();
+  const userId = params?.id;
   
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,41 +35,50 @@ const EditProfilePage = () => {
   });
 
   // Simulate fetching user data
-  useEffect(() => {
-    const fetchUserData = async () => {
-      setLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const userData = {
-          username: 'john_doe',
-          bio: 'Food enthusiast and cooking lover. Sharing my culinary journey with the world! 🍳👨‍🍳',
-          city: 'Ho Chi Minh City',
-          country: 'Vietnam',
-          email: 'john@example.com',
-          phone_number: '+84 901 234 567',
-          avatar_url: '/Logo.png',
-          cover_photo_url: 'https://marketplace.canva.com/EAEmBit3KfU/3/0/1600w/canva-black-flatlay-photo-motivational-finance-quote-facebook-cover-ZsKh4J6p4s8.jpg',
-          is_chef: true,
-          date_of_birth: '1990-05-15'
-        };
-        
-        setFormData(userData);
-        setPreviewImages({
-          avatar: userData.avatar_url,
-          cover: userData.cover_photo_url
-        });
-      } catch (error) {
-        setMessage({ type: 'error', text: 'Failed to load profile data' });
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchUserData = async () => {
+    if (!userId) return;
 
-    fetchUserData();
-  }, [userId]);
+    setLoading(true);
+    try {
+      const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to load profile data');
+      }
+
+      const userData = await res.json();
+
+      const cleanData = {
+        username: userData.username || '',
+        bio: userData.bio || '',
+        city: userData.city || '',
+        country: userData.country || '',
+        email: userData.email || '',
+        phone_number: userData.phone_number || '',
+        avatar_url: userData.avatar_url || '',
+        cover_photo_url: userData.cover_photo_url || '',
+        is_chef: userData.is_chef || false,
+        date_of_birth: userData.date_of_birth?.split('T')[0] || ''
+      };
+
+      setFormData(cleanData);
+      setPreviewImages({
+        avatar: cleanData.avatar_url,
+        cover: cleanData.cover_photo_url
+      });
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message || 'Failed to load profile data' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchUserData();
+}, [userId]);
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -128,6 +141,7 @@ const EditProfilePage = () => {
         throw new Error('Failed to update profile');
       }
 
+      toast.success("Profile updated successfully!");
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       
       // Auto-hide success message after 3 seconds
@@ -137,6 +151,7 @@ const EditProfilePage = () => {
       
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'An error occurred' });
+      toast.error(error.message || 'An error occurred');
     } finally {
       setSaving(false);
     }
@@ -154,7 +169,7 @@ const EditProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white overflow-y-auto hide-scrollbar">
+    <div className="h-screen bg-gray-900 text-white overflow-y-auto hide-scrollbar">
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-6">
         <div className="max-w-4xl mx-auto">
