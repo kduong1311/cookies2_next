@@ -1,21 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { 
-  Camera, 
-  Save, 
-  X, 
-  Upload, 
-  User, 
-  MapPin, 
-  FileText, 
-  Globe,
-  Mail,
-  Phone,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  Loader2
-} from 'lucide-react';
+  Camera, Save, X, Upload, User, MapPin, FileText, Globe, Mail, Phone, Calendar, CheckCircle, AlertCircle, Loader2} from 'lucide-react';
+import { uploadToCloudinary } from '@/components/upload/uploadCloudinary';
 
 const EditProfilePage = () => {
   // Giả sử userId được lấy từ params hoặc context
@@ -91,26 +78,34 @@ const EditProfilePage = () => {
   };
 
   const handleImageUpload = (type) => {
-    // Simulate image upload
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target.result;
+        try {
+          setSaving(true);
+          const { url } = await uploadToCloudinary(file);
+
           setPreviewImages(prev => ({
             ...prev,
-            [type]: imageUrl
+            [type]: url
           }));
           setFormData(prev => ({
             ...prev,
-            [`${type}_url`]: imageUrl
+            [`${type}_url`]: url
           }));
-        };
-        reader.readAsDataURL(file);
+          setMessage({ type: 'success', text: 'Image uploaded successfully!' });
+
+          setTimeout(() => {
+            setMessage({ type: '', text: '' });
+          }, 2000);
+        } catch (err) {
+          setMessage({ type: 'error', text: 'Failed to upload image' });
+        } finally {
+          setSaving(false);
+        }
       }
     };
     input.click();
