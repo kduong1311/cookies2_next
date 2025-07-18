@@ -139,6 +139,7 @@ export default function OrdersPage() {
     try {
       const response = await fetch(`http://103.253.145.7:3003/api/orders/${orderId}`, {
         method: 'PUT',
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },
