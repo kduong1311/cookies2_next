@@ -12,6 +12,8 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [username, setUserNames] = useState("");
+
 
   // Get shop ID from params or use default
   const shopId = params?.id;
