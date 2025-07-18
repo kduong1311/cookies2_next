@@ -119,6 +119,7 @@ const EditProfilePage = () => {
       // Simulate API call
       const response = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
         method: 'PUT',
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },
