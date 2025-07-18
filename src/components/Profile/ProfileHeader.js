@@ -28,7 +28,6 @@ const ProfileHeader = ({ userProfile }) => {
     );
   }
 
-  // Memoize các giá trị hiển thị để tránh tính lại không cần thiết
   const {
     username,
     bio,
