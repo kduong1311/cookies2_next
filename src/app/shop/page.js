@@ -59,7 +59,6 @@ export default function ShopPage() {
 
     loadProducts();
   }, []);
-console.log("Aaa", products)
   if (loading) {
     return (
       <div className="flex relative justify-center items-center min-h-screen">

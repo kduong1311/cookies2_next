@@ -13,17 +13,16 @@ export async function uploadToCloudinary(file) {
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "Upload thất bại!");
+    if (!response.ok) throw new Error(data.error?.message || "Upload Fail!");
     console.log("duration:", data.duration)
 
-    // ✅ Trả về nhiều thông tin hơn
     return {
       url: data.secure_url,
       type: data.resource_type,
       duration: data.duration || null,
     };
   } catch (error) {
-    console.error("Lỗi upload Cloudinary:", error);
+    console.error("Error upload Cloudinary:", error);
     throw error;
   }
 }

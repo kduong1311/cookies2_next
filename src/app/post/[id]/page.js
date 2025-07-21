@@ -26,6 +26,17 @@ export default function PostDetailPage() {
   // Determine active panel type - giống y hệt MainLayout
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
 
+  const increaseViewCount = async (postId) => {
+  try {
+    await fetch(`http://103.253.145.7:3001/api/posts/${postId}/view`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Failed to increase view count:", error);
+  }
+};
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -37,6 +48,7 @@ export default function PostDetailPage() {
         if (data.status === "success") {
           setPost(data.data);
           setCurrentPostId(data.data.post_id); // Set current post ID for panels
+          increaseViewCount(data.data.post_id)
 
           const userRes = await fetch(`http://103.253.145.7:3000/api/users/${data.data.user_id}`, {
             credentials: "include",
@@ -67,7 +79,6 @@ export default function PostDetailPage() {
     setIsRecipeOpen(false);
     setCurrentPostId(post.post_id);
   };
-
 
   if (loading || !post) return <Loading />;
 

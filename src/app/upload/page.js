@@ -109,7 +109,7 @@ export default function CookingUploadPage() {
     return ingredientTexts
       .filter(text => text.trim())
       .map((text, index) => {
-        // Try to parse quantity and unit from text like "500g thịt heo" or "2 quả trứng"
+
         const match = text.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)?\s+(.+)$/);
         if (match) {
           return {
@@ -136,21 +136,28 @@ export default function CookingUploadPage() {
       .map((text, index) => ({
         step_number: index + 1,
         description: text.trim(),
-        duration: 5 // Default duration, could be enhanced to parse from text
+        duration: 5
       }));
   };
 
   const handleSubmit = async () => {
-    if (!file) return alert("Bạn chưa chọn file!");
-        if (!title.trim()) return alert("Vui lòng nhập tiêu đề!");
+    if (!file) return alert("Choose file please!");
+    if (!title.trim()) return alert("Enter Title please!");
     
     // Only validate recipe fields if hasRecipe is true
-    if (hasRecipe) {
-      if (!recipe.title.trim()) return alert("Vui lòng nhập tên món ăn!");
-      if (isPremium && (!premiumPrice || premiumPrice <= 0)) return alert("Vui lòng nhập giá hợp lệ cho nội dung premium!");
-      if (parseInt(recipe.prepTime) < 0 || parseInt(recipe.cookTime) < 0) return alert("Thời gian không được âm!");
-      if (parseInt(recipe.servings) < 0) return alert("Số khẩu phần không được âm!");
-    }
+  if (hasRecipe) {
+  if (!recipe.title.trim()) return alert("Please enter the recipe title!");
+  if (isPremium && (!premiumPrice || premiumPrice <= 0)) return alert("Please enter a valid price for premium content!");
+  if (parseInt(recipe.prepTime) < 0 || parseInt(recipe.cookTime) < 0) return alert("Time cannot be negative!");
+  if (parseInt(recipe.servings) < 0) return alert("Servings cannot be negative!");
+
+  const nonEmptyIngredients = recipe.ingredients.filter(i => i.trim() !== "");
+  if (nonEmptyIngredients.length === 0) return alert("At least one ingredient is required!");
+
+  const nonEmptyInstructions = recipe.instructions.filter(i => i.trim() !== "");
+  if (nonEmptyInstructions.length === 0) return alert("At least one instruction step is required!");
+  }
+
 
     setIsUploading(true);
 
@@ -171,7 +178,7 @@ export default function CookingUploadPage() {
         title: title.trim(),
         description: caption.trim(),
         cooking_time: parseInt(recipe.cookTime) || 0,
-        difficulty_level: recipe.difficulty === "Dễ" ? "easy" : recipe.difficulty === "Trung bình" ? "medium" : "hard",
+        difficulty_level: recipe.difficulty,
         serving_size: parseInt(recipe.servings) || 1,
         has_recipe: hasRecipe,
         is_premium: hasRecipe ? isPremium : false,
@@ -197,13 +204,12 @@ export default function CookingUploadPage() {
 
       if (!postResponse.ok) {
         const errorData = await postResponse.json();
-        throw new Error(errorData.message || "Tạo post thất bại!");
+        throw new Error(errorData.message || "Create post fail!");
       }
 
       const postResult = await postResponse.json();
-      console.log("Tạo post thành công:", postResult);
+      console.log("Create Post successfully", postResult);
 
-      // Step 3: Create recipe if has_recipe is true
       if (hasRecipe) {
         const recipeData = {
           post_id: postResult.post_id,
@@ -232,10 +238,10 @@ export default function CookingUploadPage() {
           const errorData = await recipeResponse.json();
           console.error("Tạo recipe thất bại:", errorData);
           // Don't throw error here since post was created successfully
-          alert("Post đã được tạo thành công nhưng có lỗi khi tạo recipe!");
+          alert("Create post sucessfull but have error in recipe!");
         } else {
           const recipeResult = await recipeResponse.json();
-          console.log("Tạo recipe thành công:", recipeResult);
+          console.log("Create post sucessfully:", recipeResult);
         }
       }
 
@@ -259,14 +265,14 @@ export default function CookingUploadPage() {
         prepTime: "",
         cookTime: "",
         servings: "",
-        difficulty: "Dễ",
+        difficulty: "Easy",
         ingredients: [""],
         instructions: [""]
       });
 
     } catch (err) {
-      console.error("Upload lỗi:", err);
-      alert(`Upload lỗi: ${err.message}`);
+      console.error("Upload Error:", err);
+      alert(`Upload Error: ${err.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -283,7 +289,7 @@ export default function CookingUploadPage() {
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
           <ChefHat className="w-6 h-6 text-orange-500" />
-          <h1 className="text-2xl font-bold text-white">Chia sẻ món ngon</h1>
+          <h1 className="text-2xl font-bold text-white">Share amazing food</h1>
         </div>
         <p className="text-gray-400 text-sm">Show off your amazing food to the community!</p>
       </div>
@@ -336,7 +342,7 @@ export default function CookingUploadPage() {
                         className="rounded-lg w-full max-h-48"
                       >
                         <source src={preview} type={file.type} />
-                        Trình duyệt không hỗ trợ video.
+                        Browser do not accept this video.
                       </video>
                     )}
                     <p className="mt-2 text-xs text-gray-400">Click to change</p>
@@ -368,7 +374,7 @@ export default function CookingUploadPage() {
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Chia sẻ câu chuyện về món ăn này..."
+              placeholder="Share the story..."
               className="w-full h-20 p-3 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
             />
             <p className="text-xs text-gray-500 mt-1">{caption.length}/500</p>
@@ -402,7 +408,7 @@ export default function CookingUploadPage() {
           {hasRecipe && (
             <>
             <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700 space-y-3">
-            <h3 className="text-lg font-semibold text-white">Ảnh bìa công thức (tùy chọn)</h3>
+            <h3 className="text-lg font-semibold text-white">Cover iamge (optional)</h3>
             <div className="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center hover:border-orange-500 transition-colors">
               <input
                 type="file"
@@ -417,7 +423,7 @@ export default function CookingUploadPage() {
                     <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
                       <ImageIcon className="w-6 h-6 text-orange-500" />
                     </div>
-                    <p className="text-sm font-medium text-white">Chọn ảnh bìa cho công thức</p>
+                    <p className="text-sm font-medium text-white">Choose cover iamge</p>
                   </>
                 ) : (
                   <Image 
@@ -433,10 +439,10 @@ export default function CookingUploadPage() {
           </div>
               {/* Recipe Basic Info */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700 space-y-3">
-                <h3 className="text-lg font-semibold text-white">Thông tin cơ bản</h3>
+                <h3 className="text-lg font-semibold text-white">Basic Information</h3>
                 
                 <div>
-                  <Label className="text-xs font-medium text-gray-300">Tên món ăn *</Label>
+                  <Label className="text-xs font-medium text-gray-300">Name *</Label>
                   <input
                     type="text"
                     value={recipe.title}
@@ -448,7 +454,7 @@ export default function CookingUploadPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium text-gray-300">Loại ẩm thực</Label>
+                    <Label className="text-xs font-medium text-gray-300">Cuisine</Label>
                     <select
                       value={cuisine}
                       onChange={(e) => setCuisine(e.target.value)}
@@ -461,24 +467,24 @@ export default function CookingUploadPage() {
                     </select>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-gray-300">Loại bữa ăn</Label>
+                    <Label className="text-xs font-medium text-gray-300">Meal type</Label>
                     <select
                       value={mealType}
                       onChange={(e) => setMealType(e.target.value)}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
                     >
-                      <option value="">Chọn loại bữa ăn</option>
+                      <option value="">Choose Meal Type</option>
                       {mealTypeOptions.map(option => (
-                        <option key={option} value={option}>
-                          {option === 'breakfast' ? 'Sáng' : 
-                           option === 'lunch' ? 'Trưa' : 
-                           option === 'dinner' ? 'Tối' : 
-                           option === 'snack' ? 'Ăn vặt' : 
-                           option === 'dessert' ? 'Tráng miệng' : 
-                           option === 'appetizer' ? 'Khai vị' : 
-                           'Đồ uống'}
-                        </option>
-                      ))}
+                      <option key={option} value={option}>
+                        {option === 'breakfast' ? 'Breakfast' : 
+                        option === 'lunch' ? 'Lunch' : 
+                        option === 'dinner' ? 'Dinner' : 
+                        option === 'snack' ? 'Snack' : 
+                        option === 'dessert' ? 'Dessert' : 
+                        option === 'appetizer' ? 'Appetizer' : 
+                        'Drink'}
+                      </option>
+                    ))}
                     </select>
                   </div>
                 </div>
@@ -486,7 +492,7 @@ export default function CookingUploadPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Prep (phút)
+                      <Clock className="w-3 h-3" /> Prep (Mins)
                     </Label>
                     <input
                       type="number"
@@ -498,7 +504,7 @@ export default function CookingUploadPage() {
                   </div>
                   <div>
                     <Label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Cook (phút)
+                      <Clock className="w-3 h-3" /> Cook (Mins)
                     </Label>
                     <input
                       type="number"
@@ -513,7 +519,7 @@ export default function CookingUploadPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                      <Users className="w-3 h-3" /> Khẩu phần
+                      <Users className="w-3 h-3" /> Servings
                     </Label>
                     <input
                       type="number"
@@ -524,15 +530,15 @@ export default function CookingUploadPage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs font-medium text-gray-300">Độ khó</Label>
+                    <Label className="text-xs font-medium text-gray-300">difficulty</Label>
                     <select
                       value={recipe.difficulty}
                       onChange={(e) => setRecipe({...recipe, difficulty: e.target.value})}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
                     >
-                      <option value="Dễ">Dễ</option>
-                      <option value="Trung bình">Trung bình</option>
-                      <option value="Khó">Khó</option>
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
                     </select>
                   </div>
                 </div>
@@ -542,8 +548,7 @@ export default function CookingUploadPage() {
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <Label className="text-sm font-semibold text-white flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-yellow-500" />
-                    Nội dung Premium
+                    <DollarSign className="w-4 h-4 text-yellow-500" /> Premium
                   </Label>
                   <button
                     onClick={() => setIsPremium(!isPremium)}
@@ -560,7 +565,7 @@ export default function CookingUploadPage() {
                 </div>
                 {isPremium && (
                   <div>
-                    <Label className="text-xs font-medium text-gray-300">Giá (VND)</Label>
+                    <Label className="text-xs font-medium text-gray-300">Price</Label>
                     <input
                       type="number"
                       value={premiumPrice}
@@ -577,13 +582,13 @@ export default function CookingUploadPage() {
               {/* Ingredients */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-white">Nguyên liệu</h3>
+                  <h3 className="text-lg font-semibold text-white">Ingredients</h3>
                   <Button
                     onClick={addIngredient}
                     className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg text-sm"
                   >
                     <Plus className="w-3 h-3 mr-1" />
-                    Thêm
+                    Add
                   </Button>
                 </div>
                 <div className="space-y-2">
@@ -594,7 +599,7 @@ export default function CookingUploadPage() {
                         value={ingredient}
                         onChange={(e) => updateIngredient(index, e.target.value)}
                         className="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                        placeholder="Ví dụ: 500g thịt heo"
+                        placeholder="Ví dụ: 500g Beef"
                       />
                       {recipe.ingredients.length > 1 && (
                         <Button
@@ -612,13 +617,13 @@ export default function CookingUploadPage() {
               {/* Instructions */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-white">Cách làm</h3>
+                  <h3 className="text-lg font-semibold text-white">Steps</h3>
                   <Button
                     onClick={addInstruction}
                     className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg text-sm"
                   >
                     <Plus className="w-3 h-3 mr-1" />
-                    Thêm bước
+                    Add step
                   </Button>
                 </div>
                 <div className="space-y-3">
@@ -632,7 +637,7 @@ export default function CookingUploadPage() {
                           value={instruction}
                           onChange={(e) => updateInstruction(index, e.target.value)}
                           className="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                          placeholder="Mô tả chi tiết bước này..."
+                          placeholder="How to do..."
                           rows="2"
                         />
                         {recipe.instructions.length > 1 && (
@@ -657,7 +662,7 @@ export default function CookingUploadPage() {
             disabled={!file || isUploading}
             className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl text-base font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUploading ? "Đang đăng bài..." : "Đăng bài ngay"}
+            {isUploading ? "Uploading..." : "Upload Post"}
           </Button>
         </div>
       </div>
