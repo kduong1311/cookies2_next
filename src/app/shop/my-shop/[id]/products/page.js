@@ -19,7 +19,19 @@ export default function ProductsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [categoriesData, setCategoriesData] = useState([]);
 
-    useEffect(() => {
+    // Helper function to determine category based on product name/description
+  const getCategoryFromProduct = (product) => {
+    const name = product.name.toLowerCase();
+    const description = product.description;
+
+  // Helper function to determine status based on stock
+  const getStatusFromStock = (stock) => {
+    if (stock === 0) return "Out of Stock";
+    if (stock < 10) return "Low Stock";
+    return "In Stock";
+  };
+
+  useEffect(() => {
   const fetchCategories = async () => {
     try {
       const res = await fetch("http://103.253.145.7:3003/api/categories");
@@ -81,18 +93,6 @@ export default function ProductsPage() {
       fetchProducts();
     }
   }, [shopId]);
-
-  // Helper function to determine category based on product name/description
-  const getCategoryFromProduct = (product) => {
-    const name = product.name.toLowerCase();
-    const description = product.description;
-
-  // Helper function to determine status based on stock
-  const getStatusFromStock = (stock) => {
-    if (stock === 0) return "Out of Stock";
-    if (stock < 10) return "Low Stock";
-    return "In Stock";
-  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
