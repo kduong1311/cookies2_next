@@ -8,6 +8,7 @@ import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin, DollarSign
 import { Description } from "@radix-ui/react-dialog";
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 import Image from "next/image";
+import { data } from "autoprefixer";
 
 export default function CookingUploadPage() {
 
@@ -162,7 +163,8 @@ export default function CookingUploadPage() {
 
       let recipeCoverUrl = "";
       if (hasRecipe && recipeCover) {
-        recipeCoverUrl = await uploadToCloudinary(recipeCover);
+        dataCloud1 = await uploadToCloudinary(recipeCover);
+        recipeCoverUrl = dataCloud1.url;
       }
 
       // Step 2: Create post

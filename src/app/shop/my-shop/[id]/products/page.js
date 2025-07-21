@@ -195,7 +195,7 @@ export default function ProductsPage() {
           },
           {
             label: "Out of Stock",
-            value: products.filter((p) => p.status === "Out of Stock").length,
+            value: products.filter((p) => p.status === "Out Stock").length,
             color: "red",
           },
         ].map((item, i) => (
@@ -215,7 +215,7 @@ export default function ProductsPage() {
           <div className="flex flex-col sm:flex-row gap-4 flex-1">
             <input
               type="text"
-              placeholder="Tìm kiếm sản phẩm..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500"
@@ -225,7 +225,7 @@ export default function ProductsPage() {
               onChange={(e) => setFilterCategory(e.target.value)}
               className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600"
             >
-              <option value="all">Tất cả danh mục</option>
+              <option value="all">All</option>
               {categoriesData.map((category) => (
                 <option key={category.category_id} value={category.name}>
                   {category.name}
@@ -237,7 +237,7 @@ export default function ProductsPage() {
             onClick={() => setShowCreateModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2"
           >
-            ➕ Thêm sản phẩm
+            ➕ Add product
           </button>
         </div>
       </div>
