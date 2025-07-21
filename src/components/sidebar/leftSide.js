@@ -68,7 +68,9 @@ const [activeItem, setActiveItem] = useState(() => {
                   Login
                 </button>
               </div>
-              <LoginModal open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen} />
+              <LoginModal open={isLoginModalOpen} onOpenChange={()=> 
+                {if (user) setIsLoginModalOpen(open)}
+              } />
             </>
           )}
         </div>

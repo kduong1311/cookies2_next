@@ -54,10 +54,6 @@ export default function LoginModal({ open, onOpenChange }) {
           <div className="text-black py-4">
             {formMode === "social" && (
               <div className="grid gap-4">
-                <Button className="w-full justify-center hover-orange-bg" variant="outline">
-                  <FaFacebookSquare className="mr-2 h-4 w-4" />
-                  Login with Facebook
-                </Button>
                 <Button 
                   className="w-full justify-center hover-orange-bg" 
                   variant="outline"
@@ -98,10 +94,6 @@ export default function LoginModal({ open, onOpenChange }) {
                   <FaGooglePlusSquare className="mr-2 h-4 w-4" />
                   Login with Google
                 </Button>
-                <Button className="w-full justify-center hover-orange-bg" variant="outline">
-                  <FaSquareXTwitter className="mr-2 h-4 w-4" />
-                  Login with X
-                </Button>
                 <Button
                   className="w-full justify-center hover-orange-bg"
                   variant="outline"
@@ -120,11 +112,8 @@ export default function LoginModal({ open, onOpenChange }) {
                 const password = e.target.password.value;
 
                 try {
-                  // First, authenticate with Firebase
                   const userCredential = await signInWithEmailAndPassword(auth, email, password);
                   const idToken = await userCredential.user.getIdToken();
-
-                  // Then send the ID token to your backend
                   const res = await fetch("http://103.253.145.7:3000/api/users/login", {
                     method: "POST",
                     headers: {

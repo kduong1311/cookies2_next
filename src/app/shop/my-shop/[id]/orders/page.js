@@ -202,7 +202,7 @@ export default function OrdersPage() {
           <p className="text-gray-400">Xem và xử lý các đơn hàng</p>
         </div>
         <Link
-          href={`/shop/my_shop/${shopId}`}
+          href={`/shop/my-shop/${shopId}`}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
           ← Về Dashboard

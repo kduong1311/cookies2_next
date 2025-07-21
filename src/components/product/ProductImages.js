@@ -19,8 +19,8 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
       const imageUrl = await uploadToCloudinary(file);
       
       const newImage = {
-        url: imageUrl,
-        thumbnail_url: imageUrl,
+        url: imageUrl.url,
+        thumbnail_url: imageUrl.url,
         alt_text: "Product image",
         position: images.length,
         is_primary: images.length === 0

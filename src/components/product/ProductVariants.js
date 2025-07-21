@@ -42,10 +42,10 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
     setIsUploading(true);
     try {
       const imageUrl = await uploadToCloudinary(file);
-      updateVariant(index, "image_url", imageUrl);
+      updateVariant(index, "image_url", imageUrl.url);
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Lỗi khi tải lên hình ảnh. Vui lòng thử lại!");
+      alert("Failed to upload image. Please try again!");
     } finally {
       setIsUploading(false);
     }
@@ -57,14 +57,14 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
             <Layers className="w-5 h-5 text-orange-500" />
-            Biến thể sản phẩm
+            Product Variants
           </h3>
           <button
             onClick={addVariant}
             className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <Plus className="w-4 h-4" />
-            Thêm biến thể
+            Add Variant
           </button>
         </div>
 
@@ -73,12 +73,12 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
             <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <Layers className="w-8 h-8 text-gray-400" />
             </div>
-            <p className="text-gray-400 mb-4">Chưa có biến thể nào được tạo</p>
+            <p className="text-gray-400 mb-4">No variants created yet</p>
             <button
               onClick={addVariant}
               className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
-              Tạo biến thể đầu tiên
+              Create First Variant
             </button>
           </div>
         ) : (
@@ -90,7 +90,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                     <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                       {index + 1}
                     </div>
-                    Biến thể {index + 1}
+                    Variant {index + 1}
                   </h4>
                   {variants.length > 1 && (
                     <button
@@ -106,48 +106,48 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                   <div>
                     <label className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                       <Palette className="w-3 h-3 text-pink-400" />
-                      Màu sắc
+                      Color
                     </label>
                     <input
                       type="text"
                       value={variant.color}
                       onChange={(e) => updateVariant(index, "color", e.target.value)}
                       className="w-full p-3 bg-gray-600/50 border border-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
-                      placeholder="Ví dụ: Đỏ, Xanh, Đen..."
+                      placeholder="e.g. Red, Blue, Black..."
                     />
                   </div>
 
                   <div>
                     <label className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                       <Package className="w-3 h-3 text-blue-400" />
-                      Kích thước
+                      Size
                     </label>
                     <input
                       type="text"
                       value={variant.size}
                       onChange={(e) => updateVariant(index, "size", e.target.value)}
                       className="w-full p-3 bg-gray-600/50 border border-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
-                      placeholder="Ví dụ: S, M, L, XL..."
+                      placeholder="e.g. S, M, L, XL..."
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Chất liệu
+                      Material
                     </label>
                     <input
                       type="text"
                       value={variant.material}
                       onChange={(e) => updateVariant(index, "material", e.target.value)}
                       className="w-full p-3 bg-gray-600/50 border border-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
-                      placeholder="Ví dụ: Cotton, Polyester..."
+                      placeholder="e.g. Cotton, Polyester..."
                     />
                   </div>
 
                   <div>
                     <label className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                       <DollarSign className="w-3 h-3 text-green-400" />
-                      Giá
+                      Price
                     </label>
                     <input
                       type="number"
@@ -163,7 +163,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                 {/* Variant Image Upload */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Hình ảnh biến thể (tùy chọn)
+                    Variant Image (optional)
                   </label>
                   <div className="flex items-center gap-4">
                     <input
@@ -183,7 +183,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                       ) : (
                         <Plus className="w-4 h-4" />
                       )}
-                      Chọn ảnh
+                      Upload Image
                     </label>
                     
                     {variant.image_url && (
@@ -207,7 +207,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                 {/* Stock Quantity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Số lượng tồn kho
+                    Stock Quantity
                   </label>
                   <input
                     type="number"

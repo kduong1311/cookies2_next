@@ -26,11 +26,10 @@ export default function ShopPage() {
   const handleSearch = ({ query = "", category = "All"}) => {
   const keyword = query.toLowerCase();
   let filtered = [...allProducts];
-
     if (category !== "All") {
       filtered = filtered.filter((product) =>
-        product.category?.some((cat) =>
-          cat.toLowerCase().includes(category.toLowerCase())
+        product.categories?.some((cat) =>
+          cat.name.toLowerCase().includes(category.toLowerCase())
         )
       );
     }
@@ -47,8 +46,8 @@ export default function ShopPage() {
       try {
         setLoading(true);
         const fetchedProducts = await fetchProducts();
-        setAllProducts(fetchedProducts); // 👉 lưu toàn bộ
-        setProducts(fetchedProducts);    // 👉 hiển thị ban đầu
+        setAllProducts(fetchedProducts);
+        setProducts(fetchedProducts);
         setError(null);
       } catch (err) {
         setError("Failed to load products");
@@ -60,7 +59,7 @@ export default function ShopPage() {
 
     loadProducts();
   }, []);
-
+console.log("Aaa", products)
   if (loading) {
     return (
       <div className="flex relative justify-center items-center min-h-screen">
@@ -82,7 +81,7 @@ export default function ShopPage() {
       {activeShopView === "productList" && (
         <>
           <Banner />
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} allProducts={products}/>
           <div className="mt-5">
             <ProductList products={products} />
           </div>

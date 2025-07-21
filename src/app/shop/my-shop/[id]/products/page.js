@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export default function ProductsPage() {
   const params = useParams();
-  const shopId = params.id; // Lấy shop_id từ URL params
+  const shopId = params.id;
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ export default function ProductsPage() {
         setCategoriesData(result.data); 
       }
     } catch (error) {
-      console.error("Lỗi tải danh mục:", error);
+      console.error("Error get categories:", error);
     }
   };
 
@@ -45,8 +45,6 @@ export default function ProductsPage() {
           credentials: "include",
         });
         const result = await response.json();
-        
-        console.log("API Response:", result.data);
         
         if (result.status === "success") {
           // Transform API data to match our component structure
@@ -69,11 +67,11 @@ export default function ProductsPage() {
           
           setProducts(transformedProducts);
         } else {
-          setError("Không thể tải danh sách sản phẩm");
+          setError("Can not get products");
         }
       } catch (err) {
         console.error("Error fetching products:", err);
-        setError("Lỗi kết nối API");
+        setError("Error connect API");
       } finally {
         setLoading(false);
       }
@@ -87,31 +85,18 @@ export default function ProductsPage() {
   // Helper function to determine category based on product name/description
   const getCategoryFromProduct = (product) => {
     const name = product.name.toLowerCase();
-    const description = product.description.toLowerCase();
-    
-    if (name.includes('phone') || name.includes('iphone') || name.includes('điện thoại')) {
-      return 'Điện thoại';
-    } else if (name.includes('laptop') || name.includes('macbook') || name.includes('computer')) {
-      return 'Laptop';
-    } else if (name.includes('tablet') || name.includes('ipad')) {
-      return 'Tablet';
-    } else if (name.includes('scale') || name.includes('bowl') || name.includes('kitchen')) {
-      return 'Nhà bếp';
-    } else {
-      return 'Phụ kiện';
-    }
-  };
+    const description = product.description;
 
   // Helper function to determine status based on stock
   const getStatusFromStock = (stock) => {
-    if (stock === 0) return "Hết hàng";
-    if (stock < 10) return "Sắp hết";
-    return "Còn hàng";
+    if (stock === 0) return "Out of Stock";
+    if (stock < 10) return "Low Stock";
+    return "In Stock";
   };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === "all" || product.category === filterCategory;
+    const matchesCategory = filterCategory === "all" || product.categories.name === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -120,7 +105,7 @@ export default function ProductsPage() {
     try {
       const response = await fetch(`http://103.253.145.7:3003/api/products/${id}`, {
         method: "DELETE",
-        credentials: "include", // Nếu API cần xác thực session/cookie
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -129,14 +114,15 @@ export default function ProductsPage() {
       const result = await response.json();
 
       if (result.status === "success") {
-        // Xóa ở local state
+
+        //Delete in local
         setProducts(products.filter(p => p.id !== id));
       } else {
-        alert("Xóa sản phẩm thất bại: " + result.message || "Unknown error");
+        alert("Delete Failt: " + result.message || "Unknown error");
       }
     } catch (error) {
-      console.error("Lỗi khi xóa sản phẩm:", error);
-      alert("Có lỗi xảy ra khi xóa sản phẩm.");
+      console.error("Delete Error:", error);
+      alert("Can not delete, Error");
     }
   }
 };
@@ -144,9 +130,9 @@ export default function ProductsPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Còn hàng": return "bg-green-500";
-      case "Sắp hết": return "bg-yellow-500";
-      case "Hết hàng": return "bg-red-500";
+      case "In Stock": return "bg-green-500";
+      case "Low Stock": return "bg-yellow-500";
+      case "Out of Stock": return "bg-red-500";
       default: return "bg-gray-500";
     }
   };
@@ -169,7 +155,7 @@ export default function ProductsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-white text-xl">Đang tải danh sách sản phẩm...</div>
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
@@ -191,13 +177,13 @@ export default function ProductsPage() {
             <span className="text-blue-400">📦</span>
             Quản lý sản phẩm
           </h1>
-          <p className="text-gray-400">Thêm, sửa, xóa và quản lý sản phẩm</p>
+          <p className="text-gray-400">Manage Products</p>
         </div>
         <Link
-          href={`/shop/my_shop/${shopId}`}
+          href={`/shop/my-shop/${shopId}`}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
-          ← Về Dashboard
+          ← Back
         </Link>
       </div>
 
@@ -205,19 +191,19 @@ export default function ProductsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-blue-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{products.length}</div>
-          <div className="text-blue-100">Tổng sản phẩm</div>
+          <div className="text-blue-100">Totals:</div>
         </div>
         <div className="bg-green-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{products.filter(p => p.status === "In Stock").length}</div>
-          <div className="text-green-100">Còn hàng</div>
+          <div className="text-green-100">In Stock</div>
         </div>
         <div className="bg-yellow-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{products.filter(p => p.status === "Low Stock").length}</div>
-          <div className="text-yellow-100">Sắp hết hàng</div>
+          <div className="text-yellow-100">Low Stock</div>
         </div>
         <div className="bg-red-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{products.filter(p => p.status === "Out of Stock").length}</div>
-          <div className="text-red-100">Hết hàng</div>
+          <div className="text-red-100">Out of Stock</div>
         </div>
       </div>
 
@@ -272,27 +258,27 @@ export default function ProductsPage() {
       {/* Products Table */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">Danh sách sản phẩm ({filteredProducts.length})</h2>
+          <h2 className="text-xl font-semibold text-white">Product list ({filteredProducts.length})</h2>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-700/50">
               <tr>
-                <th className="text-left text-white font-medium p-4">Sản phẩm</th>
-                <th className="text-left text-white font-medium p-4">Danh mục</th>
-                <th className="text-left text-white font-medium p-4">Giá</th>
-                <th className="text-left text-white font-medium p-4">Tồn kho</th>
-                <th className="text-left text-white font-medium p-4">Trạng thái</th>
-                <th className="text-left text-white font-medium p-4">Đánh giá</th>
-                <th className="text-left text-white font-medium p-4">Thao tác</th>
+                <th className="text-left text-white font-medium p-4">Product</th>
+                <th className="text-left text-white font-medium p-4">Category</th>
+                <th className="text-left text-white font-medium p-4">Price</th>
+                <th className="text-left text-white font-medium p-4">Stock</th>
+                <th className="text-left text-white font-medium p-4">Status</th>
+                <th className="text-left text-white font-medium p-4">Rating</th>
+                <th className="text-left text-white font-medium p-4">Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center text-gray-400 py-8">
-                    Không tìm thấy sản phẩm nào
+                    Products not found
                   </td>
                 </tr>
               ) : (
@@ -337,22 +323,15 @@ export default function ProductsPage() {
                     </td>
                     <td className="p-4">
                       <div className="text-yellow-400">
-                        ⭐ {product.rating} ({product.total_sales} bán)
+                        ⭐ {product.rating} ({product.total_sales} sale)
                       </div>
                     </td>
                     <td className="p-4">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => setEditingProduct(product)}
-                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                        >
-                          ✏️ Sửa
-                        </button>
-                        <button
                           onClick={() => handleDeleteProduct(product.id)}
                           className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                        >
-                          🗑️ Xóa
+                        >Xóa
                         </button>
                       </div>
                     </td>
@@ -363,73 +342,9 @@ export default function ProductsPage() {
           </table>
         </div>
       </div>
-
-      {/* Add/Edit Product Modal */}
-      {(showAddForm || editingProduct) && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">
-              {editingProduct ? "Sửa sản phẩm" : "Thêm sản phẩm mới"}
-            </h3>
-            <form className="space-y-4">
-              <input
-                type="text"
-                placeholder="Tên sản phẩm"
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                defaultValue={editingProduct?.name || ""}
-              />
-              <input
-                type="text"
-                placeholder="Mô tả"
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                defaultValue={editingProduct?.description || ""}
-              />
-              <select 
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                defaultValue={editingProduct?.category || ""}
-              >
-                <option value="">Chọn danh mục</option>
-                {categoriesData.map(category => (
-                  <option key={category.category_id} value={category.name}>{category.name}</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                placeholder="Giá (USD)"
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                defaultValue={editingProduct?.price || ""}
-                step="0.01"
-              />
-              <input
-                type="number"
-                placeholder="Số lượng tồn kho"
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-                defaultValue={editingProduct?.stock || ""}
-              />
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setEditingProduct(null);
-                  }}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
-                >
-                  {editingProduct ? "Cập nhật" : "Thêm"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
+}
 }
 
 

@@ -23,30 +23,32 @@ export default function SearchBar({ onSearch, allProducts = [] }) {
   }, []);
 
   // ⬇ Search theo query (debounced)
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      const keyword = (query || " ").toLowerCase();
-      let filtered = allProducts;
+  // ⬇ Search theo query (debounced)
+useEffect(() => {
+  const delayDebounce = setTimeout(() => {
+    const keyword = (query || " ").toLowerCase();
+    let filtered = allProducts;
 
-      // Filter theo category nếu không phải All
-      if (activeCategory !== "All") {
-        filtered = filtered.filter((product) =>
-          product.category?.some((cat) =>
-            cat.toLowerCase().includes(activeCategory.toLowerCase())
-          )
-        );
-      }
-
-      // Filter theo tên sản phẩm
+    // ❗ Dùng đúng tên field là `categories`
+    if (activeCategory !== "All") {
       filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(keyword)
+        product.categories?.some((cat) =>
+          cat.name.toLowerCase().includes(activeCategory.toLowerCase())
+        )
       );
+    }
 
-      onSearch({query, category: activeCategory});
-    }, 300);
+    // Filter theo tên sản phẩm
+    filtered = filtered.filter((product) =>
+      product.name.toLowerCase().includes(keyword)
+    );
 
-    return () => clearTimeout(delayDebounce);
-  }, [query, activeCategory, allProducts, onSearch]);
+    onSearch({ query, category: activeCategory });
+  }, 300);
+
+  return () => clearTimeout(delayDebounce);
+}, [query, activeCategory, allProducts, onSearch]);
+
 
   // ⬇ Khi chọn category
   const handleCategoryClick = (categoryName) => {
@@ -87,27 +89,6 @@ export default function SearchBar({ onSearch, allProducts = [] }) {
               {category}
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Optional: Featured Collections */}
-      <div>
-        <h4 className="font-medium mb-2 text-white">Featured Collections</h4>
-        <div className="space-y-3">
-          <div className="bg-gray-800 rounded-md p-3 hover:bg-gray-700">
-            <h5 className="font-medium mb-1 text-white">Summer Specials</h5>
-            <p className="text-xs text-gray-400">
-              Limited time summer flavors
-            </p>
-          </div>
-          <div className="bg-gray-800 rounded-md p-3 hover:bg-gray-700">
-            <h5 className="font-medium mb-1 text-white">Gift Boxes</h5>
-            <p className="text-xs text-gray-400">Perfect for any occasion</p>
-          </div>
-          <div className="bg-gray-800 rounded-md p-3 hover:bg-gray-700">
-            <h5 className="font-medium mb-1 text-white">Best Sellers</h5>
-            <p className="text-xs text-gray-400">Our most popular cookies</p>
-          </div>
         </div>
       </div>
     </div>
