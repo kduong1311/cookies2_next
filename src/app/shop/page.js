@@ -10,7 +10,7 @@ import Loading from "@/components/Loading";
 export default function ShopPage() {
   const [activeShopView, setActiveShopView] = useState("productList");
   const [products, setProducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]); // 👉 giữ toàn bộ danh sách
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 

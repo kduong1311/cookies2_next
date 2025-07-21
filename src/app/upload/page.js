@@ -33,7 +33,7 @@ export default function CookingUploadPage() {
     prepTime: "",
     cookTime: "",
     servings: "",
-    difficulty: "Dễ",
+    difficulty: "Easy",
     ingredients: [""],
     instructions: [""]
   })

@@ -47,7 +47,7 @@ export default function PostDetailPage() {
         const data = await res.json();
         if (data.status === "success") {
           setPost(data.data);
-          setCurrentPostId(data.data.post_id); // Set current post ID for panels
+          setCurrentPostId(data.data.post_id);
           increaseViewCount(data.data.post_id)
 
           const userRes = await fetch(`http://103.253.145.7:3000/api/users/${data.data.user_id}`, {
