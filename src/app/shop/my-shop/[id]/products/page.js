@@ -12,7 +12,7 @@ const getStatusFromStock = (stock) => {
 };
 
 const getCategoryFromProduct = (product) => {
-  return product.category?.name || "Uncategorized";
+  return product.categories?.name || "Uncategorized";
 };
 
 export default function ProductsPage() {
