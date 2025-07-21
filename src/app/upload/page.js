@@ -8,7 +8,6 @@ import { ChefHat, Plus, X, Clock, Users, Camera, Video, Hash, MapPin, DollarSign
 import { Description } from "@radix-ui/react-dialog";
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 import Image from "next/image";
-import { data } from "autoprefixer";
 
 export default function CookingUploadPage() {
 
@@ -163,8 +162,7 @@ export default function CookingUploadPage() {
 
       let recipeCoverUrl = "";
       if (hasRecipe && recipeCover) {
-        dataCloud1 = await uploadToCloudinary(recipeCover);
-        recipeCoverUrl = dataCloud1.url;
+        recipeCoverUrl = await uploadToCloudinary(recipeCover);
       }
 
       // Step 2: Create post
@@ -217,7 +215,7 @@ export default function CookingUploadPage() {
           is_premium: isPremium,
           ingredients: parseIngredients(recipe.ingredients),
           steps: parseInstructions(recipe.instructions),
-          cover_media_url: recipeCoverUrl,
+          cover_media_url: recipeCoverUrl.url,
         };
 
         console.log("Đang tạo recipe...", recipeData);
