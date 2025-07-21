@@ -19,18 +19,6 @@ export default function ProductsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [categoriesData, setCategoriesData] = useState([]);
 
-    // Helper function to determine category based on product name/description
-  const getCategoryFromProduct = (product) => {
-    const name = product.name.toLowerCase();
-    const description = product.description;
-
-  // Helper function to determine status based on stock
-  const getStatusFromStock = (stock) => {
-    if (stock === 0) return "Out of Stock";
-    if (stock < 10) return "Low Stock";
-    return "In Stock";
-  };
-
   useEffect(() => {
   const fetchCategories = async () => {
     try {
@@ -47,7 +35,17 @@ export default function ProductsPage() {
   fetchCategories();
   }, []);
 
+      // Helper function to determine category based on product name/description
+    const getCategoryFromProduct = (product) => {
+      const name = product.name.toLowerCase();
+      const description = product.description;
 
+    // Helper function to determine status based on stock
+    const getStatusFromStock = (stock) => {
+      if (stock === 0) return "Out of Stock";
+      if (stock < 10) return "Low Stock";
+      return "In Stock";
+    };
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
