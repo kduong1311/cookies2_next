@@ -192,6 +192,26 @@ export default function VideoFeed({
     }
   }, [currentPostIndex, posts, setCurrentPostId]);
 
+
+  useEffect(() => {
+  const currentPost = posts[currentPostIndex];
+  if (!currentPost) return;
+
+  const increaseView = async () => {
+    try {
+      await fetch(`http://103.253.145.7:3001/api/posts/${currentPost.post_id}/view`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      console.log(`View incremented for post ${currentPost.post_id}`);
+    } catch (error) {
+      console.error('Failed to increase view count:', error);
+    }
+  };
+
+  increaseView();
+}, [currentPostIndex]);
+
   const currentPost = posts.length > 0 ? posts[currentPostIndex] : null;
   const currentPostDetail = currentPost ? (postData[currentPost.post_id] || currentPost) : null;
   const currentUserData = currentPost ? users[currentPost.user_id] : null;

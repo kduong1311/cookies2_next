@@ -33,7 +33,7 @@ export default function CookingUploadPage() {
     prepTime: "",
     cookTime: "",
     servings: "",
-    difficulty: "Easy",
+    difficulty: "easy",
     ingredients: [""],
     instructions: [""]
   })
@@ -265,7 +265,7 @@ export default function CookingUploadPage() {
         prepTime: "",
         cookTime: "",
         servings: "",
-        difficulty: "Easy",
+        difficulty: "easy",
         ingredients: [""],
         instructions: [""]
       });
@@ -536,9 +536,9 @@ export default function CookingUploadPage() {
                       onChange={(e) => setRecipe({...recipe, difficulty: e.target.value})}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
                     >
-                      <option value="Easy">Easy</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Hard">Hard</option>
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
                     </select>
                   </div>
                 </div>
