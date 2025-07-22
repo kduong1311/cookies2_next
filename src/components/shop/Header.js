@@ -7,7 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 
 export default function Header() {
   const router = useRouter();
-  const { user } = useAuth(); // 👈 Lấy user đang đăng nhập
+  const { user } = useAuth();
   const {cartCount} = useCart();
 
   const handleShopClick = async () => {
@@ -31,7 +31,6 @@ export default function Header() {
       }
     } catch (error) {
       console.error("Failed to fetch shop data", error);
-      // Có thể show toast hoặc redirect fallback nếu cần
     }
   };
 

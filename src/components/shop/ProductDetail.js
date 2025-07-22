@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { fetchProductById } from "@/api_services/product";
 import AddToCartModal from "./AddToCartModal";
 import { useCart } from "@/contexts/CartContext";
+import toast from "react-hot-toast";
 
 export default function ProductDetail({ productId, onBack }) {
   const router = useRouter();
@@ -22,7 +23,6 @@ export default function ProductDetail({ productId, onBack }) {
       try {
         setLoading(true);
         const fetchedProduct = await fetchProductById(productId);
-        console.log(fetchedProduct);
         if (fetchedProduct) {
           setProduct(fetchedProduct);
           setError(null);
@@ -88,13 +88,13 @@ export default function ProductDetail({ productId, onBack }) {
   const handleAddToCartConfirmed = (item) => {
     addToCart(item);
     setCartModalOpen(false);
-    alert("Đã thêm vào giỏ hàng!");
+    toast.success("Added to cart!")
   };
 
   const handleBuyNow = () => {
     const totalStock = getTotalStock();
     if (totalStock === 0) {
-      alert("Sản phẩm đã hết hàng!");
+      toast.error("Sold out")
       return;
     }
     handleAddToCart();

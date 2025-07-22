@@ -6,17 +6,6 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import toast from 'react-hot-toast';
 
 export default function ShareModal({ open, onOpenChange, shareUrl }) {
-
-  console.log("a", shareUrl);
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied to clipboard!");
-    } catch (err) {
-      toast.error("Failed to copy link.");
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="text-white sm:max-w-[400px] bg-gray-900 rounded-lg p-6">
@@ -57,15 +46,6 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
           >
             <FaTelegramPlane className="text-white text-2xl" />
           </a>
-
-          {/* Copy Link */}
-          <button
-            onClick={handleCopyLink}
-            className="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition"
-            aria-label="Copy link"
-          >
-            <FaLink className="text-white text-2xl" />
-          </button>
         </div>
       </DialogContent>
     </Dialog>

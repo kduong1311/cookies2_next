@@ -29,7 +29,7 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
       setImages([...images, newImage]);
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Lỗi khi tải lên hình ảnh. Vui lòng thử lại!");
+      alert("Image upload failed. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -74,7 +74,7 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <ImageIcon className="w-5 h-5 text-orange-500" />
-          Hình ảnh sản phẩm
+          Product Images
         </h3>
         
         <div
@@ -109,10 +109,10 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
               )}
               <div>
                 <p className="text-lg font-semibold text-white">
-                  {isUploading ? "Đang tải lên..." : "Tải lên hình ảnh"}
+                  {isUploading ? "Uploading..." : "Upload an image"}
                 </p>
                 <p className="text-sm text-gray-400">
-                  Kéo thả hoặc click để chọn ảnh (PNG, JPG, JPEG)
+                  Drag & drop or click to upload (PNG, JPG, JPEG)
                 </p>
               </div>
             </div>
@@ -124,7 +124,7 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
       {images.length > 0 && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
           <h4 className="text-md font-semibold text-white mb-4">
-            Ảnh đã tải lên ({images.length})
+            Uploaded Images ({images.length})
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {images.map((image, index) => (
@@ -137,7 +137,7 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
                 />
                 {image.is_primary && (
                   <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
-                    Ảnh chính
+                    Primary
                   </div>
                 )}
                 <button
@@ -147,7 +147,7 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
                   <X className="w-4 h-4" />
                 </button>
                 <div className="absolute bottom-2 left-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                  Click để đặt làm ảnh chính
+                  Click to set as primary image
                 </div>
               </div>
             ))}

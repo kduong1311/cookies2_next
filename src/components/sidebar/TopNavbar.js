@@ -69,15 +69,14 @@ export default function TopNavbar() {
     fetchNotifications();
   }, [user?.user_id]);
 
-  // Format thời gian
   const formatTime = (timestamp) => {
     const now = new Date();
     const notificationTime = new Date(timestamp);
     const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
     
-    if (diffInMinutes < 1) return "Vừa xong";
-    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} giờ trước`;
+    if (diffInMinutes < 1) return "Now";
+    if (diffInMinutes < 60) return `${diffInMinutes} Last min`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} last hour`;
     return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
   };
 
@@ -119,21 +118,17 @@ export default function TopNavbar() {
     }
   };
 
-  // Xử lý click vào avatar để chuyển sang profile
   const handleAvatarClick = () => {
     if (user?.user_id) {
       router.push(`/profile/${user.user_id}`);
     }
   };
 
-  // Xử lý click vào notification
   const handleNotificationClick = async (notification) => {
-    // Đánh dấu đã đọc nếu chưa đọc
     if (!notification.is_read) {
       await markAsRead(notification.notification_id);
     }
     
-    // Chuyển hướng dựa trên type và reference
     if (notification.reference_type === 'post' && notification.reference_id) {
       router.push(`/post/${notification.reference_id}`);
     } else if (notification.reference_type === 'user' && notification.reference_id) {
@@ -235,7 +230,7 @@ export default function TopNavbar() {
                   {loading ? (
                     <div className="p-8 text-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-                      <p className="text-gray-400 mt-2">Đang tải...</p>
+                      <p className="text-gray-400 mt-2">Loading...</p>
                     </div>
                   ) : notifications.length === 0 ? (
                     <div className="p-8 text-center">
@@ -244,8 +239,8 @@ export default function TopNavbar() {
                           <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="currentColor"/>
                         </svg>
                       </div>
-                      <p className="text-gray-400 font-medium">Không có thông báo nào</p>
-                      <p className="text-gray-500 text-sm mt-1">Thông báo mới sẽ xuất hiện ở đây</p>
+                      <p className="text-gray-400 font-medium">Have no new notification</p>
+                      <p className="text-gray-500 text-sm mt-1">New notification will be here</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-gray-200 dark:divide-gray-700">

@@ -13,14 +13,14 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
         <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Package className="w-4 h-4 text-orange-500" />
-          Tên sản phẩm *
+          Product Name *
         </label>
         <input
           type="text"
           value={product.name}
           onChange={(e) => setProduct({ ...product, name: e.target.value })}
           className="w-full p-4 bg-gray-700/50 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
-          placeholder="Nhập tên sản phẩm..."
+          placeholder="Enter product name..."
         />
       </div>
 
@@ -28,23 +28,24 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
         <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Info className="w-4 h-4 text-orange-500" />
-          Mô tả sản phẩm
+          Product Description
         </label>
         <textarea
           value={product.description}
           onChange={(e) => setProduct({ ...product, description: e.target.value })}
           className="w-full p-4 bg-gray-700/50 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 resize-none transition-all duration-300"
-          placeholder="Mô tả chi tiết về sản phẩm..."
+          placeholder="Detailed description about the product..."
           rows={4}
         />
       </div>
 
       {/* Price & Category */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Price */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
           <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-green-500" />
-            Giá cơ bản *
+            Base Price *
           </label>
           <input
             type="number"
@@ -56,10 +57,11 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
           />
         </div>
 
+        {/* Category */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
           <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <Tag className="w-4 h-4 text-blue-500" />
-            Danh mục *
+            Category *
           </label>
           <select
             value={product.category_id}
@@ -67,7 +69,7 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
             className="w-full p-4 bg-gray-700/50 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white transition-all duration-300"
             disabled={isLoading}
           >
-            <option value="">Chọn danh mục</option>
+            <option value="">Select a category</option>
             {categories.map((category) => (
               <option key={category.category_id} value={category.category_id}>
                 {category.name}
