@@ -37,7 +37,7 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
 
           {/* X (Twitter) */}
           <a
-            href={`https://twitter.com/intent/tweet?url=${encodedUrl}`}
+            href={`https://twitter.com/intent/tweet?url=${shareUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-14 h-14 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition"
@@ -48,7 +48,7 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
 
           {/* Telegram */}
           <a
-            href={`https://t.me/share/url?url=${encodedUrl}`}
+            href={`https://t.me/share/url?url=${shareUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-14 h-14 rounded-full bg-[#0088cc] flex items-center justify-center hover:bg-[#34abe0] transition"
