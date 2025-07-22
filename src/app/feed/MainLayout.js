@@ -87,6 +87,7 @@ const isCustomPage = pathname.startsWith("/shop")
                   className="w-[800px] bg-gray-800 text-black p-6 overflow-y-auto shadow-lg hide-scrollbar"
                 >
                   <RecipePage
+                  key={currentPostId}
                   postId={currentPostId}/>
                 </motion.div>
               )}
