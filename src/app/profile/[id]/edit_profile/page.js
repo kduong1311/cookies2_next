@@ -17,7 +17,8 @@ const EditProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   
-  const [formData, setFormData] = useState({
+  // Separate state for user profile
+  const [profileData, setProfileData] = useState({
     username: '',
     bio: '',
     city: '',
@@ -27,13 +28,17 @@ const EditProfilePage = () => {
     avatar_url: '',
     cover_photo_url: '',
     is_chef: false,
-    date_of_birth: '',
+    date_of_birth: ''
+  });
+
+  // Separate state for shipping address
+  const [shippingData, setShippingData] = useState({
     recipient_name: '',
-    shipping_contact_number: '',
+    contact_number: '',
     address: '',
-    shipping_city: '',
+    city: '',
     state: '',
-    shipping_country: '',
+    country: '',
     district: '',
     ward: '',
     postal_code: ''
@@ -58,7 +63,7 @@ const EditProfilePage = () => {
         });
         if (!res.ok) throw new Error('Failed to load profile data');
         const userData = await res.json();
-        const cleanData = {
+        const cleanProfile = {
           username: userData.username || '',
           bio: userData.bio || '',
           city: userData.city || '',
@@ -68,12 +73,12 @@ const EditProfilePage = () => {
           avatar_url: userData.avatar_url || '',
           cover_photo_url: userData.cover_photo_url || '',
           is_chef: userData.is_chef || false,
-          date_of_birth: userData.date_of_birth?.split('T')[0] || '',
+          date_of_birth: userData.date_of_birth?.split('T')[0] || ''
         };
-        setFormData(prev => ({ ...prev, ...cleanData }));
+        setProfileData(cleanProfile);
         setPreviewImages({
-          avatar: cleanData.avatar_url,
-          cover: cleanData.cover_photo_url
+          avatar: cleanProfile.avatar_url,
+          cover: cleanProfile.cover_photo_url
         });
       } catch (error) {
         setMessage({ type: 'error', text: error.message || 'Failed to load profile data' });
@@ -90,18 +95,17 @@ const EditProfilePage = () => {
         const data = await res.json();
         if (data) {
           setShippingAddressId(data.id || null);
-          setFormData(prev => ({
-            ...prev,
+          setShippingData({
             recipient_name: data.recipient_name || '',
-            shipping_contact_number: data.contact_number || '',
+            contact_number: data.contact_number || '',
             address: data.address || '',
-            shipping_city: data.city || '',
+            city: data.city || '',
             state: data.state || '',
-            shipping_country: data.country || '',
+            country: data.country || '',
             district: data.district || '',
             ward: data.ward || '',
             postal_code: data.postal_code || ''
-          }));
+          });
         }
       } catch (error) {
         // ignore if not found
@@ -111,12 +115,19 @@ const EditProfilePage = () => {
     fetchShippingAddress();
   }, [userId]);
 
-
-  const handleInputChange = (e) => {
+  // Unified input change handler
+  const handleProfileChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setProfileData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+  const handleShippingChange = (e) => {
+    const { name, value } = e.target;
+    setShippingData(prev => ({
+      ...prev,
+      [name]: value
     }));
   };
 
@@ -130,17 +141,15 @@ const EditProfilePage = () => {
         try {
           setSaving(true);
           const { url } = await uploadToCloudinary(file);
-
           setPreviewImages(prev => ({
             ...prev,
             [type]: url
           }));
-          setFormData(prev => ({
+          setProfileData(prev => ({
             ...prev,
             [`${type}_url`]: url
           }));
           setMessage({ type: 'success', text: 'Image uploaded successfully!' });
-
           setTimeout(() => {
             setMessage({ type: '', text: '' });
           }, 2000);
@@ -158,28 +167,18 @@ const EditProfilePage = () => {
     setSaving(true);
     setMessage({ type: '', text: '' });
     try {
-      // Save profile
+      // 1. Update user profile
       const response = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
         method: 'PUT',
         credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(profileData),
       });
       if (!response.ok) throw new Error('Failed to update profile');
-      // Save shipping address
-      const shippingPayload = {
-        recipient_name: formData.recipient_name,
-        contact_number: formData.shipping_contact_number,
-        address: formData.address,
-        city: formData.shipping_city,
-        state: formData.state,
-        country: formData.shipping_country,
-        district: formData.district,
-        ward: formData.ward,
-        postal_code: formData.postal_code
-      };
+      // 2. Update or create shipping address
+      const shippingPayload = { ...shippingData };
       let shippingRes;
       if (shippingAddressId) {
         shippingRes = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
@@ -323,8 +322,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
+                  value={profileData.username}
+                  onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your username"
                 />
@@ -334,8 +333,8 @@ const EditProfilePage = () => {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={profileData.email}
+                  onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your email"
                 />
@@ -345,8 +344,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="phone_number"
-                  value={formData.phone_number}
-                  onChange={handleInputChange}
+                  value={profileData.phone_number}
+                  onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your phone number"
                 />
@@ -356,8 +355,8 @@ const EditProfilePage = () => {
                 <input
                   type="date"
                   name="date_of_birth"
-                  value={formData.date_of_birth}
-                  onChange={handleInputChange}
+                  value={profileData.date_of_birth}
+                  onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                 />
               </div>
@@ -376,8 +375,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
+                  value={profileData.city}
+                  onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your city"
                 />
@@ -387,8 +386,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
+                  value={profileData.country}
+                  onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your country"
                 />
@@ -404,13 +403,13 @@ const EditProfilePage = () => {
             </h2>
             <textarea
               name="bio"
-              value={formData.bio}
-              onChange={handleInputChange}
+              value={profileData.bio}
+              onChange={handleProfileChange}
               rows={4}
               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors resize-none"
               placeholder="Tell us about yourself..."
             />
-            <p className="text-sm text-gray-400 mt-2">{formData.bio.length}/500 characters</p>
+            <p className="text-sm text-gray-400 mt-2">{profileData.bio.length}/500 characters</p>
           </div>
           {/* Shipping Address */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
@@ -424,8 +423,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="recipient_name"
-                  value={formData.recipient_name || ''}
-                  onChange={handleInputChange}
+                  value={shippingData.recipient_name || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter recipient name"
                 />
@@ -434,9 +433,9 @@ const EditProfilePage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Contact Number</label>
                 <input
                   type="text"
-                  name="shipping_contact_number"
-                  value={formData.shipping_contact_number || ''}
-                  onChange={handleInputChange}
+                  name="contact_number"
+                  value={shippingData.contact_number || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter contact number"
                 />
@@ -446,19 +445,30 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="address"
-                  value={formData.address || ''}
-                  onChange={handleInputChange}
+                  value={shippingData.address || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter street address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+                <input
+                  type="text"
+                  name="country"
+                  value={shippingData.country || ''}
+                  onChange={handleShippingChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter country"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
                 <input
                   type="text"
-                  name="shipping_city"
-                  value={formData.shipping_city || ''}
-                  onChange={handleInputChange}
+                  name="city"
+                  value={shippingData.city || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter city"
                 />
@@ -468,21 +478,10 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="state"
-                  value={formData.state || ''}
-                  onChange={handleInputChange}
+                  value={shippingData.state || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter state/province"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
-                <input
-                  type="text"
-                  name="shipping_country"
-                  value={formData.shipping_country || ''}
-                  onChange={handleInputChange}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
-                  placeholder="Enter country"
                 />
               </div>
               <div>
@@ -490,8 +489,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="district"
-                  value={formData.district || ''}
-                  onChange={handleInputChange}
+                  value={shippingData.district || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter district"
                 />
@@ -501,8 +500,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="ward"
-                  value={formData.ward || ''}
-                  onChange={handleInputChange}
+                  value={shippingData.ward || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter ward"
                 />
@@ -512,8 +511,8 @@ const EditProfilePage = () => {
                 <input
                   type="text"
                   name="postal_code"
-                  value={formData.postal_code || ''}
-                  onChange={handleInputChange}
+                  value={shippingData.postal_code || ''}
+                  onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter postal code"
                 />
@@ -528,8 +527,8 @@ const EditProfilePage = () => {
               <input
                 type="checkbox"
                 name="is_chef"
-                checked={formData.is_chef}
-                onChange={handleInputChange}
+                checked={profileData.is_chef}
+                onChange={handleProfileChange}
                 className="w-5 h-5 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
               />
               <label className="text-gray-300">
