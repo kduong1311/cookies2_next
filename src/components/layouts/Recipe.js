@@ -27,7 +27,7 @@ export default function RecipePage({ postId, onBack }) {
       
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3004/api/recipes/post/${postId}`);
+        const response = await fetch(`http://103.253.145.7:3004/api/recipes/${postId}`);
         const data = await response.json();
         
         if (data.status === 'success') {
