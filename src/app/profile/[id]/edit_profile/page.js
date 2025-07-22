@@ -27,58 +27,89 @@ const EditProfilePage = () => {
     avatar_url: '',
     cover_photo_url: '',
     is_chef: false,
-    date_of_birth: ''
+    date_of_birth: '',
+    recipient_name: '',
+    shipping_contact_number: '',
+    address: '',
+    shipping_city: '',
+    state: '',
+    shipping_country: '',
+    district: '',
+    ward: '',
+    postal_code: ''
   });
+
+  // Track if shipping address exists
+  const [shippingAddressId, setShippingAddressId] = useState(null);
 
   const [previewImages, setPreviewImages] = useState({
     avatar: '',
     cover: ''
   });
 
-  // Simulate fetching user data
-useEffect(() => {
-  const fetchUserData = async () => {
-    if (!userId) return;
-
-    setLoading(true);
-    try {
-      const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to load profile data');
+  // Fetch user data and shipping address
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userId) return;
+      setLoading(true);
+      try {
+        const res = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error('Failed to load profile data');
+        const userData = await res.json();
+        const cleanData = {
+          username: userData.username || '',
+          bio: userData.bio || '',
+          city: userData.city || '',
+          country: userData.country || '',
+          email: userData.email || '',
+          phone_number: userData.phone_number || '',
+          avatar_url: userData.avatar_url || '',
+          cover_photo_url: userData.cover_photo_url || '',
+          is_chef: userData.is_chef || false,
+          date_of_birth: userData.date_of_birth?.split('T')[0] || '',
+        };
+        setFormData(prev => ({ ...prev, ...cleanData }));
+        setPreviewImages({
+          avatar: cleanData.avatar_url,
+          cover: cleanData.cover_photo_url
+        });
+      } catch (error) {
+        setMessage({ type: 'error', text: error.message || 'Failed to load profile data' });
+      } finally {
+        setLoading(false);
       }
-
-      const userData = await res.json();
-
-      const cleanData = {
-        username: userData.username || '',
-        bio: userData.bio || '',
-        city: userData.city || '',
-        country: userData.country || '',
-        email: userData.email || '',
-        phone_number: userData.phone_number || '',
-        avatar_url: userData.avatar_url || '',
-        cover_photo_url: userData.cover_photo_url || '',
-        is_chef: userData.is_chef || false,
-        date_of_birth: userData.date_of_birth?.split('T')[0] || ''
-      };
-
-      setFormData(cleanData);
-      setPreviewImages({
-        avatar: cleanData.avatar_url,
-        cover: cleanData.cover_photo_url
-      });
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to load profile data' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchUserData();
-}, [userId]);
+    };
+    const fetchShippingAddress = async () => {
+      try {
+        const res = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
+          credentials: 'include',
+        });
+        if (!res.ok) return; // No address yet
+        const data = await res.json();
+        if (data) {
+          setShippingAddressId(data.id || null);
+          setFormData(prev => ({
+            ...prev,
+            recipient_name: data.recipient_name || '',
+            shipping_contact_number: data.contact_number || '',
+            address: data.address || '',
+            shipping_city: data.city || '',
+            state: data.state || '',
+            shipping_country: data.country || '',
+            district: data.district || '',
+            ward: data.ward || '',
+            postal_code: data.postal_code || ''
+          }));
+        }
+      } catch (error) {
+        // ignore if not found
+      }
+    };
+    fetchUserData();
+    fetchShippingAddress();
+  }, [userId]);
 
 
   const handleInputChange = (e) => {
@@ -124,12 +155,10 @@ useEffect(() => {
   };
 
   const handleSubmit = async () => {
-    
     setSaving(true);
     setMessage({ type: '', text: '' });
-
     try {
-      // Simulate API call
+      // Save profile
       const response = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
         method: 'PUT',
         credentials: "include",
@@ -138,19 +167,39 @@ useEffect(() => {
         },
         body: JSON.stringify(formData),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
+      if (!response.ok) throw new Error('Failed to update profile');
+      // Save shipping address
+      const shippingPayload = {
+        recipient_name: formData.recipient_name,
+        contact_number: formData.shipping_contact_number,
+        address: formData.address,
+        city: formData.shipping_city,
+        state: formData.state,
+        country: formData.shipping_country,
+        district: formData.district,
+        ward: formData.ward,
+        postal_code: formData.postal_code
+      };
+      let shippingRes;
+      if (shippingAddressId) {
+        shippingRes = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(shippingPayload)
+        });
+      } else {
+        shippingRes = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(shippingPayload)
+        });
       }
-
-      toast.success("Profile updated successfully!");
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      
-      // Auto-hide success message after 3 seconds
-      setTimeout(() => {
-        setMessage({ type: '', text: '' });
-      }, 3000);
-      
+      if (!shippingRes.ok) throw new Error('Failed to save shipping address');
+      toast.success("Profile and shipping address updated successfully!");
+      setMessage({ type: 'success', text: 'Profile and shipping address updated successfully!' });
+      setTimeout(() => { setMessage({ type: '', text: '' }); }, 3000);
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'An error occurred' });
       toast.error(error.message || 'An error occurred');

@@ -8,6 +8,34 @@ const OrderPage = () => {
   const {cartItems, buyNowItem, clearBuyNow} = useCart();
   const [orderItems, setOrderItems] = useState([]);
 
+  // Autofill shipping address on mount
+  useEffect(() => {
+    const fetchShippingAddress = async () => {
+      try {
+        const res = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
+          credentials: 'include',
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data) {
+          setShippingAddress({
+            fullName: data.recipient_name || '',
+            phone: data.contact_number || '',
+            address: data.address || '',
+            city: data.city || '',
+            district: data.district || '',
+            ward: data.ward || '',
+            country: data.country || '',
+            postalCode: data.postal_code || ''
+          });
+        }
+      } catch (error) {
+        // ignore autofill errors
+      }
+    };
+    fetchShippingAddress();
+  }, []);
+
     useEffect(() => {
     if (buyNowItem) {
       setOrderItems([buyNowItem]);
