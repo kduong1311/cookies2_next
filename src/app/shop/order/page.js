@@ -188,6 +188,22 @@ const OrderPage = () => {
                   />
                   <input
                     type="text"
+                    placeholder="Country"
+                    value={shippingAddress.country}
+                    onChange={(e) => setShippingAddress({...shippingAddress, country: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Postal Code"
+                    value={shippingAddress.postalCode}
+                    onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                  <input
+                    type="text"
                     placeholder="City"
                     value={shippingAddress.city}
                     onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}

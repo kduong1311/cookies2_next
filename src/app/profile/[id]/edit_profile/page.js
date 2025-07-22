@@ -362,6 +362,103 @@ useEffect(() => {
             />
             <p className="text-sm text-gray-400 mt-2">{formData.bio.length}/500 characters</p>
           </div>
+          {/* Shipping Address */}
+          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Truck className="w-5 h-5 text-orange-500" />
+              Shipping Address
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Recipient Name</label>
+                <input
+                  type="text"
+                  name="recipient_name"
+                  value={formData.recipient_name || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter recipient name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter street address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
+                <input
+                  type="text"
+                  name="shipping_city"
+                  value={formData.shipping_city || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter city"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">State/Province</label>
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter state/province"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+                <input
+                  type="text"
+                  name="shipping_country"
+                  value={formData.shipping_country || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter country"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">District</label>
+                <input
+                  type="text"
+                  name="district"
+                  value={formData.district || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter district"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Ward</label>
+                <input
+                  type="text"
+                  name="ward"
+                  value={formData.ward || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter ward"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Postal Code</label>
+                <input
+                  type="text"
+                  name="postal_code"
+                  value={formData.postal_code || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter postal code"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Chef Status */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
