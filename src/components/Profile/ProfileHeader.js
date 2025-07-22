@@ -93,7 +93,6 @@ const ProfileHeader = ({ userProfile }) => {
           </div>
         </div>
 
-        {/* Name and Username */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-bold">{displayName}</h1>
@@ -114,7 +113,6 @@ const ProfileHeader = ({ userProfile }) => {
           <p className="text-gray-300 mb-4 leading-relaxed">{displayBio}</p>
         )}
 
-        {/* Location and Join Date */}
         <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-400">
           {location && (
             <div className="flex items-center gap-1">
@@ -130,7 +128,6 @@ const ProfileHeader = ({ userProfile }) => {
           )}
         </div>
 
-        {/* Stats */}
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4 text-gray-400" />

@@ -10,19 +10,19 @@ const ChatBot = ({ apiKey }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Tin nhắn chào mừng
+  // Welcome message
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Xin chào! 👋 Tôi là trợ lý nấu ăn AI của bạn. Tôi có thể giúp bạn:
+    content: `Hello! 👋 I’m your AI Cooking Assistant. I can help you with:
 
-🍳 Tư vấn công thức nấu ăn
-🥘 Thay thế nguyên liệu
-⏰ Hướng dẫn thời gian nấu
-🍽️ Gợi ý món ăn theo nguyên liệu có sẵn
-📝 Giải đáp thắc mắc về kỹ thuật nấu ăn
+🍳 Cooking recipe suggestions  
+🥘 Ingredient substitutions  
+⏰ Cooking and preparation time guidance  
+🍽️ Meal ideas based on available ingredients  
+📝 Answer questions about cooking techniques
 
-Bạn có câu hỏi gì về nấu ăn không?`,
+What would you like to ask today?`,
     timestamp: new Date().toLocaleTimeString()
   };
 
@@ -35,63 +35,58 @@ Bạn có câu hỏi gì về nấu ăn không?`,
   }, [messages]);
 
   useEffect(() => {
-    // Khởi tạo tin nhắn chào mừng khi mở chat lần đầu
     if (isOpen && messages.length === 0) {
       setMessages([welcomeMessage]);
     }
   }, [isOpen]);
 
   const createCookingPrompt = (userMessage) => {
-    return `Bạn là một chuyên gia nấu ăn AI thân thiện và chuyên nghiệp. Hãy trả lời câu hỏi sau về nấu ăn một cách chi tiết và hữu ích. Sử dụng tiếng Việt và cung cấp lời khuyên thực tế:
+    return `You are a friendly and professional AI cooking assistant. Answer the following cooking-related question in Vietnamese in a detailed and helpful manner:
 
-Câu hỏi: ${userMessage}
+Question: ${userMessage}
 
-Hãy trả lời một cách nhiệt tình và hữu ích, bao gồm:
-- Hướng dẫn chi tiết nếu cần
-- Mẹo và lưu ý quan trọng
-- Thời gian chuẩn bị và nấu (nếu có)
-- Gợi ý thay thế nguyên liệu (nếu phù hợp)
+Be enthusiastic and helpful in your response, and include:
+- Step-by-step instructions if needed
+- Tips and key notes
+- Estimated preparation and cooking time (if relevant)
+- Ingredient alternatives (if applicable)
 
-Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
+Keep your answer concise but informative.`;
   };
 
   const sendMessage = async () => {
     if (!input.trim() || !apiKey) return;
 
-    const userMessage = { 
-      id: Date.now(), 
-      role: 'user', 
+    const userMessage = {
+      id: Date.now(),
+      role: 'user',
       content: input,
       timestamp: new Date().toLocaleTimeString()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
       const cookingPrompt = createCookingPrompt(input);
-      
+
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{
-            parts: [{
-              text: cookingPrompt
-            }]
+            parts: [{ text: cookingPrompt }]
           }]
         })
       });
 
       if (!response.ok) {
-        throw new Error('Không thể kết nối với trợ lý AI');
+        throw new Error('Unable to connect to AI assistant');
       }
 
       const data = await response.json();
-      
+
       if (data.candidates && data.candidates[0]) {
         const botMessage = {
           id: Date.now() + 1,
@@ -101,13 +96,13 @@ Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
         };
         setMessages(prev => [...prev, botMessage]);
       } else {
-        throw new Error('Không nhận được phản hồi từ trợ lý');
+        throw new Error('No response received from AI');
       }
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 1,
         role: 'assistant',
-        content: `Xin lỗi, tôi gặp sự cố kỹ thuật. Bạn có thể thử lại không? 😅\n\nLỗi: ${error.message}`,
+        content: `Sorry, I encountered a technical issue. Please try again. 😅\n\nError: ${error.message}`,
         timestamp: new Date().toLocaleTimeString(),
         isError: true
       };
@@ -142,19 +137,17 @@ Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
     ));
   };
 
-  // Suggested questions
   const suggestedQuestions = [
-    "Cách làm phở bò ngon tại nhà?",
-    "Thay thế gì cho bơ khi làm bánh?",
-    "Món ăn nhanh với trứng và cơm?",
-    "Cách khử mùi tanh của cá?"
+    "How to make delicious beef pho at home?",
+    "What can I use instead of butter in baking?",
+    "Quick dish with rice and eggs?",
+    "How to remove the fishy smell from fish?"
   ];
 
   const handleSuggestedQuestion = (question) => {
     setInput(question);
     inputRef.current?.focus();
   };
-
 
   return (
     <div className="fixed bottom-6 right-6 z-[9999] text-white">
@@ -179,8 +172,8 @@ Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
               <div className="flex items-center space-x-2">
                 <ChefHat className="w-6 h-6" />
                 <div>
-                  <h3 className="font-semibold">Trợ lý nấu ăn AI</h3>
-                  <p className="text-xs opacity-90">{isLoading ? 'Đang suy nghĩ...' : 'Sẵn sàng hỗ trợ'}</p>
+                  <h3 className="font-semibold">AI Cooking Assistant</h3>
+                  <p className="text-xs opacity-90">{isLoading ? 'Thinking...' : 'Ready to help'}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -219,7 +212,7 @@ Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
                     <div className="max-w-xs px-3 py-2 rounded-2xl bg-gray-700 text-white border border-gray-600">
                       <div className="flex items-center space-x-2">
                         <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
-                        <span className="text-sm">Đang tư vấn...</span>
+                        <span className="text-sm">Generating response...</span>
                       </div>
                     </div>
                   </div>
@@ -227,7 +220,7 @@ Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
 
                 {messages.length === 1 && !isLoading && (
                   <div className="space-y-2">
-                    <p className="text-xs text-gray-400 text-center">Gợi ý câu hỏi:</p>
+                    <p className="text-xs text-gray-400 text-center">Try asking:</p>
                     {suggestedQuestions.map((question, index) => (
                       <button
                         key={index}
@@ -251,7 +244,7 @@ Giữ cho câu trả lời ngắn gọn nhưng đầy đủ thông tin.`;
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Hỏi về nấu ăn..."
+                    placeholder="Ask about cooking..."
                     className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-white placeholder-gray-400"
                     disabled={isLoading}
                   />

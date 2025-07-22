@@ -41,10 +41,8 @@ export default function OrdersPage() {
         const fetchedOrders = data.data;
         setOrders(fetchedOrders);
 
-        // Lấy danh sách userId duy nhất
         const uniqueUserIds = [...new Set(fetchedOrders.map(order => order.user_id))];
 
-        // Gọi API cho từng userId
         const userResponses = await Promise.all(
           uniqueUserIds.map(id =>
             fetch(`http://103.253.145.7:3000/api/users/${id}`, { credentials: "include" })
@@ -170,14 +168,14 @@ export default function OrdersPage() {
       toast.success("Profile updated successfully!");
 
     } catch (err) {
-      alert('Lỗi khi cập nhật trạng thái đơn hàng: ' + err.message);
+      toast.error("Update status Fail!");
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-white text-xl">Loading data...</div>
+        <div className="text-white text-xl">Đang tải dữ liệu...</div>
       </div>
     );
   }
@@ -185,7 +183,7 @@ export default function OrdersPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-red-400 text-xl">Error: {error}</div>
+        <div className="text-red-400 text-xl">Lỗi: {error}</div>
       </div>
     );
   }
@@ -196,16 +194,16 @@ export default function OrdersPage() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <span className="text-green-400">��</span>
-            Order Management
+            <span className="text-green-400">📑</span>
+            Quản lý đơn hàng
           </h1>
-          <p className="text-gray-400">View and process orders</p>
+          <p className="text-gray-400">Xem và xử lý các đơn hàng</p>
         </div>
         <Link
           href={`/shop/my-shop/${shopId}`}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
-          ← Back to Dashboard
+          ← Về Dashboard
         </Link>
       </div>
 
@@ -213,7 +211,7 @@ export default function OrdersPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-blue-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{orders.length}</div>
-          <div className="text-blue-100">Total Orders</div>
+          <div className="text-blue-100">Tổng đơn hàng</div>
         </div>
         <div className="bg-green-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{orders.filter(o => o.order_status === "completed").length}</div>
@@ -246,11 +244,11 @@ export default function OrdersPage() {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
           >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="all">Tất cả trạng thái</option>
+            <option value="pending">Chưa xử lý</option>
+            <option value="processing">Đang xử lý</option>
+            <option value="completed">Hoàn thành</option>
+            <option value="cancelled">Đã hủy</option>
           </select>
         </div>
       </div>
@@ -258,21 +256,21 @@ export default function OrdersPage() {
       {/* Orders Table */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-white">Order List ({filteredOrders.length})</h2>
+          <h2 className="text-xl font-semibold text-white">Danh sách đơn hàng ({filteredOrders.length})</h2>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-700/50">
               <tr>
-                <th className="text-left text-white font-medium p-4">Order Number</th>
-                <th className="text-left text-white font-medium p-4">Customer</th>
-                <th className="text-left text-white font-medium p-4">Total</th>
-                <th className="text-left text-white font-medium p-4">Status</th>
-                <th className="text-left text-white font-medium p-4">Payment</th>
-                <th className="text-left text-white font-medium p-4">Shipping</th>
-                <th className="text-left text-white font-medium p-4">Order Date</th>
-                <th className="text-left text-white font-medium p-4">Actions</th>
+                <th className="text-left text-white font-medium p-4">Mã đơn</th>
+                <th className="text-left text-white font-medium p-4">Khách hàng</th>
+                <th className="text-left text-white font-medium p-4">Tổng tiền</th>
+                <th className="text-left text-white font-medium p-4">Trạng thái</th>
+                <th className="text-left text-white font-medium p-4">Thanh toán</th>
+                <th className="text-left text-white font-medium p-4">Giao hàng</th>
+                <th className="text-left text-white font-medium p-4">Ngày đặt</th>
+                <th className="text-left text-white font-medium p-4">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -325,7 +323,7 @@ export default function OrdersPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-white">Order Details {selectedOrder.order_number}</h3>
+              <h3 className="text-xl font-semibold text-white">Chi tiết đơn hàng {selectedOrder.order_number}</h3>
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -337,10 +335,10 @@ export default function OrdersPage() {
             <div className="space-y-6">
               {/* Order Info */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Order Information</h4>
+                <h4 className="text-white font-medium mb-3">Thông tin đơn hàng</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-400">Order Number:</span>
+                    <span className="text-gray-400">Mã đơn:</span>
                     <span className="text-white ml-2">{selectedOrder.order_number}</span>
                   </div>
                   <div>
@@ -348,27 +346,27 @@ export default function OrdersPage() {
                     <span className="text-white ml-2">{userNames[selectedOrder.user_id] || selectedOrder.user_id}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Order Date:</span>
+                    <span className="text-gray-400">Ngày đặt:</span>
                     <span className="text-white ml-2">{formatDate(selectedOrder.created_at)}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Payment Method:</span>
+                    <span className="text-gray-400">Phương thức thanh toán:</span>
                     <span className="text-white ml-2">{getPaymentMethodText(selectedOrder.payment_method)}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Shipping Method:</span>
+                    <span className="text-gray-400">Phương thức giao hàng:</span>
                     <span className="text-white ml-2">{selectedOrder.shipping_method}</span>
                   </div>
                   {selectedOrder.tracking_number && (
                     <div>
-                      <span className="text-gray-400">Tracking Number:</span>
+                      <span className="text-gray-400">Mã vận đơn:</span>
                       <span className="text-white ml-2">{selectedOrder.tracking_number}</span>
                     </div>
                   )}
                 </div>
                 {selectedOrder.notes && (
                   <div className="mt-3">
-                    <span className="text-gray-400">Notes:</span>
+                    <span className="text-gray-400">Ghi chú:</span>
                     <span className="text-white ml-2">{selectedOrder.notes}</span>
                   </div>
                 )}
@@ -376,10 +374,10 @@ export default function OrdersPage() {
 
               {/* Order Summary */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Order Summary</h4>
+                <h4 className="text-white font-medium mb-3">Tổng kết đơn hàng</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Subtotal:</span>
+                    <span className="text-gray-400">Tạm tính:</span>
                     <span className="text-white">{formatPrice(selectedOrder.subtotal, selectedOrder.currency)}</span>
                   </div>
                   <div className="flex justify-between">
@@ -387,7 +385,7 @@ export default function OrdersPage() {
                     <span className="text-white">{formatPrice(selectedOrder.tax_amount, selectedOrder.currency)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Shipping Fee:</span>
+                    <span className="text-gray-400">Phí giao hàng:</span>
                     <span className="text-white">{formatPrice(selectedOrder.shipping_amount, selectedOrder.currency)}</span>
                   </div>
                   {parseFloat(selectedOrder.discount_amount) > 0 && (
@@ -407,10 +405,10 @@ export default function OrdersPage() {
 
               {/* Order Status & Actions */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Status & Actions</h4>
+                <h4 className="text-white font-medium mb-3">Trạng thái & Thao tác</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                   <div>
-                    <span className="text-gray-400">Order Status:</span>
+                    <span className="text-gray-400">Trạng thái đơn:</span>
                     <span className={`ml-2 px-3 py-1 rounded-full text-sm ${getStatusColor(selectedOrder.order_status)} text-white`}>
                       {getStatusText(selectedOrder.order_status)}
                     </span>
@@ -435,7 +433,7 @@ export default function OrdersPage() {
                       onClick={() => updateOrderStatus(selectedOrder.order_id, "processing")}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
-                      🚀 Process Order
+                      🚀 Xử lý đơn hàng
                     </button>
                   )}
                   {selectedOrder.order_status === "processing" && (
@@ -451,7 +449,7 @@ export default function OrdersPage() {
                       onClick={() => updateOrderStatus(selectedOrder.order_id, "cancelled")}
                       className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
-                      ❌ Cancel Order
+                      ❌ Hủy đơn hàng
                     </button>
                   )}
                 </div>

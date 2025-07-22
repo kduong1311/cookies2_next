@@ -12,31 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
-  Upload,
-  CheckCircle,
-  AlertCircle,
-  Loader,
-  DollarSign,
-  Palette,
-  Ruler,
-  Settings,
-  X,
-  Plus,
-  Trash2,
-  Package,
-  Tag,
-  FileImage,
-  Star,
-  ShoppingCart,
-  Info,
-  Layers,
-  Hash,
-  Percent,
+  Upload,CheckCircle,AlertCircle, Loader, DollarSign, Palette,  Ruler, Settings, X, Plus, Trash2, Package, Tag, FileImage, Star, ShoppingCart,Info, Layers, Hash, Percent,
   Box,
   Camera,
   ChevronDown,
   ChevronUp
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function AddProductModal1({ open, onOpenChange, shopId, onSuccess }) {
   // Basic product info
@@ -288,16 +270,10 @@ console.log([...formData.entries()]);
 
         {/* Status Messages */}
         {status === "success" && (
-          <div className="flex items-center gap-2 text-green-400 mb-6 p-4 bg-green-400/10 rounded-lg border border-green-400/20">
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-medium">Product created successfully!</span>
-          </div>
+          toast.success("Create sucessfully")
         )}
         {status === "error" && (
-          <div className="flex items-center gap-2 text-red-400 mb-6 p-4 bg-red-400/10 rounded-lg border border-red-400/20">
-            <AlertCircle className="w-5 h-5" />
-            <span className="font-medium">{errorMessage}</span>
-          </div>
+          toast.error("Create fail!")
         )}
 
         {/* Form */}

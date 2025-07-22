@@ -11,9 +11,7 @@ export default function AddToCartModal({ open, onClose, product, onAddToCart, on
 
   useEffect(() => {
     if (open && product) {
-      // Reset state when modal opens
       if (product.variants && product.variants.length > 0) {
-        // Find first variant with stock
         const availableVariant = product.variants.find(v => v.stock_quantity > 0);
         setSelectedVariant(availableVariant || product.variants[0]);
       } else {
@@ -71,7 +69,7 @@ const handleAddToCart = () => {
 const handleBuyNow = () => {
   if (!canAddToCart) return;
   const item = getItemPayload();
-  onBuyNow(item); // 👈 chuyển tới order
+  onBuyNow(item);
   onClose();
 };
 
@@ -254,7 +252,7 @@ const handleBuyNow = () => {
             className="flex-1 bg-orange-500 hover:bg-orange-600"
             disabled={!canAddToCart}
           >
-            Mua ngay
+            Buy now
           </Button>
           </div>
         </div>

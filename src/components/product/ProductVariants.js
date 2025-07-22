@@ -9,6 +9,7 @@ import {
   Package
 } from "lucide-react";
 import { uploadToCloudinary } from "../upload/uploadCloudinary";
+import toast from "react-hot-toast";
 
 const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading }) => {
   const addVariant = () => {
@@ -34,6 +35,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
 
   const removeVariant = (index) => {
     setVariants(variants.filter((_, i) => i !== index));
+    toast.success("Variant removed");
   };
 
   const handleVariantImageUpload = async (index, file) => {
@@ -43,9 +45,10 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
     try {
       const imageUrl = await uploadToCloudinary(file);
       updateVariant(index, "image_url", imageUrl.url);
+      toast.success("Image uploaded successfully");
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload image. Please try again!");
+      toast.error("Failed to upload image. Please try again!");
     } finally {
       setIsUploading(false);
     }

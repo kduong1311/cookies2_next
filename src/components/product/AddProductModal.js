@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { 
   Dialog, 
   DialogContent, 
@@ -12,12 +15,16 @@ import {
   AlertCircle,
   CheckCircle
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 import ProductBasicInfo from "./ProductBasicInfo";
 import ProductImages from "./ProductImages";
 import ProductVariants from "./ProductVariants";
 
 const AddProductModal = ({ open, onClose, onSuccess }) => {
+  const params = useParams();
+  const shopId = params?.id || "";
+
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -30,7 +37,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
     description: "",
     price: 0,
     category_id: "",
-    shop_id: "d1aa87d9-7b59-4a5e-8d18-79b2f682f311" // Hardcoded
+    shop_id: shopId
   });
 
   const [images, setImages] = useState([]);
@@ -47,9 +54,9 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
   ]);
 
   const steps = [
-    { title: "Thông tin cơ bản", component: "basic" },
-    { title: "Hình ảnh", component: "images" },
-    { title: "Biến thể", component: "variants" }
+    { title: "Basic Information", component: "basic" },
+    { title: "Images", component: "images" },
+    { title: "Variants", component: "variants" }
   ];
 
   useEffect(() => {
@@ -70,8 +77,12 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
 
     if (open) {
       fetchCategories();
+      setProduct((prev) => ({
+        ...prev,
+        shop_id: shopId,
+      }));
     }
-  }, [open]);
+  }, [open, shopId]);
 
   useEffect(() => {
     if (!open) {
@@ -81,7 +92,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
         description: "",
         price: 0,
         category_id: "",
-        shop_id: "d1aa87d9-7b59-4a5e-8d18-79b2f682f311"
+        shop_id: shopId
       });
       setImages([]);
       setVariants([
@@ -97,7 +108,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
       ]);
       setSubmitStatus(null);
     }
-  }, [open]);
+  }, [open, shopId]);
 
   const validateStep = (step) => {
     switch (step) {
@@ -116,7 +127,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
 
   const handleSubmit = async () => {
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
-      alert("Vui lòng điền đầy đủ thông tin bắt buộc!");
+      toast.error("Please complete all required fields.");
       return;
     }
 
@@ -152,7 +163,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
         }, 2000);
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Có lỗi xảy ra khi tạo sản phẩm");
+        throw new Error(errorData.message || "Failed to create product.");
       }
     } catch (error) {
       console.error("Error creating product:", error);
@@ -198,15 +209,14 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
-    if (!isOpen) onClose?.();
+      if (!isOpen) onClose?.();
     }}>
       <DialogContent className="max-w-4xl max-h-[90vh] bg-gray-900 border-gray-700 text-white overflow-hidden flex flex-col">
         <DialogHeader className="border-b border-gray-700 pb-4">
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-            Thêm sản phẩm mới
+            Add New Product
           </DialogTitle>
-          <DialogDescription>
-            </DialogDescription>
+          <DialogDescription />
         </DialogHeader>
 
         {/* Progress Steps */}
@@ -231,30 +241,30 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
           ))}
         </div>
 
-        {/* Nội dung bước hiện tại */}
+        {/* Step Content */}
         <div className="flex-1 overflow-y-auto px-4">
           {renderCurrentStep()}
         </div>
 
-        {/* Trạng thái submit */}
+        {/* Submit status */}
         {submitStatus && (
           <div className={`flex items-center gap-2 mt-4 px-4 py-2 rounded-md mx-4 my-2
             ${submitStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
             {submitStatus === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
             <span>
-              {submitStatus === 'success' ? 'Tạo sản phẩm thành công!' : 'Tạo sản phẩm thất bại. Vui lòng thử lại.'}
+              {submitStatus === 'success' ? 'Product created successfully!' : 'Failed to create product. Please try again.'}
             </span>
           </div>
         )}
 
-        {/* Nút điều hướng */}
+        {/* Navigation Buttons */}
         <div className="flex justify-between items-center mt-4 px-4 pb-4 border-t border-gray-700 pt-4">
           <button
             onClick={() => setCurrentStep(prev => Math.max(prev - 1, 0))}
             disabled={currentStep === 0}
             className="text-sm text-gray-400 hover:text-white disabled:opacity-50"
           >
-            ← Quay lại
+            ← Back
           </button>
 
           <div className="flex items-center gap-4">
@@ -265,7 +275,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
                 className={`px-4 py-2 text-sm font-semibold rounded-md transition 
                   ${canProceed ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-gray-600 text-gray-300 cursor-not-allowed"}`}
               >
-                Tiếp →
+                Next →
               </button>
             ) : (
               <button
@@ -276,12 +286,12 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" size={16} />
-                    Đang tạo...
+                    Submitting...
                   </>
                 ) : (
                   <>
                     <Save size={16} />
-                    Xác nhận
+                    Confirm
                   </>
                 )}
               </button>

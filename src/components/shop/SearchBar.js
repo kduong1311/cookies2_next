@@ -7,7 +7,6 @@ export default function SearchBar({ onSearch, allProducts = [] }) {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
 
-  // ⬇ Lấy categories từ API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -22,14 +21,11 @@ export default function SearchBar({ onSearch, allProducts = [] }) {
     fetchCategories();
   }, []);
 
-  // ⬇ Search theo query (debounced)
-  // ⬇ Search theo query (debounced)
 useEffect(() => {
   const delayDebounce = setTimeout(() => {
     const keyword = (query || " ").toLowerCase();
     let filtered = allProducts;
 
-    // ❗ Dùng đúng tên field là `categories`
     if (activeCategory !== "All") {
       filtered = filtered.filter((product) =>
         product.categories?.some((cat) =>
@@ -38,7 +34,6 @@ useEffect(() => {
       );
     }
 
-    // Filter theo tên sản phẩm
     filtered = filtered.filter((product) =>
       product.name.toLowerCase().includes(keyword)
     );
@@ -50,10 +45,9 @@ useEffect(() => {
 }, [query, activeCategory, allProducts, onSearch]);
 
 
-  // ⬇ Khi chọn category
   const handleCategoryClick = (categoryName) => {
     setActiveCategory(categoryName);
-    setQuery(""); // Optional: clear query khi đổi category
+    setQuery("");
   };
 
   return (
