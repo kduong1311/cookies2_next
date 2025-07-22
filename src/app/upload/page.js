@@ -192,7 +192,7 @@ export default function CookingUploadPage() {
         }]
       };
 
-      console.log("Đang tạo post...", postData);
+      console.log("Creating post...", postData);
       const postResponse = await fetch("http://103.253.145.7:3001/api/posts", {
         method: "POST",
         headers: {
@@ -224,7 +224,7 @@ export default function CookingUploadPage() {
           cover_media_url: recipeCoverUrl.url,
         };
 
-        console.log("Đang tạo recipe...", recipeData);
+        console.log("Creating recipe...", recipeData);
         const recipeResponse = await fetch("http://103.253.145.7:3004/api/recipes", {
           method: "POST",
           headers: {
@@ -236,7 +236,7 @@ export default function CookingUploadPage() {
 
         if (!recipeResponse.ok) {
           const errorData = await recipeResponse.json();
-          console.error("Tạo recipe thất bại:", errorData);
+          console.error("Create recipe failed:", errorData);
           // Don't throw error here since post was created successfully
           alert("Create post sucessfull but have error in recipe!");
         } else {
@@ -245,8 +245,8 @@ export default function CookingUploadPage() {
         }
       }
 
-      alert("Đăng bài thành công!");
-      
+        alert("Upload successfully!");
+        
       // Reset form
       setFile(null);
       setPreview(null);
@@ -301,7 +301,7 @@ export default function CookingUploadPage() {
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
               <Camera className="w-4 h-4 text-orange-500" />
-              Tải lên ảnh/video
+              Upload media
             </h3>
             
             <div className="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center hover:border-orange-500 transition-colors">
@@ -388,7 +388,7 @@ export default function CookingUploadPage() {
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold text-white flex items-center gap-2">
                 <ChefHat className="w-4 h-4 text-orange-500" />
-                Thêm công thức nấu ăn
+                Add recipe
               </Label>
               <button
                 onClick={() => setHasRecipe(!hasRecipe)}
