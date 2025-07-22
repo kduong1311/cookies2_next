@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 export default function ShareModal({ open, onOpenChange, shareUrl }) {
 
+  console.log("a", shareUrl);
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);

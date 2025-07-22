@@ -109,8 +109,6 @@ export default function VideoFeed({
     const currentPostId = posts[currentPostIndex]?.post_id;
     if (!currentPostId) return;
 
-    console.log(`Fetching data for post ${currentPostId} at ${new Date().toLocaleTimeString()}`);
-
     const intervalId = setInterval(async () => {
       try {
         const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
@@ -132,7 +130,6 @@ export default function VideoFeed({
     return () => clearInterval(intervalId);
   }, [currentPostIndex, posts]);
 
-  // Cập nhật post trong danh sách
   const updatePostInList = useCallback((updatedPost) => {
     setPosts(prevPosts =>
       prevPosts.map(post => {
@@ -203,7 +200,6 @@ export default function VideoFeed({
         method: 'POST',
         credentials: 'include'
       });
-      console.log(`View incremented for post ${currentPost.post_id}`);
     } catch (error) {
       console.error('Failed to increase view count:', error);
     }
