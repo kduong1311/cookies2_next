@@ -382,6 +382,17 @@ useEffect(() => {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Contact Number</label>
+                <input
+                  type="text"
+                  name="shipping_contact_number"
+                  value={formData.shipping_contact_number || ''}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  placeholder="Enter contact number"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Address</label>
                 <input
                   type="text"
