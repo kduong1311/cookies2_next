@@ -13,10 +13,11 @@ import ProfilePage from "@/components/Profile/ProfilePage";
 import ChatBot from "@/components/chatbot/chatBot";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import Loading from "@/components/Loading";
 
 export default function MainLayout({ children }) {
   const pathname = usePathname();
-  const {user} = useAuth();
+  const {user, loading} = useAuth();
 
   const [isRecipeOpen, setIsRecipeOpen] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -34,6 +35,10 @@ const isCustomPage = pathname.startsWith("/shop")
 
 
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex h-screen bg-black text-white">
