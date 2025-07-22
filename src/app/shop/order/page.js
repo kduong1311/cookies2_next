@@ -53,7 +53,7 @@ const OrderPage = () => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
-    phone: '',
+    phone_number: '',
     address: '',
     city: '',
     district: '',
@@ -103,7 +103,7 @@ const OrderPage = () => {
   // Handle form submission
   const handleSubmit = async () => {
     // Validate required fields
-    if (!shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.address || 
+    if (!shippingAddress.fullName || !shippingAddress.phone_number || !shippingAddress.address || 
         !shippingAddress.city || !shippingAddress.district || !shippingAddress.ward) {
       alert('Please fill in all shipping address information!');
       return;

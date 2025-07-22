@@ -34,7 +34,7 @@ const EditProfilePage = () => {
   // Separate state for shipping address
   const [shippingData, setShippingData] = useState({
     recipient_name: '',
-    phone_number: '',
+    contact_number: '',
     address: '',
     city: '',
     state: '',
@@ -97,7 +97,7 @@ const EditProfilePage = () => {
           setShippingAddressId(data.id || null);
           setShippingData({
             recipient_name: data.recipient_name || '',
-            phone_number: data.phone_number || '',
+            contact_number: data.contact_number || '',
             address: data.address || '',
             city: data.city || '',
             state: data.state || '',
@@ -433,8 +433,8 @@ const EditProfilePage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Contact Number</label>
                 <input
                   type="text"
-                  name="phone_number"
-                  value={shippingData.phone_number || ''}
+                  name="contact_number"
+                  value={shippingData.contact_number || ''}
                   onChange={handleShippingChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter contact number"
