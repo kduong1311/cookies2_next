@@ -2,6 +2,7 @@
 import { Compass, BellRing, Flame, HeartPlus, ShoppingBag, Info, Upload, LogIn, LogOut, Search } from 'lucide-react';
 import LoginModal from '@/components/user/LoginModal';
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConfirm } from '@/contexts/ConfirmContext';
@@ -46,13 +47,18 @@ const [activeItem, setActiveItem] = useState(() => {
     { label: "About me", icon: <Info className="h-5 w-5" />, onClick: () => router.push("/about")},
   ];
 
+  useEffect(() => {
+  if (!user) {
+    setIsLoginModalOpen(true);
+  }
+}, [user]);
+
   return (
     <div className="w-64 border-r border-gray-800 p-4 flex flex-col">
       <div className="p-4 mb-8 rounded-lg items-center bg-orange">
         <img src='/Logo2-white.png' alt='logo' />
         <div className="w-full flex justify-center mt-3">
           {user ? (
-            // ⚡ Nút Logout kiểu border-animation
             <div className="main_div">
               <button onClick={handleLogout}>
                 <LogOut className="inline mr-2 h-4 w-4" />
@@ -61,7 +67,6 @@ const [activeItem, setActiveItem] = useState(() => {
             </div>
           ) : (
             <>
-              {/* ⚡ Nút Login kiểu border-animation */}
               <div className="main_div">
                 <button onClick={() => setIsLoginModalOpen(true)}>
                   <LogIn className="inline mr-2 h-4 w-4" />
