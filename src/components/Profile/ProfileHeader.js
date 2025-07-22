@@ -71,7 +71,12 @@ const ProfileHeader = ({ userProfile }) => {
           className="w-full h-full object-cover"
           onError={() => setCoverSrc(DEFAULT_COVER)}
         />
-        <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%)'
+          }}
+        ></div>
       </div>
 
       {/* Profile Info */}

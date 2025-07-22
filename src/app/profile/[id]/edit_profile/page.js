@@ -260,7 +260,13 @@ const EditProfilePage = () => {
                   className="w-full h-full object-cover"
                 />
               )}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Gradient overlay for hover effect */}
+              <div className="absolute inset-0 pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%)'
+                }}
+              ></div>
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   type="button"
                   onClick={() => handleImageUpload('cover_photo')}
