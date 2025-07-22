@@ -34,23 +34,23 @@ const OrderPage = () => {
 
   // Shipping options
   const shippingOptions = [
-    { id: 'standard', name: 'Giao hàng tiêu chuẩn', price: 30000, time: '3-5 ngày' },
-    { id: 'express', name: 'Giao hàng nhanh', price: 50000, time: '1-2 ngày' },
-    { id: 'same_day', name: 'Giao hàng trong ngày', price: 80000, time: 'Trong ngày' }
+    { id: 'standard', name: 'Standard Shipping', price: 3, time: '3-5 days' },
+    { id: 'express', name: 'Express Shipping', price: 5, time: '1-2 days' },
+    { id: 'same_day', name: 'Same Day Delivery', price: 8, time: 'Same day' }
   ];
 
   // Payment methods
   const paymentMethods = [
-    { id: 'credit_card', name: 'Thẻ tín dụng/Ghi nợ', icon: <CreditCard className="w-5 h-5 text-orange-500" /> },
-    { id: 'e_wallet', name: 'Ví điện tử', icon: <Wallet className="w-5 h-5 text-orange-500" /> },
-    { id: 'bank_transfer', name: 'Chuyển khoản ngân hàng', icon: <Banknote className="w-5 h-5 text-orange-500" /> },
-    { id: 'cod', name: 'Thanh toán khi nhận hàng', icon: <HandCoins className="w-5 h-5 text-orange-500" /> }
+    { id: 'credit_card', name: 'Credit/Debit Card', icon: <CreditCard className="w-5 h-5 text-orange-500" /> },
+    { id: 'e_wallet', name: 'E-Wallet', icon: <Wallet className="w-5 h-5 text-orange-500" /> },
+    { id: 'bank_transfer', name: 'Bank Transfer', icon: <Banknote className="w-5 h-5 text-orange-500" /> },
+    { id: 'cod', name: 'Cash on Delivery', icon: <HandCoins className="w-5 h-5 text-orange-500" /> }
   ];
 
   // Vouchers
   const vouchers = [
-    { id: 'DISCOUNT15', name: 'Giảm 15%', discount: 0.15, minOrder: 500000 },
-    { id: 'DISCOUNT20', name: 'Giảm 20%', discount: 0.20, minOrder: 1000000 }
+    { id: 'DISCOUNT15', name: '15% Off', discount: 0.15, minOrder: 50 },
+    { id: 'DISCOUNT20', name: '20% Off', discount: 0.20, minOrder: 100 }
   ];
 
   // Calculate totals
@@ -66,9 +66,9 @@ const OrderPage = () => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'VND'
+      currency: 'USD'
     }).format(amount);
   };
 
@@ -77,7 +77,7 @@ const OrderPage = () => {
     // Validate required fields
     if (!shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.address || 
         !shippingAddress.city || !shippingAddress.district || !shippingAddress.ward) {
-      alert('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng!');
+      alert('Please fill in all shipping address information!');
       return;
     }
 
@@ -119,7 +119,7 @@ const OrderPage = () => {
       }
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!');
+      alert('An error occurred while placing the order. Please try again!');
     } finally {
       setIsLoading(false);
     }
@@ -130,13 +130,13 @@ const OrderPage = () => {
       <div className="min-h-screen bg-gray-800 flex items-center justify-center">
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Đặt hàng thành công!</h2>
-          <p className="text-gray-600 mb-6">Đơn hàng của bạn đã được xác nhận và sẽ được xử lý trong thời gian sớm nhất.</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Order placed successfully!</h2>
+          <p className="text-gray-600 mb-6">Your order has been confirmed and will be processed as soon as possible.</p>
           <button 
             onClick={() => window.location.reload()}
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
-            Đặt hàng mới
+            Place a new order
           </button>
         </div>
       </div>
@@ -149,7 +149,7 @@ const OrderPage = () => {
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-bold text-orange mb-8 flex items-center">
             <ShoppingCart className="w-8 h-8 mr-3" />
-            Đặt hàng
+            Place Order
           </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -159,12 +159,12 @@ const OrderPage = () => {
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <MapPin className="w-5 h-5 mr-2" />
-                  Địa chỉ giao hàng
+                  Shipping Address
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input
                     type="text"
-                    placeholder="Họ và tên"
+                    placeholder="Full Name"
                     value={shippingAddress.fullName}
                     onChange={(e) => setShippingAddress({...shippingAddress, fullName: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -172,7 +172,7 @@ const OrderPage = () => {
                   />
                   <input
                     type="tel"
-                    placeholder="Số điện thoại"
+                    placeholder="Phone Number"
                     value={shippingAddress.phone}
                     onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -180,7 +180,7 @@ const OrderPage = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Địa chỉ"
+                    placeholder="Address"
                     value={shippingAddress.address}
                     onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent md:col-span-2"
@@ -188,7 +188,7 @@ const OrderPage = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Thành phố"
+                    placeholder="City"
                     value={shippingAddress.city}
                     onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -196,7 +196,7 @@ const OrderPage = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Quận/Huyện"
+                    placeholder="District"
                     value={shippingAddress.district}
                     onChange={(e) => setShippingAddress({...shippingAddress, district: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -204,7 +204,7 @@ const OrderPage = () => {
                   />
                   <input
                     type="text"
-                    placeholder="Phường/Xã"
+                    placeholder="Ward"
                     value={shippingAddress.ward}
                     onChange={(e) => setShippingAddress({...shippingAddress, ward: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent md:col-span-2"
@@ -217,7 +217,7 @@ const OrderPage = () => {
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <Truck className="w-5 h-5 mr-2" />
-                  Phương thức giao hàng
+                  Shipping Method
                 </h2>
                 <div className="space-y-3">
                   {shippingOptions.map((option) => (
@@ -246,7 +246,7 @@ const OrderPage = () => {
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <CreditCard className="w-5 h-5 mr-2" />
-                  Phương thức thanh toán
+                  Payment Method
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {paymentMethods.map((method) => (
@@ -268,7 +268,7 @@ const OrderPage = () => {
 
               {/* Voucher */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold text-orange mb-4">Mã giảm giá</h2>
+                <h2 className="text-xl font-semibold text-orange mb-4">Voucher</h2>
                 <div className="space-y-3">
                   <label className="flex items-center p-3 border border-gray-200 rounded-md hover-orange-bg cursor-pointer">
                     <input
@@ -279,7 +279,7 @@ const OrderPage = () => {
                       onChange={(e) => setSelectedVoucher(e.target.value)}
                       className="mr-3"
                     />
-                    <span>Không sử dụng voucher</span>
+                    <span>No voucher</span>
                   </label>
                   {availableVouchers.map((voucher) => (
                     <label key={voucher.id} className="flex items-center p-3 border border-gray-200 rounded-md hover-orange-bg cursor-pointer">
@@ -296,7 +296,7 @@ const OrderPage = () => {
                           <span className="font-medium">{voucher.name}</span>
                           <span className="text-green-600 font-semibold">-{formatCurrency(voucher.discount * subtotal)}</span>
                         </div>
-                        <p className="text-sm text-gray-600">Đơn tối thiểu: {formatCurrency(voucher.minOrder)}</p>
+                        <p className="text-sm text-gray-600">Minimum order: {formatCurrency(voucher.minOrder)}</p>
                       </div>
                     </label>
                   ))}
@@ -305,9 +305,9 @@ const OrderPage = () => {
 
               {/* Notes */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold text-orange mb-4">Ghi chú</h2>
+                <h2 className="text-xl font-semibold text-orange mb-4">Notes</h2>
                 <textarea
-                  placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                  placeholder="Notes for the order (optional)"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -321,7 +321,7 @@ const OrderPage = () => {
               <div className="bg-gray-950 p-6 rounded-lg shadow-sm sticky top-8">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <Package className="w-5 h-5 mr-2" />
-                  Đơn hàng của bạn
+                  Your Order
                 </h2>
 
                 {/* Cart Items */}
@@ -340,7 +340,7 @@ const OrderPage = () => {
                           ? `${item.variant.color || ''} | ${item.variant.size || ''} | ${item.variant.material || ''}`
                           : ''}
                       </p>
-                        <p className="text-xs text-gray-600">Số lượng: {item.quantity}</p>
+                        <p className="text-xs text-gray-600">Quantity: {item.quantity}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-sm">{formatCurrency(item.price * item.quantity)}</p>
@@ -352,26 +352,26 @@ const OrderPage = () => {
                 {/* Order Summary */}
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Tạm tính:</span>
+                    <span>Subtotal:</span>
                     <span>{formatCurrency(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Phí giao hàng:</span>
+                    <span>Shipping Fee:</span>
                     <span>{formatCurrency(shippingFee)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Thuế (8%):</span>
+                    <span>Tax (8%):</span>
                     <span>{formatCurrency(tax)}</span>
                   </div>
                   {voucherDiscount > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
-                      <span>Giảm giá:</span>
+                      <span>Discount:</span>
                       <span>-{formatCurrency(voucherDiscount)}</span>
                     </div>
                   )}
                   <div className="border-t pt-2">
                     <div className="flex justify-between font-semibold text-lg">
-                      <span>Tổng cộng:</span>
+                      <span>Total:</span>
                       <span className="text-blue-600">{formatCurrency(total)}</span>
                     </div>
                   </div>
@@ -383,7 +383,7 @@ const OrderPage = () => {
                   disabled={isLoading}
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-semibold mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Đang xử lý...' : 'Đặt hàng'}
+                  {isLoading ? 'Processing...' : 'Place Order'}
                 </button>
               </div>
             </div>

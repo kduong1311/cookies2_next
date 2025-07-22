@@ -27,11 +27,11 @@ export default function SearchPage() {
       if (data.status === "success") {
         setResults(data.data || []);
       } else {
-        setError("Không thể tìm kiếm. Vui lòng thử lại.");
+        setError("Unable to search. Please try again.");
       }
     } catch (err) {
       console.error("Error fetching search results:", err);
-      setError("Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.");
+      setError("Connection error. Please check your internet and try again.");
     } finally {
       setLoading(false);
     }
@@ -46,7 +46,7 @@ export default function SearchPage() {
     const value = e.target.value;
     setQuery(value);
     
-    // Auto search khi user gõ (debounce)
+    // Auto search when user types (debounce)
     if (value.trim()) {
       const timeoutId = setTimeout(() => {
         fetchSearchResults(value);
@@ -60,7 +60,7 @@ export default function SearchPage() {
 
   return (
     <div className="h-screen bg-black text-white overflow-y-auto hide-scrollbar">
-      {/* Header với Search Bar */}
+      {/* Header with Search Bar */}
       <div className="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-gray-800">
         <div className="max-w-4xl mx-auto p-4">
           <form onSubmit={handleSearch} className="relative">
@@ -68,7 +68,7 @@ export default function SearchPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Tìm kiếm món ăn, công thức..."
+                placeholder="Search for dishes, recipes..."
                 value={query}
                 onChange={handleInputChange}
                 className="w-full pl-12 pr-4 py-3 bg-gray-800 rounded-full border border-gray-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-white placeholder-gray-400"
@@ -108,7 +108,7 @@ export default function SearchPage() {
               onClick={() => fetchSearchResults(query)}
               className="px-6 py-2 bg-orange-500 hover:bg-orange-600 rounded-full transition-colors"
             >
-              Thử lại
+              Retry
             </button>
           </div>
         )}
@@ -117,8 +117,8 @@ export default function SearchPage() {
         {!loading && !error && query && results.length === 0 && (
           <div className="text-center py-12">
             <Search className="mx-auto mb-4 text-gray-600" size={48} />
-            <p className="text-gray-400 mb-2">Không tìm thấy kết quả cho: {query}</p>
-            <p className="text-gray-500 text-sm">Thử tìm kiếm với từ khóa khác</p>
+            <p className="text-gray-400 mb-2">No results found for: {query}</p>
+            <p className="text-gray-500 text-sm">Try searching with a different keyword</p>
           </div>
         )}
 
@@ -127,7 +127,7 @@ export default function SearchPage() {
           <>
             <div className="mb-6">
               <p className="text-gray-400">
-                Tìm thấy {results.length} kết quả cho: {query}
+                Found {results.length} results for: {query}
               </p>
             </div>
             
@@ -199,8 +199,8 @@ export default function SearchPage() {
         {!query && !loading && (
           <div className="text-center py-16">
             <Search className="mx-auto mb-4 text-gray-600" size={64} />
-            <h2 className="text-xl font-semibold mb-2">Tìm kiếm món ăn yêu thích</h2>
-            <p className="text-gray-400">Nhập tên món ăn hoặc công thức để bắt đầu tìm kiếm</p>
+            <h2 className="text-xl font-semibold mb-2">Search for your favorite dishes</h2>
+            <p className="text-gray-400">Enter the name of a dish or recipe to start searching</p>
           </div>
         )}
       </div>

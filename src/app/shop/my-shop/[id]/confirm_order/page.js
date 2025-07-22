@@ -73,10 +73,10 @@ export default function ConfirmOrdersPage() {
 
   const getPaymentMethodText = (method) => {
     const methodMap = {
-      "credit_card": "Thẻ tín dụng",
-      "e_wallet": "Ví điện tử",
-      "cod": "Thanh toán khi nhận hàng",
-      "bank_transfer": "Chuyển khoản ngân hàng"
+      "credit_card": "Credit Card",
+      "e_wallet": "E-Wallet",
+      "cod": "Cash on Delivery",
+      "bank_transfer": "Bank Transfer"
     };
     return methodMap[method] || method;
   };
@@ -122,9 +122,9 @@ export default function ConfirmOrdersPage() {
         setSelectedOrder(null);
       }
 
-      alert('Đơn hàng đã được xác nhận thành công!');
+      alert('Order confirmed successfully!');
     } catch (err) {
-      alert('Lỗi khi xác nhận đơn hàng: ' + err.message);
+      alert('Error confirming order: ' + err.message);
     } finally {
       setConfirmingOrders(prev => {
         const newSet = new Set(prev);
@@ -137,7 +137,7 @@ export default function ConfirmOrdersPage() {
   const confirmAllOrders = async () => {
     if (filteredOrders.length === 0) return;
     
-    const confirmAll = window.confirm(`Bạn có chắc muốn xác nhận tất cả ${filteredOrders.length} đơn hàng?`);
+    const confirmAll = window.confirm(`Are you sure you want to confirm all ${filteredOrders.length} orders?`);
     if (!confirmAll) return;
 
     for (const order of filteredOrders) {
@@ -148,7 +148,7 @@ export default function ConfirmOrdersPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-white text-xl">Đang tải dữ liệu...</div>
+        <div className="text-white text-xl">Loading data...</div>
       </div>
     );
   }
@@ -156,7 +156,7 @@ export default function ConfirmOrdersPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-red-400 text-xl">Lỗi: {error}</div>
+        <div className="text-red-400 text-xl">Error: {error}</div>
       </div>
     );
   }
@@ -168,16 +168,16 @@ export default function ConfirmOrdersPage() {
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
             <span className="text-yellow-400">⏳</span>
-            Xác nhận đơn hàng
+            Confirm Orders
           </h1>
-          <p className="text-gray-400">Xác nhận các đơn hàng đang chờ xử lý</p>
+          <p className="text-gray-400">Confirm pending orders</p>
         </div>
         <div className="flex gap-4">
           <button
             onClick={() => window.history.back()}
             className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            ← Quay lại
+            ← Back
           </button>
         </div>
       </div>
@@ -186,17 +186,17 @@ export default function ConfirmOrdersPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-yellow-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{orders.length}</div>
-          <div className="text-yellow-100">Đơn hàng chờ xác nhận</div>
+          <div className="text-yellow-100">Pending Orders</div>
         </div>
         <div className="bg-blue-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{filteredOrders.length}</div>
-          <div className="text-blue-100">Đơn hàng hiển thị</div>
+          <div className="text-blue-100">Displayed Orders</div>
         </div>
         <div className="bg-green-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">
             {formatPrice(filteredOrders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0))}
           </div>
-          <div className="text-green-100">Tổng giá trị</div>
+          <div className="text-green-100">Total Value</div>
         </div>
       </div>
 
@@ -205,7 +205,7 @@ export default function ConfirmOrdersPage() {
         <div className="flex flex-col lg:flex-row gap-4 items-center">
           <input
             type="text"
-            placeholder="Tìm kiếm theo mã đơn hoặc ID khách hàng..."
+            placeholder="Search by order number or customer ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none flex-1"
@@ -215,7 +215,7 @@ export default function ConfirmOrdersPage() {
               onClick={confirmAllOrders}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
             >
-              ✅ Xác nhận tất cả ({filteredOrders.length})
+              ✅ Confirm All ({filteredOrders.length})
             </button>
           )}
         </div>
@@ -225,25 +225,25 @@ export default function ConfirmOrdersPage() {
       {filteredOrders.length === 0 ? (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-12 text-center">
           <div className="text-gray-400 text-xl mb-4">🎉</div>
-          <div className="text-white text-lg mb-2">Không có đơn hàng nào cần xác nhận</div>
-          <div className="text-gray-400">Tất cả đơn hàng đã được xử lý</div>
+          <div className="text-white text-lg mb-2">No orders need confirmation</div>
+          <div className="text-gray-400">All orders have been processed</div>
         </div>
       ) : (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden">
           <div className="p-6 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Đơn hàng chờ xác nhận ({filteredOrders.length})</h2>
+            <h2 className="text-xl font-semibold text-white">Pending Orders ({filteredOrders.length})</h2>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-700/50">
                 <tr>
-                  <th className="text-left text-white font-medium p-4">Mã đơn</th>
-                  <th className="text-left text-white font-medium p-4">Khách hàng</th>
-                  <th className="text-left text-white font-medium p-4">Tổng tiền</th>
-                  <th className="text-left text-white font-medium p-4">Phương thức thanh toán</th>
-                  <th className="text-left text-white font-medium p-4">Ngày đặt</th>
-                  <th className="text-left text-white font-medium p-4">Thao tác</th>
+                  <th className="text-left text-white font-medium p-4">Order Number</th>
+                  <th className="text-left text-white font-medium p-4">Customer</th>
+                  <th className="text-left text-white font-medium p-4">Total</th>
+                  <th className="text-left text-white font-medium p-4">Payment Method</th>
+                  <th className="text-left text-white font-medium p-4">Order Date</th>
+                  <th className="text-left text-white font-medium p-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,7 +261,7 @@ export default function ConfirmOrdersPage() {
                         {formatPrice(order.total_amount, order.currency)}
                       </div>
                       <div className="text-gray-400 text-sm">
-                        Tạm tính: {formatPrice(order.subtotal, order.currency)}
+                        Subtotal: {formatPrice(order.subtotal, order.currency)}
                       </div>
                     </td>
                     <td className="p-4">
@@ -305,7 +305,7 @@ export default function ConfirmOrdersPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-white">Chi tiết đơn hàng {selectedOrder.order_number}</h3>
+              <h3 className="text-xl font-semibold text-white">Order Details {selectedOrder.order_number}</h3>
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="text-gray-400 hover:text-white text-2xl"
@@ -319,41 +319,41 @@ export default function ConfirmOrdersPage() {
               <div className="bg-yellow-600/20 border border-yellow-600 p-4 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-yellow-400">⏳</span>
-                  <span className="text-yellow-400 font-medium">Đơn hàng đang chờ xác nhận</span>
+                  <span className="text-yellow-400 font-medium">Order pending confirmation</span>
                 </div>
                 <div className="text-yellow-200 text-sm mt-1">
-                  Vui lòng kiểm tra thông tin và xác nhận đơn hàng
+                  Please check the information and confirm the order
                 </div>
               </div>
 
               {/* Order Info */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Thông tin đơn hàng</h4>
+                <h4 className="text-white font-medium mb-3">Order Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-400">Mã đơn:</span>
+                    <span className="text-gray-400">Order Number:</span>
                     <span className="text-white ml-2">{selectedOrder.order_number}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Khách hàng:</span>
+                    <span className="text-gray-400">Customer:</span>
                     <span className="text-white ml-2">{selectedOrder.user_id}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Ngày đặt:</span>
+                    <span className="text-gray-400">Order Date:</span>
                     <span className="text-white ml-2">{formatDate(selectedOrder.created_at)}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Phương thức thanh toán:</span>
+                    <span className="text-gray-400">Payment Method:</span>
                     <span className="text-white ml-2">{getPaymentMethodText(selectedOrder.payment_method)}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Phương thức giao hàng:</span>
+                    <span className="text-gray-400">Shipping Method:</span>
                     <span className="text-white ml-2">{selectedOrder.shipping_method}</span>
                   </div>
                 </div>
                 {selectedOrder.notes && (
                   <div className="mt-3">
-                    <span className="text-gray-400">Ghi chú:</span>
+                    <span className="text-gray-400">Notes:</span>
                     <div className="text-white ml-2 mt-1 p-2 bg-gray-600/30 rounded">{selectedOrder.notes}</div>
                   </div>
                 )}
@@ -361,29 +361,29 @@ export default function ConfirmOrdersPage() {
 
               {/* Order Summary */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Tổng kết đơn hàng</h4>
+                <h4 className="text-white font-medium mb-3">Order Summary</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Tạm tính:</span>
+                    <span className="text-gray-400">Subtotal:</span>
                     <span className="text-white">{formatPrice(selectedOrder.subtotal, selectedOrder.currency)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Thuế:</span>
+                    <span className="text-gray-400">Tax:</span>
                     <span className="text-white">{formatPrice(selectedOrder.tax_amount, selectedOrder.currency)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Phí giao hàng:</span>
+                    <span className="text-gray-400">Shipping Fee:</span>
                     <span className="text-white">{formatPrice(selectedOrder.shipping_amount, selectedOrder.currency)}</span>
                   </div>
                   {parseFloat(selectedOrder.discount_amount) > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Giảm giá:</span>
+                      <span className="text-gray-400">Discount:</span>
                       <span className="text-red-400">-{formatPrice(selectedOrder.discount_amount, selectedOrder.currency)}</span>
                     </div>
                   )}
                   <div className="border-t border-gray-600 pt-2 mt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-white font-semibold text-lg">Tổng cộng:</span>
+                      <span className="text-white font-semibold text-lg">Total:</span>
                       <span className="text-green-400 font-bold text-lg">{formatPrice(selectedOrder.total_amount, selectedOrder.currency)}</span>
                     </div>
                   </div>
@@ -392,7 +392,7 @@ export default function ConfirmOrdersPage() {
 
               {/* Confirmation Actions */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
-                <h4 className="text-white font-medium mb-3">Xác nhận đơn hàng</h4>
+                <h4 className="text-white font-medium mb-3">Order Confirmation</h4>
                 <div className="flex gap-3">
                   <button
                     onClick={() => confirmOrder(selectedOrder)}
@@ -403,17 +403,17 @@ export default function ConfirmOrdersPage() {
                         : 'bg-green-600 hover:bg-green-700 text-white'
                     }`}
                   >
-                    {confirmingOrders.has(selectedOrder.order_id) ? '⏳ Đang xử lý...' : '✅ Xác nhận & Chuyển sang xử lý'}
+                    {confirmingOrders.has(selectedOrder.order_id) ? '⏳ Processing...' : '✅ Confirm & Move to Processing'}
                   </button>
                   <button
                     onClick={() => setSelectedOrder(null)}
                     className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors"
                   >
-                    Đóng
+                    Close
                   </button>
                 </div>
                 <div className="text-gray-400 text-sm mt-3">
-                  Sau khi xác nhận, đơn hàng sẽ chuyển sang trạng thái "Đang xử lý"
+                  After confirmation, the order will move to "Processing" status
                 </div>
               </div>
             </div>

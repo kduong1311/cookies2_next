@@ -6,41 +6,41 @@ const AboutPage = () => {
   const [activeTab, setActiveTab] = useState('story');
 
   const stats = [
-    { icon: Users, label: 'Cộng đồng', value: '50K+', color: 'text-orange-500' },
-    { icon: Play, label: 'Video công thức', value: '1,200+', color: 'text-green-500' },
-    { icon: ShoppingCart, label: 'Sản phẩm', value: '300+', color: 'text-blue-500' },
-    { icon: Heart, label: 'Yêu thích', value: '100K+', color: 'text-red-500' }
+    { icon: Users, label: 'Community', value: '50K+', color: 'text-orange-500' },
+    { icon: Play, label: 'Recipe Videos', value: '1,200+', color: 'text-green-500' },
+    { icon: ShoppingCart, label: 'Products', value: '300+', color: 'text-blue-500' },
+    { icon: Heart, label: 'Favorites', value: '100K+', color: 'text-red-500' }
   ];
 
   const features = [
     {
       icon: Camera,
-      title: 'Video HD chất lượng cao',
-      description: 'Mỗi video được quay với chất lượng 4K, góc quay đa dạng để bạn dễ dàng theo dõi từng bước nấu ăn'
+      title: 'High Quality HD Videos',
+      description: 'Each video is shot in 4K quality, with diverse angles to help you easily follow every cooking step.'
     },
     {
       icon: ChefHat,
-      title: 'Công thức chi tiết',
-      description: 'Từng nguyên liệu, gia vị và thời gian nấu đều được ghi chú rõ ràng, dễ hiểu cho người mới bắt đầu'
+      title: 'Detailed Recipes',
+      description: 'Every ingredient, spice, and cooking time is clearly noted, easy to understand for beginners.'
     },
     {
       icon: MessageCircle,
-      title: 'Cộng đồng tương tác',
-      description: 'Chia sẻ thành quả, trao đổi kinh nghiệm và nhận feedback từ cộng đồng yêu thích nấu ăn'
+      title: 'Interactive Community',
+      description: 'Share your results, exchange experiences, and get feedback from a community of cooking lovers.'
     },
     {
       icon: Award,
-      title: 'Đầu bếp chuyên nghiệp',
-      description: 'Đội ngũ đầu bếp có kinh nghiệm nhiều năm trong ngành, am hiểu ẩm thực Việt và quốc tế'
+      title: 'Professional Chefs',
+      description: 'Our team of chefs has many years of experience in the industry, knowledgeable in both Vietnamese and international cuisine.'
     }
   ];
 
   const achievements = [
-    { year: '2020', title: 'Khởi đầu hành trình', desc: 'Ra mắt kênh với 10 video đầu tiên' },
-    { year: '2021', title: 'Cột mốc đầu tiên', desc: 'Đạt 10,000 subscribers và mở shop đầu tiên' },
-    { year: '2022', title: 'Mở rộng quy mô', desc: 'Hợp tác với 50+ thương hiệu uy tín' },
-    { year: '2023', title: 'Giải thưởng danh giá', desc: 'Top 10 kênh ẩm thực được yêu thích nhất' },
-    { year: '2024', title: 'Cộng đồng lớn mạnh', desc: 'Cộng đồng 50K+ thành viên tích cực' }
+    { year: '2020', title: 'Journey Began', desc: 'Launched the channel with the first 10 videos.' },
+    { year: '2021', title: 'First Milestone', desc: 'Reached 10,000 subscribers and opened the first shop.' },
+    { year: '2022', title: 'Expansion', desc: 'Collaborated with 50+ reputable brands.' },
+    { year: '2023', title: 'Prestigious Award', desc: 'Top 10 most loved food channels.' },
+    { year: '2024', title: 'Strong Community', desc: 'A community of 50K+ active members.' }
   ];
 
   return (
@@ -55,10 +55,10 @@ const AboutPage = () => {
             <ChefHat className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Chào mừng đến với <span className="text-orange">Cook Together</span>
+            Welcome to <span className="text-orange">Cook Together</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Nơi kết nối những người yêu thích nấu ăn, chia sẻ công thức độc đáo và khám phá thế giới ẩm thực đầy màu sắc
+            Where cooking lovers connect, share unique recipes, and explore a colorful culinary world.
           </p>
         </div>
       </div>
@@ -82,10 +82,10 @@ const AboutPage = () => {
       <div className="flex justify-center mb-8">
         <div className="bg-gray-100 p-4 rounded-2xl">
           {[
-            { id: 'story', label: 'Câu chuyện', icon: Heart },
-            { id: 'features', label: 'Tính năng', icon: Star },
-            { id: 'timeline', label: 'Hành trình', icon: Clock },
-            { id: 'contact', label: 'Liên hệ', icon: Mail }
+            { id: 'story', label: 'Our Story', icon: Heart },
+            { id: 'features', label: 'Features', icon: Star },
+            { id: 'timeline', label: 'Journey', icon: Clock },
+            { id: 'contact', label: 'Contact', icon: Mail }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -107,20 +107,16 @@ const AboutPage = () => {
       <div className="mb-8">
         {activeTab === 'story' && (
           <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-3xl p-8 animate-in fade-in duration-500">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Câu chuyện của chúng tôi</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Our Story</h2>
             <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
               <p className="text-lg mb-6">
-                Bắt đầu từ niềm đam mê nấu ăn và mong muốn chia sẻ những công thức gia truyền, chúng tôi đã tạo ra một không gian 
-                trực tuyến ấm áp nơi mọi người có thể học hỏi, chia sẻ và cùng nhau khám phá thế giới ẩm thực.
+                Starting from a passion for cooking and a desire to share family recipes, we created a warm online space where everyone can learn, share, and explore the world of cuisine together.
               </p>
               <p className="text-lg mb-6">
-                Từ những video đầu tiên được quay trong căn bếp nhỏ, chúng tôi đã phát triển thành một cộng đồng lớn với hàng nghìn 
-                công thức từ khắp nơi trên thế giới. Mỗi video không chỉ là cách nấu món ăn mà còn là câu chuyện về văn hóa, 
-                truyền thống và tình yêu thương.
+                From the first videos shot in a small kitchen, we have grown into a large community with thousands of recipes from around the world. Each video is not just about cooking, but also tells a story about culture, tradition, and love.
               </p>
               <p className="text-lg">
-                Chúng tôi tin rằng nấu ăn là ngôn ngữ của tình yêu, và mỗi bữa ăn là cơ hội để kết nối với những người thân yêu. 
-                Hãy cùng chúng tôi biến mỗi bữa ăn thành một kỷ niệm đáng nhớ!
+                We believe that cooking is the language of love, and every meal is an opportunity to connect with loved ones. Join us in making every meal a memorable experience!
               </p>
             </div>
           </div>
@@ -142,7 +138,7 @@ const AboutPage = () => {
 
         {activeTab === 'timeline' && (
           <div className="animate-in fade-in duration-500">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Hành trình phát triển</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Development Journey</h2>
             <div className="space-y-6">
               {achievements.map((achievement, index) => (
                 <div key={index} className="flex items-start gap-6 group">
@@ -161,12 +157,12 @@ const AboutPage = () => {
 
         {activeTab === 'contact' && (
           <div className="animate-in fade-in duration-500">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Kết nối với chúng tôi</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Connect with Us</h2>
             
             {/* Contact Info */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Thông tin liên hệ</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Contact Information</h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -182,7 +178,7 @@ const AboutPage = () => {
                       <Phone className="w-5 h-5 text-green-500" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">Điện thoại</p>
+                      <p className="font-medium text-gray-800">Phone</p>
                       <p className="text-gray-600">+84 123 456 789</p>
                     </div>
                   </div>
@@ -191,7 +187,7 @@ const AboutPage = () => {
                       <MapPin className="w-5 h-5 text-orange-500" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-800">Địa chỉ</p>
+                      <p className="font-medium text-gray-800">Address</p>
                       <p className="text-gray-600">123 Đường Ẩm Thực, Quận 1, TP.HCM</p>
                     </div>
                   </div>
@@ -199,24 +195,24 @@ const AboutPage = () => {
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Giờ hoạt động</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Working Hours</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Thứ 2 - Thứ 6</span>
+                    <span className="text-gray-600">Monday - Friday</span>
                     <span className="font-medium text-gray-800">8:00 - 18:00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Thứ 7</span>
+                    <span className="text-gray-600">Saturday</span>
                     <span className="font-medium text-gray-800">9:00 - 17:00</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Chủ nhật</span>
+                    <span className="text-gray-600">Sunday</span>
                     <span className="font-medium text-gray-800">10:00 - 16:00</span>
                   </div>
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700">
-                    💡 Chúng tôi luôn sẵn sàng trả lời câu hỏi về công thức nấu ăn và sản phẩm!
+                    💡 We are always ready to answer your questions about recipes and products!
                   </p>
                 </div>
               </div>
@@ -224,7 +220,7 @@ const AboutPage = () => {
 
             {/* Social Media */}
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 mb-8">
-                <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Theo dõi chúng tôi</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">Follow Us</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-center">
                     <a href="#" className="flex flex-col items-center p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 group hover:scale-105">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-blue-500 transition-colors">
@@ -255,18 +251,18 @@ const AboutPage = () => {
 
       {/* Call to Action */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl p-8 text-center text-white">
-        <h2 className="text-3xl font-bold mb-4">Tham gia cộng đồng ngay hôm nay!</h2>
+        <h2 className="text-3xl font-bold mb-4">Join the community today!</h2>
         <p className="text-xl mb-6 opacity-90">
-          Khám phá hàng nghìn công thức độc đáo và kết nối với những người yêu thích nấu ăn như bạn
+          Discover thousands of unique recipes and connect with fellow cooking enthusiasts.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button className="bg-white text-orange-500 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center gap-2">
             <Play className="w-5 h-5" />
-            Xem video mới nhất
+            Watch the latest video
           </button>
           <button className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-orange-500 transition-colors flex items-center justify-center gap-2">
             <ShoppingCart className="w-5 h-5" />
-            Khám phá shop
+            Explore the shop
           </button>
         </div>
       </div>
