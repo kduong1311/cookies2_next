@@ -215,7 +215,7 @@ const AboutPage = () => {
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700">
-                    💡 We’re happy to answer any questions about recipes or our products!
+                    💡 We are happy to answer any questions about recipes or our products!!
                   </p>
                 </div>
               </div>
