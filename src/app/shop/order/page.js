@@ -17,16 +17,17 @@ const OrderPage = () => {
         });
         if (!res.ok) return;
         const data = await res.json();
-        if (data) {
+        const address = data.data; // Use the nested data object
+        if (address) {
           setShippingAddress({
-            fullName: data.recipient_name || '',
-            phone: data.phone_number || '',
-            address: data.address || '',
-            city: data.city || '',
-            district: data.district || '',
-            ward: data.ward || '',
-            country: data.country || '',
-            postalCode: data.postal_code || ''
+            fullName: address.recipient_name || '',
+            phone_number: address.contact_number || '',
+            address: address.address || '',
+            city: address.city || '',
+            district: address.district || '',
+            ward: address.ward || '',
+            country: address.country || '',
+            postalCode: address.postal_code || ''
           });
         }
       } catch (error) {
@@ -201,8 +202,8 @@ const OrderPage = () => {
                   <input
                     type="tel"
                     placeholder="Phone Number"
-                    value={shippingAddress.phone}
-                    onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})}
+                    value={shippingAddress.phone_number}
+                    onChange={(e) => setShippingAddress({...shippingAddress, phone_number: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />

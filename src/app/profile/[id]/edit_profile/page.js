@@ -93,23 +93,20 @@ const EditProfilePage = () => {
         });
         if (!res.ok) return; // No address yet
         const data = await res.json();
-        if (data) {
-          setShippingAddressId(data.id || null);
+        const address = data.data; // <-- this is the actual address object
+        if (address) {
           setShippingData({
-            recipient_name: data.recipient_name || '',
-            contact_number: data.contact_number || '',
-            address: data.address || '',
-            city: data.city || '',
-            state: data.state || '',
-            country: data.country || '',
-            district: data.district || '',
-            ward: data.ward || '',
-            postal_code: data.postal_code || ''
+            recipient_name: address.recipient_name || '',
+            contact_number: address.contact_number || '',
+            address: address.address || '',
+            city: address.city || '',
+            state: address.state || '',
+            country: address.country || '',
+            district: address.district || '',
+            ward: address.ward || '',
+            postal_code: address.postal_code || ''
           });
-          console.log('Fetched shipping address:', data);
-          setTimeout(() => {
-            console.log('ShippingData after set:', shippingData);
-          }, 1000);
+          console.log('ShippingData after set:', address);
         }
       } catch (error) {
         // ignore if not found
