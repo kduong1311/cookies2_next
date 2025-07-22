@@ -58,8 +58,11 @@ const OrderPage = () => {
     address: '',
     city: '',
     district: '',
-    ward: ''
+    ward: '',
+    country: '',
+    postalCode: ''
   });
+  const [updateShipping, setUpdateShipping] = useState(false);
 
   // Shipping options
   const shippingOptions = [
@@ -152,6 +155,29 @@ const OrderPage = () => {
     } finally {
       setIsLoading(false);
     }
+
+    if (updateShipping) {
+      try {
+        await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipient_name: shippingAddress.fullName,
+            contact_number: shippingAddress.phone_number,
+            address: shippingAddress.address,
+            city: shippingAddress.city,
+            state: shippingAddress.state,
+            country: shippingAddress.country,
+            district: shippingAddress.district,
+            ward: shippingAddress.ward,
+            postal_code: shippingAddress.postalCode
+          })
+        });
+      } catch (err) {
+        // Optionally show a toast or ignore
+      }
+    }
   };
 
   if (orderSuccess) {
@@ -194,7 +220,7 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="Full Name"
-                    value={shippingAddress.fullName}
+                    value={shippingAddress.fullName || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, fullName: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -202,7 +228,7 @@ const OrderPage = () => {
                   <input
                     type="tel"
                     placeholder="Phone Number"
-                    value={shippingAddress.phone_number}
+                    value={shippingAddress.phone_number || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, phone_number: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -210,7 +236,7 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="Address"
-                    value={shippingAddress.address}
+                    value={shippingAddress.address || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent md:col-span-2"
                     required
@@ -218,7 +244,7 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="Country"
-                    value={shippingAddress.country}
+                    value={shippingAddress.country || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, country: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -226,7 +252,7 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="Postal Code"
-                    value={shippingAddress.postalCode}
+                    value={shippingAddress.postalCode || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -234,7 +260,7 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="City"
-                    value={shippingAddress.city}
+                    value={shippingAddress.city || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -242,7 +268,7 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="District"
-                    value={shippingAddress.district}
+                    value={shippingAddress.district || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, district: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
@@ -250,13 +276,28 @@ const OrderPage = () => {
                   <input
                     type="text"
                     placeholder="Ward"
-                    value={shippingAddress.ward}
+                    value={shippingAddress.ward || ''}
                     onChange={(e) => setShippingAddress({...shippingAddress, ward: e.target.value})}
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent md:col-span-2"
                     required
                   />
                 </div>
               </div>
+
+              {/* Update Shipping Address Checkbox */}
+              <div className="flex items-center mt-4">
+                <input
+                  type="checkbox"
+                  id="update-shipping"
+                  checked={updateShipping}
+                  onChange={e => setUpdateShipping(e.target.checked)}
+                  className="mr-2 w-4 h-4 text-orange-500 bg-gray-700 border-gray-600 rounded focus:ring-orange-500 focus:ring-2"
+                />
+                <label htmlFor="update-shipping" className="text-gray-300 text-sm">
+                  Update my saved shipping address with this information
+                </label>
+              </div>
+              <p className="text-xs text-gray-400 mt-1 mb-2">Check this if you want to update your saved shipping address for future orders.</p>
 
               {/* Shipping Method */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">

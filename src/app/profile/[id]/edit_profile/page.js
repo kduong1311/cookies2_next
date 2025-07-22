@@ -106,7 +106,6 @@ const EditProfilePage = () => {
             ward: address.ward || '',
             postal_code: address.postal_code || ''
           });
-          console.log('ShippingData after set:', address);
         }
       } catch (error) {
         // ignore if not found

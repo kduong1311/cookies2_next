@@ -50,7 +50,7 @@ const ProfileHeader = ({ userProfile }) => {
   const isOnline = status === 'active';
   const location = city && country ? `${city}, ${country}` : null;
   const joinDate = created_at
-    ? new Date(created_at).toLocaleDateString('vi-VN', {
+    ? new Date(created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
       })
@@ -71,7 +71,7 @@ const ProfileHeader = ({ userProfile }) => {
           className="w-full h-full object-cover"
           onError={() => setCoverSrc(DEFAULT_COVER)}
         />
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+        {/* <div className="absolute inset-0 bg-black bg-opacity-10"></div> */}
       </div>
 
       {/* Profile Info */}
