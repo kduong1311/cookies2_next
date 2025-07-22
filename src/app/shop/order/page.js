@@ -20,7 +20,7 @@ const OrderPage = () => {
         if (data) {
           setShippingAddress({
             fullName: data.recipient_name || '',
-            phone: data.contact_number || '',
+            phone: data.phone_number || '',
             address: data.address || '',
             city: data.city || '',
             district: data.district || '',
