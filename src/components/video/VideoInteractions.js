@@ -244,7 +244,7 @@ useEffect(() => {
         </div>
       </button>
 
-      <ShareModal open={shareOpen} onOpenChange={closeShareModal} />
+      <ShareModal open={shareOpen} onOpenChange={closeShareModal} shareUrl={`http://103.253.145.7:5173/post/${postId}`} />
     </div>
   );
 }

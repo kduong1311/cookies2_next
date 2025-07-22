@@ -1,20 +1,11 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  FaFacebookSquare,
-  FaLink,
-  FaTelegramPlane,
+import { Dialog, DialogContent, DialogHeader,DialogTitle,} from "@/components/ui/dialog";
+import {FaFacebookSquare, FaLink, FaTelegramPlane,
 } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
-import { toast } from "sonner";
+import toast from 'react-hot-toast';
 
 export default function ShareModal({ open, onOpenChange, shareUrl }) {
-  const encodedUrl = encodeURIComponent(shareUrl || "https://lottiefiles.com/free-animation/chef-animation-R0VyPQZOit");
 
   const handleCopyLink = async () => {
     try {
@@ -35,7 +26,7 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
         <div className="mt-6 flex justify-center space-x-6">
           {/* Facebook */}
           <a
-            href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+            href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center hover:bg-blue-700 transition"
