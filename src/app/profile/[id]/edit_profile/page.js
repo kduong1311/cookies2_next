@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { 
-  Camera, Save, X, Upload, User, MapPin, FileText, Globe, Mail, Phone, Calendar, CheckCircle, AlertCircle, Loader2} from 'lucide-react';
+  Camera, Save, X, Upload, User, MapPin, FileText, Globe, Mail, Phone, Calendar, CheckCircle, AlertCircle, Loader2, Truck
+} from 'lucide-react';
 import { uploadToCloudinary } from '@/components/upload/uploadCloudinary';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
