@@ -18,6 +18,7 @@ import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signI
 export default function LoginModal({ open, onOpenChange }) {
   const [formMode, setFormMode] = useState("social");
   const [registerError, setRegisterError] = useState("");
+  const [loginError, setLoginError] = useState("");
   const {login} = useAuth();
 
   return (
@@ -111,29 +112,39 @@ export default function LoginModal({ open, onOpenChange }) {
                 const email = e.target.email.value;
                 const password = e.target.password.value;
 
+                setLoginError("");
                 try {
+                  // Sign in with Firebase
                   const userCredential = await signInWithEmailAndPassword(auth, email, password);
                   const idToken = await userCredential.user.getIdToken();
-                  const res = await fetch("http://103.253.145.7:3000/api/users/login", {
+
+                  // Call backend API to create user instance in DB (like Google login)
+                  const res = await fetch("http://103.253.145.7:3000/api/users/google-auth", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ idToken }),
+                    body: JSON.stringify({ 
+                      idToken,
+                      user: {
+                        username: userCredential.user.displayName || userCredential.user.email.split('@')[0],
+                        photoURL: userCredential.user.photoURL
+                      }
+                    }),
                     credentials: "include",
                   });
                   const data = await res.json();
 
                   if (!res.ok) {
-                    throw new Error(data.message || "Login failed");
+                    setLoginError(data.message || "Login failed");
+                    return;
                   }
 
                   await login();
-                  alert("Login successful");
                   onOpenChange(false);
                 }
                 catch (e) {
-                  alert(e.message);
+                  setLoginError(e.message);
                 }
               }}
               >
@@ -149,6 +160,9 @@ export default function LoginModal({ open, onOpenChange }) {
                   placeholder="Password"
                   className="p-2 rounded bg-gray-100 text-black"
                 />
+                {loginError && (
+                  <span className="text-red-500 text-sm">{loginError}</span>
+                )}
                 <Button type="submit" className="w-full bg-orange">
                   Login
                 </Button>
