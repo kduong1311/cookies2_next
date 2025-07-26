@@ -237,7 +237,6 @@ export default function CookingUploadPage() {
         if (!recipeResponse.ok) {
           const errorData = await recipeResponse.json();
           console.error("Create recipe failed:", errorData);
-          // Don't throw error here since post was created successfully
           alert("Create post sucessfull but have error in recipe!");
         } else {
           const recipeResult = await recipeResponse.json();
@@ -460,7 +459,7 @@ export default function CookingUploadPage() {
                       onChange={(e) => setCuisine(e.target.value)}
                       className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
                     >
-                      <option value="">Chọn loại ẩm thực</option>
+                      <option value="">Cuisine</option>
                       {cuisineOptions.map(option => (
                         <option key={option} value={option}>{option}</option>
                       ))}
