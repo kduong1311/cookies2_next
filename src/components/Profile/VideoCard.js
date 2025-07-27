@@ -13,7 +13,7 @@ const VideoCard = ({ video }) => {
   const thumbnailUrl = video.media[0]?.thumbnail_url || video.media[0]?.url;
 
   return (
-    <Link href={`/shop/${video.post_id}`} className="block">
+    <Link href={`/post/${video.post_id}`} className="block">
       <div className="w-full max-w-sm bg-gray-700 rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all border border-gray-200 cursor-pointer">
       <div className="relative group">
         <video 

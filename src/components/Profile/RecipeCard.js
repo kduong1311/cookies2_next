@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, Bookmark, Crown} from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 const RecipeCard = ({ recipe }) => {
 
   const difficulty = getDifficulty(recipe.cooking_time);
@@ -12,6 +13,7 @@ const RecipeCard = ({ recipe }) => {
   }
 
   return (
+    <Link href={`/post/${recipe.post_id}`} className="block">
     <div className="bg-gray-700 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-200">
       <div className="relative">
         <Image 
@@ -46,6 +48,7 @@ const RecipeCard = ({ recipe }) => {
         </div>
       </div>
     </div>
+    </Link>
   );
 };
 
