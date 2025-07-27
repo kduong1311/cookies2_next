@@ -7,7 +7,7 @@ import ProductList from "@/components/shop/ProductList";
 export default function ShopPage() {
   const router = useRouter();
   const params = useParams();
-  const shopId = params.shopId;
+  const shopId = params.id;
   const [shop, setShop] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
