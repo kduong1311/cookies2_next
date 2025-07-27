@@ -22,56 +22,101 @@ export default function ShopPage() {
     const loadShopData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
+        console.log("Loading shop data for shopId:", shopId);
+        
+        // Fetch shop data
         const shopResponse = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`, {
           credentials: "include"
         });
-        const shopResult = await shopResponse.json();
         
+        console.log("Shop response status:", shopResponse.status);
+        
+        if (!shopResponse.ok) {
+          throw new Error(`Shop API failed with status: ${shopResponse.status}`);
+        }
+        
+        const shopResult = await shopResponse.json();
+        console.log("Shop result:", shopResult);
+        
+        // Fetch products data
         const productsResponse = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`, {
           credentials: "include"
         });
-        const productsResult = await productsResponse.json();
         
-        if (shopResult.status === "success" && productsResult.status === "success" && productsResult.data?.status === "success") {
-          const shopData = shopResult.data;
-          const productsData = productsResult.data.data;
-          
-          const formattedShop = {
-            id: shopData.shop_id,
-            name: shopData.name,
-            description: shopData.description,
-            avatar: shopData.logo_url || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png",
-            cover_image: shopData.cover_photo_url || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop",
-            rating: parseFloat(shopData.rating),
-            total_reviews: shopData.total_reviews,
-            total_products: productsData.length,
-            followers: 0, // Not available in API
-            address: `${shopData.address}${shopData.city ? ', ' + shopData.city : ''}${shopData.country ? ', ' + shopData.country : ''}${shopData.postal_code ? ' ' + shopData.postal_code : ''}`,
-            phone: shopData.contact_phone,
-            email: shopData.contact_email,
-            established_date: shopData.created_at,
-            is_verified: shopData.is_verified,
-            business_registration: shopData.business_registration,
-            status: shopData.status
-          };
-          
-          setShop(formattedShop);
-          setProducts(productsData);
-          setFilteredProducts(productsData);
-        } else {
-          setError("Failed to load shop data");
+        console.log("Products response status:", productsResponse.status);
+        
+        if (!productsResponse.ok) {
+          throw new Error(`Products API failed with status: ${productsResponse.status}`);
         }
+        
+        const productsResult = await productsResponse.json();
+        console.log("Products result:", productsResult);
+        
+        // Check shop data
+        if (shopResult.status !== "success") {
+          throw new Error("Shop API returned error status");
+        }
+        
+        // Handle different possible structures for products API
+        let productsData = [];
+        
+        if (productsResult.status === "success") {
+          // Check different possible data structures
+          if (productsResult.data?.status === "success" && productsResult.data?.data) {
+            productsData = productsResult.data.data;
+          } else if (productsResult.data && Array.isArray(productsResult.data)) {
+            productsData = productsResult.data;
+          } else if (Array.isArray(productsResult.data?.products)) {
+            productsData = productsResult.data.products;
+          }
+        }
+        
+        console.log("Final products data:", productsData);
+        
+        const shopData = shopResult.data;
+        
+        const formattedShop = {
+          id: shopData.shop_id,
+          name: shopData.name,
+          description: shopData.description,
+          avatar: shopData.logo_url || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png",
+          cover_image: shopData.cover_photo_url || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=400&fit=crop",
+          rating: parseFloat(shopData.rating || 0),
+          total_reviews: shopData.total_reviews || 0,
+          total_products: productsData.length,
+          followers: 0, // Not available in API
+          address: `${shopData.address || ''}${shopData.city ? ', ' + shopData.city : ''}${shopData.country ? ', ' + shopData.country : ''}${shopData.postal_code ? ' ' + shopData.postal_code : ''}`.trim().replace(/^,\s*/, ''),
+          phone: shopData.contact_phone,
+          email: shopData.contact_email,
+          established_date: shopData.created_at,
+          is_verified: shopData.is_verified,
+          business_registration: shopData.business_registration,
+          status: shopData.status
+        };
+        
+        console.log("Formatted shop:", formattedShop);
+        
+        setShop(formattedShop);
+        setProducts(productsData);
+        setFilteredProducts(productsData);
+        
       } catch (err) {
-        setError("Failed to load shop data");
         console.error("Error loading shop data:", err);
+        setError(`Failed to load shop data: ${err.message}`);
       } finally {
         setLoading(false);
+        console.log("Loading finished");
       }
     };
 
     if (shopId) {
       loadShopData();
+    } else {
+      console.log("No shopId provided");
+      setLoading(false);
+      setError("No shop ID provided");
     }
   }, [shopId]);
 
@@ -93,8 +138,8 @@ export default function ShopPage() {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -108,19 +153,19 @@ export default function ShopPage() {
     // Sort products
     switch (sortBy) {
       case "price_low":
-        filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        filtered.sort((a, b) => parseFloat(a.price || 0) - parseFloat(b.price || 0));
         break;
       case "price_high":
-        filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        filtered.sort((a, b) => parseFloat(b.price || 0) - parseFloat(a.price || 0));
         break;
       case "rating":
-        filtered.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+        filtered.sort((a, b) => parseFloat(b.rating || 0) - parseFloat(a.rating || 0));
         break;
       case "newest":
-        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
         break;
       case "name":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         break;
       default:
         // Keep original order
@@ -134,16 +179,18 @@ export default function ShopPage() {
   const transformedProducts = filteredProducts.map(product => ({
     id: product.product_id,
     name: product.name,
-    price: parseFloat(product.price),
+    price: parseFloat(product.price || 0),
     sale_price: product.sale_price ? parseFloat(product.sale_price) : null,
-    image: product.images?.[0]?.image_url || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png",
-    rating: parseFloat(product.rating),
-    total_reviews: product.total_reviews,
-    stock_quantity: product.stock_quantity,
-    is_featured: product.is_featured,
-    categories: product.categories,
+    image: product.images?.[0]?.image_url || product.images?.[0] || "https://res.cloudinary.com/da9rooi9r/image/upload/v1751130040/Logo_lt0d2t.png",
+    rating: parseFloat(product.rating || 0),
+    total_reviews: product.total_reviews || 0,
+    stock_quantity: product.stock_quantity || 0,
+    is_featured: product.is_featured || false,
+    categories: product.categories || [],
     slug: product.slug
   }));
+
+  console.log("Current state:", { loading, error, shop: !!shop, productsCount: products.length });
 
   if (loading) {
     return (
@@ -151,19 +198,40 @@ export default function ShopPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <div>Loading shop...</div>
+          <div className="text-sm text-gray-400 mt-2">Shop ID: {shopId}</div>
         </div>
       </div>
     );
   }
 
-  if (error || !shop) {
+  if (error) {
     return (
       <div className="bg-black-cs text-white min-h-screen px-4 py-6">
         <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
           <ChevronLeft size={20} />
           <span>Back</span>
         </button>
-        <div className="text-center py-8 text-red-500">{error || "Shop not found"}</div>
+        <div className="text-center py-8">
+          <div className="text-red-500 mb-4">{error}</div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!shop) {
+    return (
+      <div className="bg-black-cs text-white min-h-screen px-4 py-6">
+        <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
+          <ChevronLeft size={20} />
+          <span>Back</span>
+        </button>
+        <div className="text-center py-8 text-red-500">Shop not found</div>
       </div>
     );
   }
