@@ -23,10 +23,14 @@ export default function ShopPage() {
       try {
         setLoading(true);
         
-        const shopResponse = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`);
+        const shopResponse = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`, {
+          credentials: "include"
+        });
         const shopResult = await shopResponse.json();
         
-        const productsResponse = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`);
+        const productsResponse = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`, {
+          credentials: "include"
+        });
         const productsResult = await productsResponse.json();
         
         if (shopResult.status === "success" && productsResult.status === "success" && productsResult.data?.status === "success") {
