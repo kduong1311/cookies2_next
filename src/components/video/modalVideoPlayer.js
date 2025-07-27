@@ -30,12 +30,10 @@ export default function ModalVideoPlayer({ video, onClose }) {
   fetchUser();
 }, [video?.user_id]);
 
-  // Đóng modal khi click backdrop
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
 
-  // Đóng modal bằng ESC
   const handleKeyDown = (e) => {
     if (e.key === "Escape") onClose();
   };
@@ -52,8 +50,6 @@ export default function ModalVideoPlayer({ video, onClose }) {
         tabIndex={-1}
       >
         <div className="relative flex">
-
-          {/* VIDEO PLAYER */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -69,7 +65,6 @@ export default function ModalVideoPlayer({ video, onClose }) {
             />
           </motion.div>
 
-          {/* PANEL RECIPE & COMMENT */}
           <AnimatePresence mode="wait">
             {activePanelType === "recipe" && (
               <motion.div
@@ -97,7 +92,6 @@ export default function ModalVideoPlayer({ video, onClose }) {
             )}
           </AnimatePresence>
 
-          {/* INTERACTIONS */}
           <VideoInteractions
             currentPost={video}
             onRecipeClick={() => {
@@ -110,12 +104,10 @@ export default function ModalVideoPlayer({ video, onClose }) {
             }}
             onLike={() => {
               console.log("Like video", video.id);
-              // TODO: Call API hoặc cập nhật state
             }}
             className="absolute right-0 top-1/2 -translate-y-1/2 transform translate-x-full ml-4"
           />
 
-          {/* CLOSE BUTTON */}
           <button
             className="absolute top-4 right-4 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors z-10"
             onClick={onClose}

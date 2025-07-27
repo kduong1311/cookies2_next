@@ -20,7 +20,6 @@ export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, is
 
       <div className="absolute bottom-4 left-4 right-4 text-white z-10">
         <div className="space-y-2">
-          {/* User Info */}
           <div className="flex items-center space-x-2">
             <Link href={`/profile/${currentUser?.user_id || ''}`}>
             <img 
@@ -45,13 +44,10 @@ export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, is
             )}
           </div>
 
-          {/* Post Title */}
           <h3 className="font-bold text-base leading-tight">{currentPost.title}</h3>
 
-          {/* Description */}
           <p className="text-xs opacity-90 line-clamp-2 leading-tight">{currentPost.description}</p>
 
-          {/* Post Stats */}
           <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs opacity-75">
             {currentPost.cooking_time > 0 && (
               <div className="flex items-center space-x-1">

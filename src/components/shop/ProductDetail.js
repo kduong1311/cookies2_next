@@ -6,6 +6,7 @@ import { fetchProductById } from "@/api_services/product";
 import AddToCartModal from "./AddToCartModal";
 import { useCart } from "@/contexts/CartContext";
 import toast from "react-hot-toast";
+import ShareModal from "../user/ShareModal";
 
 export default function ProductDetail({ productId, onBack }) {
   const router = useRouter();
@@ -16,9 +17,9 @@ export default function ProductDetail({ productId, onBack }) {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [cartModalOpen, setCartModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const { addToCart, setBuyNow} = useCart();
 
-  // Fetch shop information
   const fetchShopById = async (shopId) => {
     try {
       const response = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`);
@@ -43,7 +44,6 @@ export default function ProductDetail({ productId, onBack }) {
           setProduct(fetchedProduct);
           setError(null);
           
-          // Fetch shop information if shop_id exists
           if (fetchedProduct.shop_id) {
             const shopData = await fetchShopById(fetchedProduct.shop_id);
             setShop(shopData);
@@ -62,7 +62,6 @@ export default function ProductDetail({ productId, onBack }) {
     loadProduct();
   }, [productId]);
 
-  // Get total stock quantity from all variants
   const getTotalStock = () => {
     if (product?.variants && product.variants.length > 0) {
       return product.variants.reduce((total, variant) => {
@@ -72,7 +71,6 @@ export default function ProductDetail({ productId, onBack }) {
     return product?.stock_quantity || 0;
   };
 
-  // Get price range for display
   const getPriceRange = () => {
     if (!product?.variants || product.variants.length === 0) {
       return {
@@ -92,6 +90,14 @@ export default function ProductDetail({ productId, onBack }) {
       minSalePrice: salePrices.length > 0 ? Math.min(...salePrices) : null,
       maxSalePrice: salePrices.length > 0 ? Math.max(...salePrices) : null
     };
+  };
+
+  const getShareUrl = () => {
+    if (typeof window !== 'undefined') {
+      const baseUrl = window.location.origin;
+      return `${baseUrl}/product/${productId}`;
+    }
+    return `http://103.253.145.7:5173/shop/${productId}`;
   };
 
   const handleQuantityChange = (action) => {
@@ -128,6 +134,34 @@ export default function ProductDetail({ productId, onBack }) {
     }
   };
 
+  const handleShare = () => {
+    setShareModalOpen(true);
+  };
+
+  const handleCopyLink = () => {
+    const shareUrl = getShareUrl();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast.success("Link copied to clipboard!");
+      }).catch(() => {
+        toast.error("Failed to copy link");
+      });
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        toast.success("Link copied to clipboard!");
+      } catch (err) {
+        toast.error("Failed to copy link");
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-black-cs text-white min-h-screen flex items-center justify-center">
@@ -153,14 +187,14 @@ export default function ProductDetail({ productId, onBack }) {
 
   return (
     <div className="bg-black-cs text-white min-h-screen px-4 py-6">
-      {/* Nút quay lại */}
+
       <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
         <ChevronLeft size={20} />
         <span>Back</span>
       </button>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Phần hình ảnh sản phẩm */}
+
         <div className="lg:w-1/2">
           <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
             <img
@@ -196,7 +230,6 @@ export default function ProductDetail({ productId, onBack }) {
         <div className="lg:w-1/2">
           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
 
-          {/* Shop Information */}
           {shop && (
             <div 
               onClick={handleShopClick}
@@ -234,8 +267,6 @@ export default function ProductDetail({ productId, onBack }) {
             </div>
             <span className="text-sm text-gray-400">{product.rating} ({product.total_reviews || 0} reviews)</span>
           </div>
-
-          {/* Price Display */}
           <div className="mb-4">
             {product.variants && product.variants.length > 0 ? (
               <div>
@@ -273,8 +304,6 @@ export default function ProductDetail({ productId, onBack }) {
               </div>
             )}
           </div>
-
-          {/* Stock Status */}
           <div className="mb-4">
             <span className={`text-sm font-medium ${totalStock > 0 ? 'text-green-400' : 'text-red-400'}`}>
               {totalStock > 0 ? `In Stock (${totalStock} available)` : 'Out of Stock'}
@@ -286,7 +315,6 @@ export default function ProductDetail({ productId, onBack }) {
             <p className="text-gray-300">{product.description}</p>
           </div>
 
-          {/* Variants Preview */}
           {product.variants && product.variants.length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-4">Available Options:</h3>
@@ -363,13 +391,12 @@ export default function ProductDetail({ productId, onBack }) {
           </div>
 
           <div className="flex items-center justify-between pb-4 border-b border-gray-800">
-            <button className="flex items-center gap-2 text-gray-400 hover:text-white">
+            <button 
+              onClick={handleShare}
+              className="flex items-center gap-2 text-gray-400 hover:text-white"
+            >
               <Share2 size={18} />
               <span>Share</span>
-            </button>
-            <button className="flex items-center gap-2 text-gray-400 hover:text-white">
-              <Heart size={18} />
-              <span>Add to favorite list</span>
             </button>
           </div>
         </div>
@@ -384,6 +411,14 @@ export default function ProductDetail({ productId, onBack }) {
           setBuyNow(item);
           router.push("/shop/order")
         }}
+      />
+
+      <ShareModal
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
+        shareUrl={getShareUrl()}
+        product={product}
+        onCopyLink={handleCopyLink}
       />
     </div>
   );

@@ -42,8 +42,6 @@ export default function VideoFeed({
         if (data.status === 'success') {
           const shuffledPosts = shuffleArray(data.data);
           setPosts(shuffledPosts);
-
-          // Fetch chi tiết từng post để lấy thông tin like
           const postDetailPromises = shuffledPosts.map(async (post) => {
             try {
               const res = await fetch(`http://103.253.145.7:3001/api/posts/${post.post_id}`, {
@@ -102,7 +100,6 @@ export default function VideoFeed({
     fetchPosts();
   }, []);
 
-  // Polling để cập nhật dữ liệu post hiện tại
   useEffect(() => {
     if (posts.length === 0) return;
 
@@ -156,7 +153,6 @@ export default function VideoFeed({
     }));
   }, []);
 
-  // Navigation handlers
   const handlePrevious = () => {
     setCurrentPostIndex((prev) => (prev === 0 ? posts.length - 1 : prev - 1));
   };
@@ -164,8 +160,6 @@ export default function VideoFeed({
   const handleNext = () => {
     setCurrentPostIndex((prev) => (prev === posts.length - 1 ? 0 : prev + 1));
   };
-
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowUp') {

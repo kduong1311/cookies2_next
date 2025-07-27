@@ -29,22 +29,18 @@ export default function VideoInteractions({
   const isInitialized = useRef(false);
   const lastClickTime = useRef(0);
 
-  // Memoize các giá trị
   const postId = useMemo(() => currentPost?.post_id, [currentPost?.post_id]);
   const userId = useMemo(() => user?.user_id, [user?.user_id]);
   const commentCount = useMemo(() => currentPost?.comments_count ?? 0, [currentPost?.comments_count]);
   const shareCount = useMemo(() => currentPost?.shares_count ?? 0, [currentPost?.shares_count]);
 
-  // Khởi tạo dữ liệu post
   const initializePostData = useCallback(async () => {
   if (!postId || !userId) return;
 
-  // Nếu đã khởi tạo cho post này rồi thì không làm gì
   if (isInitialized.current && lastFetchedPostId.current === postId) {
     return;
   }
 
-  // Reset state khi chuyển post
   if (lastFetchedPostId.current !== postId) {
     setLiked(false);
     setLikeCount(0);
@@ -87,7 +83,6 @@ export default function VideoInteractions({
 useEffect(() => {
   if (postId && userId) {
     initializePostData();
-    // Sau khi fetch xong thì reset flag
     if (refreshPost) setRefreshPost(false);
   }
 }, [postId, userId, refreshPost, initializePostData]);
@@ -97,7 +92,7 @@ useEffect(() => {
     if (!postId || !userId || loadingLike) return;
 
     const now = Date.now();
-    if (now - lastClickTime.current < 300) return; // Throttle 300ms
+    if (now - lastClickTime.current < 300) return;
     lastClickTime.current = now;
 
     setLoadingLike(true);
@@ -127,7 +122,6 @@ useEffect(() => {
     }
 
     try {
-      // Hủy request cũ nếu có
       if (pendingLikeRequest.current) {
         pendingLikeRequest.current.abort();
       }
@@ -152,7 +146,6 @@ useEffect(() => {
       const responseData = await response.json();
       lastServerLikeState.current = newLiked;
 
-      // Cập nhật dữ liệu mới nhất từ server
       if (responseData.data) {
         const updatedPost = responseData.data;
         setLikeCount(Math.max(0, updatedPost.likes_count ?? newLikeCount));
