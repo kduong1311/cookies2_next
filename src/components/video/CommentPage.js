@@ -17,17 +17,16 @@ export default function CommentPage({ postId }) {
     setError("");
     try {
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`);
-      if (!res.ok) throw new Error("Không thể tải bình luận.");
+      if (!res.ok) throw new Error("Failed to load comments.");
       const data = await res.json();
-      if (data.status !== "success") throw new Error("Lỗi phản hồi từ server.");
+      if (data.status !== "success") throw new Error("Server responded with an error.");
       const fetchedComments = data.data?.comments || [];
 
-      // Fetch users info first
       const userIds = [...new Set(fetchedComments.map(c => c.user_id))];
       const userFetches = userIds.map(async (id) => {
         try {
           const userRes = await fetch(`http://103.253.145.7:3000/api/users/${id}`);
-          if (!userRes.ok) throw new Error("Không thể tải thông tin người dùng.");
+          if (!userRes.ok) throw new Error("Failed to load user information.");
           const userData = await userRes.json();
           return { id, data: userData };
         } catch (err) {
@@ -35,7 +34,7 @@ export default function CommentPage({ postId }) {
           return { id, data: null };
         }
       });
-      
+
       const usersData = await Promise.all(userFetches);
       const newUsersMap = {};
       usersData.forEach(({ id, data }) => {
@@ -45,7 +44,6 @@ export default function CommentPage({ postId }) {
       });
       setUsersMap(newUsersMap);
 
-      // Process comments after users are loaded
       const commentMap = {};
       const rootComments = [];
 
@@ -70,7 +68,6 @@ export default function CommentPage({ postId }) {
         };
       });
 
-      // Build comment tree
       Object.values(commentMap).forEach(comment => {
         if (comment.parentId && commentMap[comment.parentId]) {
           commentMap[comment.parentId].replies.push(comment);
@@ -79,9 +76,8 @@ export default function CommentPage({ postId }) {
         }
       });
 
-      // Sort comments by time (newest first for root, oldest first for replies)
       rootComments.sort((a, b) => new Date(b.time) - new Date(a.time));
-      
+
       const sortReplies = (comments) => {
         comments.forEach(comment => {
           if (comment.replies && comment.replies.length > 0) {
@@ -90,13 +86,13 @@ export default function CommentPage({ postId }) {
           }
         });
       };
-      
+
       sortReplies(rootComments);
       setComments(rootComments);
-      
+
     } catch (err) {
       console.error("Fetch comments error:", err);
-      setError("Đã có lỗi khi tải bình luận.");
+      setError("An error occurred while loading comments.");
     } finally {
       setLoading(false);
     }
@@ -105,42 +101,33 @@ export default function CommentPage({ postId }) {
   useEffect(() => {
     if (!postId) return;
     fetchCommentsAndUsers();
-  }, [postId]); // Removed loggedInUser from dependency to prevent unnecessary refetches
+  }, [postId]);
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-    
-    // Debug log to check what's being sent
-    console.log("Sending comment with data:", {
-      content: newComment,
-      parent_comment_id: replyTo || null,
-      replyTo: replyTo
-    });
-    
+
     try {
       const requestBody = {
         content: newComment,
         parent_comment_id: replyTo || null,
       };
-      
+
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.text();
         console.error("Server response:", errorData);
-        throw new Error("Không thể gửi bình luận.");
+        throw new Error("Failed to submit comment.");
       }
-      
+
       const data = await res.json();
-      console.log("Server response:", data);
-      
-      if (data.status !== "success") throw new Error("Server trả về lỗi.");
+      if (data.status !== "success") throw new Error("Server returned an error.");
 
       const newCommentObj = {
         id: data.data.comment_id,
@@ -175,13 +162,12 @@ export default function CommentPage({ postId }) {
       setReplyTo(null);
     } catch (err) {
       console.error("Add comment error:", err);
-      alert("Đã có lỗi khi gửi bình luận.");
+      alert("An error occurred while submitting the comment.");
     }
   };
 
   const handleLike = async (commentId) => {
     try {
-      // Optimistically update UI first
       const likeRecursive = (comments) => comments.map(comment => {
         if (comment.id === commentId) {
           return { ...comment, likes: comment.likes + 1 };
@@ -192,14 +178,12 @@ export default function CommentPage({ postId }) {
       });
       setComments(likeRecursive(comments));
 
-      // Then send request to server
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments/${commentId}/like`, {
         method: "POST",
         credentials: "include",
       });
-      
+
       if (!res.ok) {
-        // Revert the optimistic update if request fails
         const revertLike = (comments) => comments.map(comment => {
           if (comment.id === commentId) {
             return { ...comment, likes: comment.likes - 1 };
@@ -209,7 +193,7 @@ export default function CommentPage({ postId }) {
           return comment;
         });
         setComments(revertLike(comments));
-        throw new Error("Không thể like bình luận.");
+        throw new Error("Failed to like comment.");
       }
     } catch (err) {
       console.error("Like error:", err);
@@ -217,13 +201,13 @@ export default function CommentPage({ postId }) {
   };
 
   const handleDelete = async (commentId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) return;
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
     try {
       const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments/${commentId}`, {
         method: "DELETE",
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Xóa thất bại.");
+      if (!res.ok) throw new Error("Failed to delete.");
 
       const deleteRecursive = (comments) => comments
         .map(comment => {
@@ -238,7 +222,7 @@ export default function CommentPage({ postId }) {
       setComments(prev => deleteRecursive(prev));
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Không thể xóa bình luận.");
+      alert("Failed to delete the comment.");
     }
   };
 
@@ -278,7 +262,7 @@ export default function CommentPage({ postId }) {
               className="flex items-center gap-1 text-gray-400 hover:text-blue-500 transition-colors"
             >
               <Reply size={14} />
-              <span>Trả lời</span>
+              <span>Reply</span>
             </button>
             {comment.userId === loggedInUser?.user_id && (
               <button
@@ -286,7 +270,7 @@ export default function CommentPage({ postId }) {
                 className="flex items-center gap-1 text-gray-400 hover:text-red-600 transition-colors"
               >
                 <Trash2 size={14} />
-                <span>Xóa</span>
+                <span>Delete</span>
               </button>
             )}
             <button className="text-gray-400 hover:text-white transition-colors">
@@ -306,7 +290,7 @@ export default function CommentPage({ postId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full text-white">
-        Đang tải bình luận...
+        Loading comments...
       </div>
     );
   }
@@ -323,9 +307,9 @@ export default function CommentPage({ postId }) {
     <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        <h2 className="text-xl font-bold text-white">Bình luận</h2>
+        <h2 className="text-xl font-bold text-white">Comments</h2>
         <div className="text-sm text-gray-400">
-          {comments.length} bình luận
+          {comments.length} comments
         </div>
       </div>
 
@@ -345,7 +329,7 @@ export default function CommentPage({ postId }) {
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder={replyTo ? "Trả lời bình luận..." : "Viết bình luận..."}
+              placeholder={replyTo ? "Reply to comment..." : "Write a comment..."}
               className="flex-1 bg-gray-700 text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
@@ -359,7 +343,7 @@ export default function CommentPage({ postId }) {
         </form>
         {replyTo && (
           <div className="text-sm text-gray-400 mt-2">
-            Đang trả lời... <button onClick={() => setReplyTo(null)} className="underline">Hủy</button>
+            Replying... <button onClick={() => setReplyTo(null)} className="underline">Cancel</button>
           </div>
         )}
       </div>
@@ -368,12 +352,12 @@ export default function CommentPage({ postId }) {
       <div className="flex-1 overflow-y-auto">
         {comments.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
-            Chưa có bình luận nào
+            No comments yet
           </div>
         ) : (
           comments.map((comment) => renderComment(comment))
         )}
-      </div>  
+      </div>
     </div>
   );
 }

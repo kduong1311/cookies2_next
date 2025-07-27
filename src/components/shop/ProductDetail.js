@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ChevronLeft, Heart, Star, ShoppingCart, Share2, Minus, Plus } from "lucide-react";
+import { ChevronLeft, Heart, Star, ShoppingCart, Share2, Minus, Plus, Store } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchProductById } from "@/api_services/product";
 import AddToCartModal from "./AddToCartModal";
@@ -10,12 +10,28 @@ import toast from "react-hot-toast";
 export default function ProductDetail({ productId, onBack }) {
   const router = useRouter();
   const [product, setProduct] = useState(null);
+  const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const { addToCart, setBuyNow} = useCart();
+
+  // Fetch shop information
+  const fetchShopById = async (shopId) => {
+    try {
+      const response = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch shop');
+      }
+      const data = await response.json();
+      return data.status === 'success' ? data.data : null;
+    } catch (error) {
+      console.error('Error fetching shop:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -26,6 +42,12 @@ export default function ProductDetail({ productId, onBack }) {
         if (fetchedProduct) {
           setProduct(fetchedProduct);
           setError(null);
+          
+          // Fetch shop information if shop_id exists
+          if (fetchedProduct.shop_id) {
+            const shopData = await fetchShopById(fetchedProduct.shop_id);
+            setShop(shopData);
+          }
         } else {
           setError("Product not found");
         }
@@ -100,6 +122,12 @@ export default function ProductDetail({ productId, onBack }) {
     handleAddToCart();
   };
 
+  const handleShopClick = () => {
+    if (shop?.shop_id) {
+      router.push(`/shop/shop-detail/${shop.shop_id}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-black-cs text-white min-h-screen flex items-center justify-center">
@@ -165,9 +193,53 @@ export default function ProductDetail({ productId, onBack }) {
           </div>
         </div>
 
-        {/* Thông tin sản phẩm */}
         <div className="lg:w-1/2">
           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+
+          {/* Shop Information */}
+          {shop && (
+            <div 
+              onClick={handleShopClick}
+              className="flex items-center gap-3 mb-4 p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                {shop.logo_url ? (
+                  <img 
+                    src={shop.logo_url} 
+                    alt={shop.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Store size={20} className="text-gray-300" />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-white">{shop.name}</span>
+                  {shop.is_verified && (
+                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        size={12}
+                        className={i < Math.floor(parseFloat(shop.rating)) ? "text-yellow-500 fill-yellow-500" : "text-gray-500"}
+                      />
+                    ))}
+                  </div>
+                  <span>({shop.total_reviews || 0} reviews)</span>
+                </div>
+              </div>
+              <ChevronLeft size={16} className="text-gray-400 rotate-180" />
+            </div>
+          )}
 
           <div className="flex items-center gap-2 mb-4">
             <div className="flex">

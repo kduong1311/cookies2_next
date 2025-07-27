@@ -22,7 +22,6 @@ export default function ShopPage() {
     setActiveShopView("productList");
   };
 
-  // ✅ Search local trong allProducts
   const handleSearch = ({ query = "", category = "All"}) => {
   const keyword = query.toLowerCase();
   let filtered = [...allProducts];

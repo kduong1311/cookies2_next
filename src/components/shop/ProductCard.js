@@ -18,7 +18,6 @@ export default function ProductCard({ data }) {
         />
       </div>
         <CardContent className="pb-4">
-          <p className="text-gray-400">My shop</p>
           <h2 className="text-lg text-white font-semibold truncate">
             {data.name}
           </h2>
