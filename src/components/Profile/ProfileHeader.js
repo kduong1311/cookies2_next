@@ -14,7 +14,6 @@ const DEFAULT_COVER =
 const DEFAULT_AVATAR = '/Logo.png';
 
 const ProfileHeader = ({ userProfile }) => {
-  // Hiển thị loading skeleton nếu chưa có dữ liệu
   if (!userProfile) {
     return (
       <div className="w-full h-64 bg-gray-700 animate-pulse rounded-lg">
@@ -79,9 +78,7 @@ const ProfileHeader = ({ userProfile }) => {
         ></div>
       </div>
 
-      {/* Profile Info */}
       <div className="px-4 pb-6">
-        {/* Avatar */}
         <div className="relative -mt-12 mb-4">
           <div className="relative inline-block">
             <Image

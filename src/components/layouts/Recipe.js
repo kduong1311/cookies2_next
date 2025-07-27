@@ -267,25 +267,11 @@ export default function RecipePage({ postId, onBack }) {
                   />
                   <span className="text-gray-300">Like</span>
                 </button>
-                <button className="flex items-center gap-2">
-                  <MessageSquare className="text-gray-300" size={20} />
-                  <span className="text-gray-300">Comments</span>
-                </button>
               </div>
               <div className="flex items-center gap-4">
                 <button className="flex items-center gap-2">
                   <Share2 className="text-gray-300" size={20} />
                   <span className="text-gray-300">Share</span>
-                </button>
-                <button 
-                  className="flex items-center gap-2"
-                  onClick={() => setSaved(!saved)}
-                >
-                  <Bookmark 
-                    className={saved ? "text-orange-500 fill-orange-500" : "text-gray-300"} 
-                    size={20} 
-                  />
-                  <span className="text-gray-300">Save</span>
                 </button>
               </div>
             </div>
@@ -304,17 +290,6 @@ export default function RecipePage({ postId, onBack }) {
                 ))}
                 {rating > 0 && (
                   <span className="text-gray-300 ml-2">({rating}/5)</span>
-                )}
-              </div>
-            </div>
-
-            {/* Recipe Info Footer */}
-            <div className="bg-gray-600 rounded-lg p-4">
-              <div className="text-sm text-gray-300">
-                <p>Recipe ID: {recipe.recipe_id}</p>
-                <p>Created: {new Date(recipe.created_at).toLocaleDateString()}</p>
-                {recipe.updated_at !== recipe.created_at && (
-                  <p>Last updated: {new Date(recipe.updated_at).toLocaleDateString()}</p>
                 )}
               </div>
             </div>
