@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, Star, MapPin, Phone, Mail, Store, Users, Package, Filter, Search, Grid, List } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-import ProductList from "./ProductList";
+import ProductList from "@/components/shop/ProductList";
 
 export default function ShopPage() {
   const router = useRouter();
@@ -18,17 +18,14 @@ export default function ShopPage() {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [viewMode, setViewMode] = useState("grid");
 
-  // Fetch shop and products data from API
   useEffect(() => {
     const loadShopData = async () => {
       try {
         setLoading(true);
         
-        // Fetch shop information
         const shopResponse = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`);
         const shopResult = await shopResponse.json();
         
-        // Fetch products from shop
         const productsResponse = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`);
         const productsResult = await productsResponse.json();
         
@@ -36,7 +33,6 @@ export default function ShopPage() {
           const shopData = shopResult.data;
           const productsData = productsResult.data.data;
           
-          // Set shop data
           const formattedShop = {
             id: shopData.shop_id,
             name: shopData.name,
