@@ -22,6 +22,11 @@ export default function DashboardPage() {
     }
   }, [shopId]);
 
+   const axiosInstance = axios.create({
+    baseURL: "http://103.253.145.7:8080/api",
+    withCredentials: true,
+  });
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -52,6 +57,7 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
 
   // Calculate statistics
   const totalRevenue = ordersData.reduce((sum, order) => {
