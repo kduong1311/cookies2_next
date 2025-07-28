@@ -135,7 +135,7 @@ export default function OrdersPage() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://103.253.145.7:3003/api/orders/${orderId}`, {
+      const response = await fetch(`http://103.253.145.7:8080/api/orders/${orderId}`, {
         method: 'PUT',
         credentials: "include",
         headers: {
@@ -190,7 +190,6 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
@@ -203,11 +202,10 @@ export default function OrdersPage() {
           href={`/shop/my-shop/${shopId}`}
           className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
         >
-          ← Về Dashboard
+          ← Back Dashboard
         </Link>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-blue-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{orders.length}</div>
@@ -229,7 +227,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Controls */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl mb-6">
         <div className="flex flex-col lg:flex-row gap-4 items-center">
           <input
@@ -253,7 +250,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Orders Table */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">Order List ({filteredOrders.length})</h2>
@@ -318,7 +314,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Order Detail Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -333,7 +328,6 @@ export default function OrdersPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Order Info */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="text-white font-medium mb-3">Order Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -372,7 +366,6 @@ export default function OrdersPage() {
                 )}
               </div>
 
-              {/* Order Summary */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="text-white font-medium mb-3">Order Summary</h4>
                 <div className="space-y-2 text-sm">
@@ -403,7 +396,6 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              {/* Order Status & Actions */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="text-white font-medium mb-3">Status and Actions</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">

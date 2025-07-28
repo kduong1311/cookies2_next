@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
+
 
 export default function DashboardPage() {
   const params = useParams();
@@ -25,46 +27,27 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
 
-      const shopResponse = await fetch(`http://103.253.145.7:8080/api/shops/${shopId}`, {
-        credentials: 'include'
-      });
-      
-      if (!shopResponse.ok) {
-        throw new Error('Failed to fetch shop data');
-      }
-      
-      const shopResult = await shopResponse.json();
-      if (shopResult.status === 'success') {
-        setShopData(shopResult.data);
+      const [shopRes, productsRes, ordersRes] = await Promise.all([
+        axiosInstance.get(`/shops/${shopId}`),
+        axiosInstance.get(`/products/shop/${shopId}`),
+        axiosInstance.get(`/orders/shop/${shopId}`),
+      ]);
+
+      if (shopRes.data.status === "success") {
+        setShopData(shopRes.data.data);
       }
 
-      // Fetch products data
-      const productsResponse = await fetch(`http://103.253.145.7:8080/api/products/shop/${shopId}`, {
-        credentials: 'include'
-      });
-      
-      if (productsResponse.ok) {
-        const productsResult = await productsResponse.json();
-        if (productsResult.status === 'success' && productsResult.data?.data) {
-          setProductsData(productsResult.data.data);
-        }
+      if (productsRes.data.status === "success" && productsRes.data.data?.data) {
+        setProductsData(productsRes.data.data.data);
       }
 
-      // Fetch orders data
-      const ordersResponse = await fetch(`http://103.253.145.7:8080/api/orders/shop/${shopId}`, {
-        credentials: 'include'
-      });
-      
-      if (ordersResponse.ok) {
-        const ordersResult = await ordersResponse.json();
-        if (ordersResult.status === 'success' && ordersResult.data) {
-          setOrdersData(ordersResult.data);
-        }
+      if (ordersRes.data.status === "success" && ordersRes.data.data) {
+        setOrdersData(ordersRes.data.data);
       }
 
     } catch (err) {
-      setError(err.message);
-      console.error('Error fetching data:', err);
+      console.error("Error fetching data:", err);
+      setError(err?.response?.data?.message || err.message || "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -281,7 +264,7 @@ export default function DashboardPage() {
 
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            📦 Recent Products
+            🎁 Recent Products
           </h3>
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {productsData.slice(0, 5).map((product) => (

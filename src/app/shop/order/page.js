@@ -2,40 +2,38 @@
 import React, { useState, useEffect } from 'react';
 import { Package, MapPin, CreditCard, Truck, ShoppingCart, CheckCircle, AlertCircle, Wallet, Banknote, HandCoins} from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const OrderPage = () => {
-  // Sample cart items (simulating data from cart)
   const {cartItems, buyNowItem, clearBuyNow} = useCart();
   const [orderItems, setOrderItems] = useState([]);
 
-  // Autofill shipping address on mount
   useEffect(() => {
-    const fetchShippingAddress = async () => {
-      try {
-        const res = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
-          credentials: 'include',
+  const fetchShippingAddress = async () => {
+    try {
+      const res = await axios.get('http://103.253.145.7:3000/api/users/shipping-address/', {
+        withCredentials: true,
+      });
+      const address = res.data.data;
+      if (address) {
+        setShippingAddress({
+          fullName: address.recipient_name || '',
+          phone_number: address.contact_number || '',
+          address: address.address || '',
+          city: address.city || '',
+          district: address.district || '',
+          ward: address.ward || '',
+          country: address.country || '',
+          postalCode: address.postal_code || ''
         });
-        if (!res.ok) return;
-        const data = await res.json();
-        const address = data.data; // Use the nested data object
-        if (address) {
-          setShippingAddress({
-            fullName: address.recipient_name || '',
-            phone_number: address.contact_number || '',
-            address: address.address || '',
-            city: address.city || '',
-            district: address.district || '',
-            ward: address.ward || '',
-            country: address.country || '',
-            postalCode: address.postal_code || ''
-          });
-        }
-      } catch (error) {
-        // ignore autofill errors
       }
-    };
-    fetchShippingAddress();
-  }, []);
+    } catch (error) {
+      console.error("Failed to fetch shipping address:", error);
+    }
+  };
+  fetchShippingAddress();
+}, []);
 
     useEffect(() => {
     if (buyNowItem) {
@@ -64,14 +62,12 @@ const OrderPage = () => {
   });
   const [updateShipping, setUpdateShipping] = useState(false);
 
-  // Shipping options
   const shippingOptions = [
     { id: 'standard', name: 'Standard Shipping', price: 3, time: '3-5 days' },
     { id: 'express', name: 'Express Shipping', price: 5, time: '1-2 days' },
     { id: 'same_day', name: 'Same Day Delivery', price: 8, time: 'Same day' }
   ];
 
-  // Payment methods
   const paymentMethods = [
     { id: 'credit_card', name: 'Credit/Debit Card', icon: <CreditCard className="w-5 h-5 text-orange-500" /> },
     { id: 'e_wallet', name: 'E-Wallet', icon: <Wallet className="w-5 h-5 text-orange-500" /> },
@@ -79,13 +75,11 @@ const OrderPage = () => {
     { id: 'cod', name: 'Cash on Delivery', icon: <HandCoins className="w-5 h-5 text-orange-500" /> }
   ];
 
-  // Vouchers
   const vouchers = [
     { id: 'DISCOUNT15', name: '15% Off', discount: 0.15, minOrder: 50 },
     { id: 'DISCOUNT20', name: '20% Off', discount: 0.20, minOrder: 100 }
   ];
 
-  // Calculate totals
   const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shippingFee = shippingOptions.find(option => option.id === shippingMethod)?.price || 0;
   const tax = subtotal * 0.08; // 8% tax
@@ -96,7 +90,6 @@ const OrderPage = () => {
   
   const total = subtotal + shippingFee + tax - voucherDiscount;
 
-  // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -104,81 +97,72 @@ const OrderPage = () => {
     }).format(amount);
   };
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    // Validate required fields
-    if (!shippingAddress.fullName || !shippingAddress.phone_number || !shippingAddress.address || 
-        !shippingAddress.city || !shippingAddress.district || !shippingAddress.ward) {
-      alert('Please fill in all shipping address information!');
-      return;
-    }
+const handleSubmit = async () => {
+  if (
+    !shippingAddress.fullName ||
+    !shippingAddress.phone_number ||
+    !shippingAddress.address ||
+    !shippingAddress.city ||
+    !shippingAddress.district ||
+    !shippingAddress.ward
+  ) {
+    toast.error('Please fill in all shipping address information!');
+    return;
+  }
 
-    setIsLoading(true);
+  setIsLoading(true);
 
+  try {
+    const orderData = {
+      items: orderItems.map(item => ({
+        product_id: item.product_id,
+        variant_id: item.variant?.variant_id,
+        quantity: item.quantity,
+        shop_id: item.shop_id
+      })),
+      payment_method: paymentMethod,
+      shipping_method: shippingMethod,
+      notes: notes,
+      subtotal: subtotal,
+      discount_amount: voucherDiscount,
+      total_amount: total,
+      shipping_address: shippingAddress
+    };
+
+    await axios.post('http://103.253.145.7:8080/api/orders', orderData, {
+      withCredentials: true,
+    });
+
+    setOrderSuccess(true);
+    clearBuyNow();
+  } catch (error) {
+    console.error('Error placing order:', error);
+    toast.error('An error occurred while placing the order. Please try again!');
+  } finally {
+    setIsLoading(false);
+  }
+
+  if (updateShipping) {
     try {
-      // Prepare order data
-      const orderData = {
-        items: orderItems.map(item => ({
-          product_id: item.product_id,
-          variant_id: item.variant?.variant_id,
-          quantity: item.quantity,
-          shop_id: item.shop_id
-        })),
-        payment_method: paymentMethod,
-        shipping_method: shippingMethod,
-        notes: notes,
-        subtotal: subtotal,
-        discount_amount: voucherDiscount,
-        total_amount: total,
-        shipping_address: shippingAddress
-      };
-
-      // Call API
-      const response = await fetch('http://103.253.145.7:3003/api/orders', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
+      await axios.put('http://103.253.145.7:3000/api/users/shipping-address/', {
+        recipient_name: shippingAddress.fullName,
+        contact_number: shippingAddress.phone_number,
+        address: shippingAddress.address,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        country: shippingAddress.country,
+        district: shippingAddress.district,
+        ward: shippingAddress.ward,
+        postal_code: shippingAddress.postalCode
+      }, {
+        withCredentials: true,
       });
-
-      if (response.ok) {
-        setOrderSuccess(true);
-        clearBuyNow();
-      } else {
-        throw new Error('Order failed');
-      }
-    } catch (error) {
-      console.error('Error placing order:', error);
-      alert('An error occurred while placing the order. Please try again!');
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to update shipping address:', err);
     }
+  }
+};
 
-    if (updateShipping) {
-      try {
-        await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
-          method: 'PUT',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recipient_name: shippingAddress.fullName,
-            contact_number: shippingAddress.phone_number,
-            address: shippingAddress.address,
-            city: shippingAddress.city,
-            state: shippingAddress.state,
-            country: shippingAddress.country,
-            district: shippingAddress.district,
-            ward: shippingAddress.ward,
-            postal_code: shippingAddress.postalCode
-          })
-        });
-      } catch (err) {
-        // Optionally show a toast or ignore
-      }
-    }
-  };
 
   if (orderSuccess) {
     return (

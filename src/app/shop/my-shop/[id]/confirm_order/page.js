@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function ConfirmOrdersPage() {
   const params = useParams();
@@ -122,9 +123,9 @@ export default function ConfirmOrdersPage() {
         setSelectedOrder(null);
       }
 
-      alert('Order confirmed successfully!');
+      toast.success('Order confirmed successfully!');
     } catch (err) {
-      alert('Error confirming order: ' + err.message);
+      toast.error('Error confirming order');
     } finally {
       setConfirmingOrders(prev => {
         const newSet = new Set(prev);
@@ -163,7 +164,6 @@ export default function ConfirmOrdersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
@@ -182,7 +182,6 @@ export default function ConfirmOrdersPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-yellow-600 p-4 rounded-xl text-white">
           <div className="text-2xl font-bold">{orders.length}</div>
@@ -200,7 +199,6 @@ export default function ConfirmOrdersPage() {
         </div>
       </div>
 
-      {/* Controls */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl mb-6">
         <div className="flex flex-col lg:flex-row gap-4 items-center">
           <input
@@ -221,7 +219,6 @@ export default function ConfirmOrdersPage() {
         </div>
       </div>
 
-      {/* Orders List */}
       {filteredOrders.length === 0 ? (
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-12 text-center">
           <div className="text-gray-400 text-xl mb-4">🎉</div>
@@ -300,7 +297,6 @@ export default function ConfirmOrdersPage() {
         </div>
       )}
 
-      {/* Order Detail Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -315,7 +311,6 @@ export default function ConfirmOrdersPage() {
             </div>
 
             <div className="space-y-6">
-              {/* Order Status Alert */}
               <div className="bg-yellow-600/20 border border-yellow-600 p-4 rounded-lg">
                 <div className="flex items-center gap-2">
                   <span className="text-yellow-400">⏳</span>
@@ -326,7 +321,6 @@ export default function ConfirmOrdersPage() {
                 </div>
               </div>
 
-              {/* Order Info */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="text-white font-medium mb-3">Order Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -359,7 +353,6 @@ export default function ConfirmOrdersPage() {
                 )}
               </div>
 
-              {/* Order Summary */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="text-white font-medium mb-3">Order Summary</h4>
                 <div className="space-y-2 text-sm">
@@ -390,7 +383,6 @@ export default function ConfirmOrdersPage() {
                 </div>
               </div>
 
-              {/* Confirmation Actions */}
               <div className="bg-gray-700/50 p-4 rounded-lg">
                 <h4 className="text-white font-medium mb-3">Order Confirmation</h4>
                 <div className="flex gap-3">

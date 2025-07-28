@@ -3,10 +3,11 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import AddProductModal from "@/components/product/AddProductModal";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 // Helpers
 const getStatusFromStock = (stock) => {
-  if (stock === 0) return "Out of Stock";
+  if (stock === 0) return "Out Stock";
   if (stock < 10) return "Low Stock";
   return "In Stock";
 };
@@ -94,7 +95,7 @@ export default function ProductsPage() {
   });
 
   const handleDeleteProduct = async (id) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+    if (confirm("Are you sure to delete this product?")) {
       try {
         const response = await fetch(`http://103.253.145.7:3003/api/products/${id}`, {
           method: "DELETE",
@@ -108,11 +109,11 @@ export default function ProductsPage() {
         if (result.status === "success") {
           setProducts(products.filter((p) => p.id !== id));
         } else {
-          alert("Delete Fail: " + (result.message || "Unknown error"));
+          toast.error("Delete fail!");
         }
       } catch (error) {
         console.error("Delete Error:", error);
-        alert("Can not delete, Error");
+        toast.error("Delete fail!");
       }
     }
   };
@@ -123,7 +124,7 @@ export default function ProductsPage() {
         return "bg-green-500";
       case "Low Stock":
         return "bg-yellow-500";
-      case "Out of Stock":
+      case "Out Stock":
         return "bg-red-500";
       default:
         return "bg-gray-500";
@@ -162,7 +163,6 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
@@ -179,7 +179,6 @@ export default function ProductsPage() {
         </Link>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         {[
           { label: "Totals", value: products.length, color: "blue" },
@@ -194,7 +193,7 @@ export default function ProductsPage() {
             color: "yellow",
           },
           {
-            label: "Out of Stock",
+            label: "Out Stock",
             value: products.filter((p) => p.status === "Out Stock").length,
             color: "red",
           },
@@ -209,7 +208,6 @@ export default function ProductsPage() {
         ))}
       </div>
 
-      {/* Controls */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl mb-6">
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
           <div className="flex flex-col sm:flex-row gap-4 flex-1">
@@ -242,7 +240,6 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Add Modal */}
       <AddProductModal
         open={showCreateModal}
         onOpenChange={setShowCreateModal}
@@ -253,7 +250,6 @@ export default function ProductsPage() {
         }}
       />
 
-      {/* Product Table */}
       <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">
