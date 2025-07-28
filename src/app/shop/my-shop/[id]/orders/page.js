@@ -1,6 +1,7 @@
-// app/shop/dashboard/orders/page.js
+
 "use client";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -15,29 +16,18 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [userNames, setUserNames] = useState({});
 
-
-
-  // Get shop ID from params or use default
   const shopId = params?.id;
 
-
-
-  // Fetch orders from API
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3002/api/orders/shop/${shopId}`,{
-          credentials: "include"
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-        
-        const data = await response.json();
-        
-        if (data.status === "success") {
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.get(`http://103.253.145.7:8080/api/orders/shop/${shopId}`, {
+        withCredentials: true
+      });
+
+      if (data.status === "success") {
         const fetchedOrders = data.data;
         setOrders(fetchedOrders);
 
@@ -45,13 +35,12 @@ export default function OrdersPage() {
 
         const userResponses = await Promise.all(
           uniqueUserIds.map(id =>
-            fetch(`http://103.253.145.7:3000/api/users/${id}`, { credentials: "include" })
-              .then(res => res.ok ? res.json() : null)
-              .catch(() => null)
+            axios.get(`http://103.253.145.7:8080/api/users/${id}`, {
+              withCredentials: true
+            }).then(res => res.data).catch(() => null)
           )
         );
 
-        // Tạo object userId → username
         const nameMap = {};
         userResponses.forEach((res, index) => {
           if (res && res.username) {
@@ -61,18 +50,18 @@ export default function OrdersPage() {
 
         setUserNames(nameMap);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
 
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchOrders();
-  }, [shopId]);
+  if (shopId) fetchOrders();
+}, [shopId]);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.order_number.toLowerCase().includes(searchTerm.toLowerCase())
@@ -134,43 +123,37 @@ export default function OrdersPage() {
   const getPaymentMethodText = (method) => method;
 
   const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      const response = await fetch(`http://103.253.145.7:8080/api/orders/${orderId}`, {
-        method: 'PUT',
-        credentials: "include",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ order_status: newStatus })
-      });
+  try {
+    await axios.put(`http://103.253.145.7:8080/api/orders/${orderId}`, {
+      order_status: newStatus
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to update order status');
-      }
-
-      // Update local state
-      setOrders(orders.map(order => {
-        if (order.order_id === orderId) {
-          const updatedOrder = { ...order, order_status: newStatus };
-          if (newStatus === "completed" && !updatedOrder.completed_at) {
-            updatedOrder.completed_at = new Date().toISOString();
-          }
-          return updatedOrder;
+    setOrders(orders.map(order => {
+      if (order.order_id === orderId) {
+        const updatedOrder = { ...order, order_status: newStatus };
+        if (newStatus === "completed" && !updatedOrder.completed_at) {
+          updatedOrder.completed_at = new Date().toISOString();
         }
-        return order;
-      }));
-
-      // Update selected order if it's the one being updated
-      if (selectedOrder && selectedOrder.order_id === orderId) {
-        setSelectedOrder(prev => ({ ...prev, order_status: newStatus }));
+        return updatedOrder;
       }
-      
-      toast.success("Order updated successfully!");
+      return order;
+    }));
 
-    } catch (err) {
-      toast.error("Update status Fail!");
+    if (selectedOrder && selectedOrder.order_id === orderId) {
+      setSelectedOrder(prev => ({ ...prev, order_status: newStatus }));
     }
-  };
+
+    toast.success("Order updated successfully!");
+  } catch (err) {
+    toast.error("Update status Fail!");
+  }
+};
+
 
   if (loading) {
     return (

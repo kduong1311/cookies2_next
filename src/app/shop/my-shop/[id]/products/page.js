@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { useParams } from "next/navigation";
 import AddProductModal from "@/components/product/AddProductModal";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
-// Helpers
 const getStatusFromStock = (stock) => {
   if (stock === 0) return "Out Stock";
   if (stock < 10) return "Low Stock";
@@ -31,10 +31,9 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://103.253.145.7:3003/api/categories");
-        const result = await res.json();
-        if (result.status === "success") {
-          setCategoriesData(result.data);
+        const res = await axios.get("http://103.253.145.7:8080/api/categories");
+        if (res.data.status === "success") {
+          setCategoriesData(res.data.data);
         }
       } catch (error) {
         console.error("Error get categories:", error);
@@ -44,17 +43,17 @@ export default function ProductsPage() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
+
+   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`, {
-          credentials: "include",
+        const res = await axios.get(`http://103.253.145.7:8080/api/products/shop/${shopId}`, {
+          withCredentials: true,
         });
-        const result = await response.json();
 
-        if (result.status === "success") {
-          const transformedProducts = result.data.data.map((product) => ({
+        if (res.data.status === "success") {
+          const transformedProducts = res.data.data.data.map((product) => ({
             id: product.product_id,
             name: product.name,
             category: getCategoryFromProduct(product),
@@ -97,16 +96,14 @@ export default function ProductsPage() {
   const handleDeleteProduct = async (id) => {
     if (confirm("Are you sure to delete this product?")) {
       try {
-        const response = await fetch(`http://103.253.145.7:3003/api/products/${id}`, {
-          method: "DELETE",
-          credentials: "include",
+        const res = await axios.delete(`http://103.253.145.7:3003/api/products/${id}`, {
+          withCredentials: true,
           headers: {
             "Content-Type": "application/json",
           },
         });
 
-        const result = await response.json();
-        if (result.status === "success") {
+        if (res.data.status === "success") {
           setProducts(products.filter((p) => p.id !== id));
         } else {
           toast.error("Delete fail!");
@@ -323,7 +320,8 @@ export default function ProductsPage() {
                     <td className="p-4 text-gray-300">{product.stock}</td>
                     <td className="p-4">
                       <span
-                        className={`${getStatusColor(product.status)} text-white px-2 py-0.5 rounded-full text-xs`}
+                          className={`${getStatusColor(product.status)} text-white px-1.5 py-0.5 rounded text-[10px] leading-tight`}
+
                       >
                         {product.status}
                       </span>

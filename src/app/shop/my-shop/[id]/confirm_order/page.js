@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -16,30 +17,24 @@ export default function ConfirmOrdersPage() {
 
   const shopId = params?.id;
 
-  // Fetch orders from API
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3002/api/orders/shop/${shopId}`, {
-          credentials: "include"
+        const response = await axios.get(`http://103.253.145.7:8080/api/orders/shop/${shopId}`, {
+          withCredentials: true,
         });
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-        
-        const data = await response.json();
-        
+
+        const data = response.data;
+
         if (data.status === "success") {
-          // Filter only pending orders
           const pendingOrders = data.data.filter(order => order.order_status === "pending");
           setOrders(pendingOrders);
         } else {
-          throw new Error('Invalid response format');
+          throw new Error("Invalid response format");
         }
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Error fetching orders");
       } finally {
         setLoading(false);
       }
@@ -48,7 +43,7 @@ export default function ConfirmOrdersPage() {
     fetchOrders();
   }, [shopId]);
 
-  // Filter orders by search term
+
   const filteredOrders = orders.filter(order => 
     order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.user_id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -83,57 +78,46 @@ export default function ConfirmOrdersPage() {
   };
 
   const confirmOrder = async (order) => {
-    try {
-      setConfirmingOrders(prev => new Set([...prev, order.order_id]));
-      
-      const updateData = {
-        total_amount: parseFloat(order.total_amount),
-        subtotal: parseFloat(order.subtotal),
-        tax_amount: parseFloat(order.tax_amount),
-        shipping_amount: parseFloat(order.shipping_amount),
-        discount_amount: parseFloat(order.discount_amount),
-        currency: order.currency,
-        payment_method: order.payment_method,
-        payment_status: order.payment_status,
-        shipping_method: order.shipping_method,
-        shipping_status: order.shipping_status,
-        order_status: "processing",
-        tracking_number: order.tracking_number || "",
-        notes: order.notes || ""
-      };
+  try {
+    setConfirmingOrders(prev => new Set([...prev, order.order_id]));
 
-      const response = await fetch(`http://103.253.145.7:3002/api/orders/${order.order_id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(updateData)
-      });
+    const updateData = {
+      total_amount: parseFloat(order.total_amount),
+      subtotal: parseFloat(order.subtotal),
+      tax_amount: parseFloat(order.tax_amount),
+      shipping_amount: parseFloat(order.shipping_amount),
+      discount_amount: parseFloat(order.discount_amount),
+      currency: order.currency,
+      payment_method: order.payment_method,
+      payment_status: order.payment_status,
+      shipping_method: order.shipping_method,
+      shipping_status: order.shipping_status,
+      order_status: "processing",
+      tracking_number: order.tracking_number || "",
+      notes: order.notes || ""
+    };
 
-      if (!response.ok) {
-        throw new Error('Failed to confirm order');
-      }
+    await axios.put(`http://103.253.145.7:3002/api/orders/${order.order_id}`, updateData, {
+      withCredentials: true,
+    });
 
-      // Remove the confirmed order from the list
-      setOrders(prevOrders => prevOrders.filter(o => o.order_id !== order.order_id));
-      
-      // Close modal if this order was selected
-      if (selectedOrder && selectedOrder.order_id === order.order_id) {
-        setSelectedOrder(null);
-      }
+    setOrders(prevOrders => prevOrders.filter(o => o.order_id !== order.order_id));
 
-      toast.success('Order confirmed successfully!');
-    } catch (err) {
-      toast.error('Error confirming order');
-    } finally {
-      setConfirmingOrders(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(order.order_id);
-        return newSet;
-      });
+    if (selectedOrder && selectedOrder.order_id === order.order_id) {
+      setSelectedOrder(null);
     }
-  };
+
+    toast.success("Order confirmed successfully!");
+  } catch (err) {
+    toast.error("Error confirming order");
+  } finally {
+    setConfirmingOrders(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(order.order_id);
+      return newSet;
+    });
+  }
+};
 
   const confirmAllOrders = async () => {
     if (filteredOrders.length === 0) return;

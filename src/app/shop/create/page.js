@@ -144,7 +144,6 @@ export default function CreateShopPage({ onBack }) {
       [type]: file
     }));
 
-    // Upload to Cloudinary
     setUploadingImages(prev => ({
       ...prev,
       [type]: true
@@ -273,7 +272,6 @@ export default function CreateShopPage({ onBack }) {
         )}
 
         <div className="bg-gray-700 rounded-lg shadow-lg p-6 mb-6">
-          {/* Image Uploads */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
@@ -281,7 +279,6 @@ export default function CreateShopPage({ onBack }) {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Logo Upload */}
               <div className="bg-gray-600 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
                   <Camera size={20} />
