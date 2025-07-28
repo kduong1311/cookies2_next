@@ -24,16 +24,20 @@ export default function ProductDetail({ productId, onBack }) {
   const fetchShopById = async (shopId) => {
     try {
       const response = await axios.get(`http://103.253.145.7:8080/api/shops/${shopId}`);
-      if (!response.ok) {
+      // Nếu bạn kiểm tra status:
+      if (response.status !== 200) {
+        console.error('Unexpected status:', response.status);
         throw new Error('Failed to fetch shop');
       }
-      const data = await response.json();
+
+      const data = response.data;
       return data.status === 'success' ? data.data : null;
     } catch (error) {
       console.error('Error fetching shop:', error);
       return null;
     }
   };
+
 
   useEffect(() => {
     const loadProduct = async () => {
