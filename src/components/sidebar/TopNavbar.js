@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function TopNavbar() {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -11,53 +12,70 @@ export default function TopNavbar() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
+
   const fetchUserDetails = async () => {
     if (!user?.user_id) return;
-    
     try {
-      const response = await fetch(`http://103.253.145.7:8080/api/users/${user.user_id}`);
-      const data = await response.json();
-      setUserDetails(data);
+      const response = await axios.get(`http://103.253.145.7:8080/api/users/${user.user_id}`);
+      setUserDetails(response.data);
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      console.error("Error fetching user details:", error);
     }
   };
 
   const fetchNotifications = async () => {
     if (!user?.user_id) return;
-    
     setLoading(true);
     try {
-      const response = await fetch(
-        `http://103.253.145.7:3005/api/notifications?user_id=${user.user_id}&limit=20&offset=0`
-      );
-      const data = await response.json();
-      setNotifications(data.notifications || []);
+      const response = await axios.get("http://103.253.145.7:3005/api/notifications", {
+        params: {
+          user_id: user.user_id,
+          limit: 20,
+          offset: 0,
+        },
+      });
+      setNotifications(response.data.notifications || []);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      await fetch(`http://103.253.145.7:3005/api/notifications/${notificationId}/read`, {
-        method: 'PATCH',
-        credentials: "include"
-      });
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notif => 
-          notif.notification_id === notificationId 
+      await axios.patch(
+        `http://103.253.145.7:3005/api/notifications/${notificationId}/read`,
+        {},
+        { withCredentials: true }
+      );
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.notification_id === notificationId
             ? { ...notif, is_read: true }
             : notif
         )
       );
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      if (!user?.user_id) return;
+
+      await axios.patch(
+        "http://103.253.145.7:3005/api/notifications/read-all",
+        { user_id: user.user_id },
+        { withCredentials: true }
+      );
+
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, is_read: true }))
+      );
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
     }
   };
 
@@ -66,52 +84,21 @@ export default function TopNavbar() {
     fetchNotifications();
   }, [user?.user_id]);
 
-  const formatTime = (timestamp) => {
-    const now = new Date();
-    const notificationTime = new Date(timestamp);
-    const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return "Now";
-    if (diffInMinutes < 60) return `${diffInMinutes} Last min`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} last hour`;
-    return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
-  };
-
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'like':
-        return (
-          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-          </div>
-        );
-      case 'follow':
-        return (
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-          </div>
-        );
-      case 'comment':
-        return (
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
-            </svg>
-          </div>
-        );
-      default:
-        return (
-          <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-          </div>
-        );
+  const handleNotificationClick = async (notification) => {
+    if (!notification.is_read) {
+      await markAsRead(notification.notification_id);
     }
+
+    if (notification.reference_type === "post" && notification.reference_id) {
+      router.push(`/post/${notification.reference_id}`);
+    } else if (
+      notification.reference_type === "user" &&
+      notification.reference_id
+    ) {
+      router.push(`/profile/${notification.reference_id}`);
+    }
+
+    setShowNotifications(false);
   };
 
   const handleAvatarClick = () => {
@@ -120,45 +107,48 @@ export default function TopNavbar() {
     }
   };
 
-  const handleNotificationClick = async (notification) => {
-    if (!notification.is_read) {
-      await markAsRead(notification.notification_id);
-    }
-    
-    if (notification.reference_type === 'post' && notification.reference_id) {
-      router.push(`/post/${notification.reference_id}`);
-    } else if (notification.reference_type === 'user' && notification.reference_id) {
-      router.push(`/profile/${notification.reference_id}`);
-    }
-    
-    setShowNotifications(false);
+  const formatTime = (timestamp) => {
+    const now = new Date();
+    const notificationTime = new Date(timestamp);
+    const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
+
+    if (diffInMinutes < 1) return "Now";
+    if (diffInMinutes < 60) return `${diffInMinutes} Last min`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} last hour`;
+    return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
   };
 
-  const markAllAsRead = async () => {
-  try {
-    if (!user?.user_id) return;
+  const getNotificationIcon = (type) => {
+    const icons = {
+      like: "bg-red-500",
+      follow: "bg-blue-500",
+      comment: "bg-green-500",
+      default: "bg-gray-500",
+    };
 
-    await fetch("http://103.253.145.7:3005/api/notifications/read-all", {
-      method: 'PATCH',
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        user_id: user.user_id
-      })
-    });
+    const paths = {
+      like: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28...",
+      follow: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7...",
+      comment: "M21 11.5a8.38 8.38 0 01-.9 3.8...",
+      default: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10...",
+    };
 
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, is_read: true }))
+    const fillPath = paths[type] || paths.default;
+    const bgColor = icons[type] || icons.default;
+
+    return (
+      <div className={`w-8 h-8 ${bgColor} rounded-full flex items-center justify-center`}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <path d={fillPath} />
+        </svg>
+      </div>
     );
-  } catch (error) {
-    console.error("Error marking all notifications as read:", error);
-  }
   };
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
-  const defaultAvatar = "https://img.freepik.com/premium-photo/male-female-profile-avatar-user-avatars-gender-icons_1020867-75099.jpg";
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const defaultAvatar =
+    "https://img.freepik.com/premium-photo/male-female-profile-avatar-user-avatars-gender-icons_1020867-75099.jpg";
+
 
   return (
     <div className="fixed top-0 right-0 z-50 p-4">

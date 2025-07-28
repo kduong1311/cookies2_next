@@ -1,12 +1,14 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // App Router
 
 export const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
-export function AuthProvider({children}) {
+export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter(); // 👈 Add this
 
     useEffect(() => {
         checkAuthStatus();
@@ -23,7 +25,6 @@ export function AuthProvider({children}) {
                 const userData = await res.json();
                 setUser(userData);
             } else {
-                console.warn("Not authenticated");
                 setUser(null);
             }
         } catch (err) {
@@ -48,13 +49,14 @@ export function AuthProvider({children}) {
             console.error("Logout fail: ", err);
         } finally {
             setUser(null);
+            router.push("/"); // 👈 Redirect after logout
         }
     };
 
     const value = {
         user,
         loading,
-        login, 
+        login,
         logout,
         isAuthenticated: !!user,
     };
