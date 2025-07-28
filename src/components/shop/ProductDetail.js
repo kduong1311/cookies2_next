@@ -23,7 +23,7 @@ export default function ProductDetail({ productId, onBack }) {
 
   const fetchShopById = async (shopId) => {
     try {
-      const response = await axios.get(`http://103.253.145.7:8080/api/shops/${shopId}`);
+      const response = await axios.get(`http://103.253.145.7:3002/api/shops/${shopId}`);
       if (response.status !== 200) {
         console.error('Unexpected status:', response.status);
         throw new Error('Failed to fetch shop', error);
