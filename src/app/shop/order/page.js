@@ -192,9 +192,7 @@ const handleSubmit = async () => {
           </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Order Form */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Shipping Address */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <MapPin className="w-5 h-5 mr-2" />
@@ -268,7 +266,6 @@ const handleSubmit = async () => {
                 </div>
               </div>
 
-              {/* Update Shipping Address Checkbox */}
               <div className="flex items-center mt-4">
                 <input
                   type="checkbox"
@@ -283,7 +280,6 @@ const handleSubmit = async () => {
               </div>
               <p className="text-xs text-gray-400 mt-1 mb-2">Check this if you want to update your saved shipping address for future orders.</p>
 
-              {/* Shipping Method */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <Truck className="w-5 h-5 mr-2" />
@@ -312,7 +308,6 @@ const handleSubmit = async () => {
                 </div>
               </div>
 
-              {/* Payment Method */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
                   <CreditCard className="w-5 h-5 mr-2" />
@@ -336,7 +331,6 @@ const handleSubmit = async () => {
                 </div>
               </div>
 
-              {/* Voucher */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4">Voucher</h2>
                 <div className="space-y-3">
@@ -373,7 +367,6 @@ const handleSubmit = async () => {
                 </div>
               </div>
 
-              {/* Notes */}
               <div className="bg-gray-700 p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold text-orange mb-4">Notes</h2>
                 <textarea
@@ -386,7 +379,6 @@ const handleSubmit = async () => {
               </div>
             </div>
 
-            {/* Right Column - Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-gray-950 p-6 rounded-lg shadow-sm sticky top-8">
                 <h2 className="text-xl font-semibold text-orange mb-4 flex items-center">
@@ -394,7 +386,6 @@ const handleSubmit = async () => {
                   Your Order
                 </h2>
 
-                {/* Cart Items */}
                 <div className="space-y-4 mb-6">
                   {orderItems.map((item) => (
                     <div key={item.id} className="flex items-center space-x-3">
@@ -419,7 +410,6 @@ const handleSubmit = async () => {
                   ))}
                 </div>
 
-                {/* Order Summary */}
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal:</span>
@@ -447,7 +437,6 @@ const handleSubmit = async () => {
                   </div>
                 </div>
 
-                {/* Place Order Button */}
                 <button
                   onClick={handleSubmit}
                   disabled={isLoading}

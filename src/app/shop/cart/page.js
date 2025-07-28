@@ -49,7 +49,6 @@ export default function ProductCart({ onClose }) {
 
   return (
     <div className="bg-black-cs text-white rounded-lg shadow-lg p-6 flex flex-col h-[83vh]">
-      {/* Header with Back */}
       <div className="flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
         <div className="flex items-center gap-2">
           <button onClick={() => router.back()} className="text-gray-400 hover:text-white">
@@ -64,7 +63,6 @@ export default function ProductCart({ onClose }) {
         )}
       </div>
 
-      {/* Empty Cart */}
       {items.length === 0 ? (
         <div className="text-center py-10 flex-1 flex flex-col justify-center">
           <p className="text-gray-400 mb-4">Your cart is empty</p>
@@ -77,19 +75,16 @@ export default function ProductCart({ onClose }) {
         </div>
       ) : (
         <>
-          {/* Cart Items */}
           <div className="flex-1 overflow-y-auto space-y-6 pr-1 hide-scrollbar mb-6">
             {items.map((item) => (
               <div
                 key={item.id + (item.variant?.variant_id || "")}
                 className="flex border-b border-gray-700 pb-4"
               >
-                {/* Image */}
                 <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 </div>
 
-                {/* Details */}
                 <div className="ml-4 flex-grow">
                   <div className="flex justify-between">
                     <h3 className="font-medium">{item.name}</h3>
@@ -101,7 +96,6 @@ export default function ProductCart({ onClose }) {
                     </button>
                   </div>
 
-                  {/* Variant Info */}
                   {item.variant ? (
                      <div className="text-sm text-gray-500 mt-1">
                       {[item.variant.color, item.variant.size, item.variant.material]
@@ -112,12 +106,10 @@ export default function ProductCart({ onClose }) {
                     <p className="text-sm text-gray-500 mt-1">{item.shopName}</p>
                   )}
 
-                  {/* Price */}
                   <p className="text-gray-400 mt-1">
                     ${(Number(item.sale_price) || Number(item.price)).toFixed(2)}
                   </p>
 
-                  {/* Quantity controls */}
                   <div className="flex items-center mt-2">
                     <button
                       onClick={() => decreaseQuantity(item.id, item.variant?.variant_id)}
@@ -141,8 +133,6 @@ export default function ProductCart({ onClose }) {
               </div>
             ))}
           </div>
-
-          {/* Cart Summary */}
           <div className="border-t border-gray-700 pt-4">
             <div className="flex justify-between text-lg font-bold mb-6">
               <span>Total</span>

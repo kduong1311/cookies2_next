@@ -158,7 +158,7 @@ export default function CreateShopPage({ onBack }) {
       }));
       setError('');
     } catch (error) {
-      setError(`Error upload ${type}: ${error.message}`);
+      toast.error(`Error upload`);
     } finally {
       setUploadingImages(prev => ({
         ...prev,
@@ -175,7 +175,7 @@ export default function CreateShopPage({ onBack }) {
   const errors = validateForm();
   if (Object.keys(errors).length > 0) {
     setFieldErrors(errors);
-    setError('Please fix the errors below');
+    toast.error('Please fix the errors below');
     setLoading(false);
     return;
   }
@@ -201,6 +201,7 @@ export default function CreateShopPage({ onBack }) {
     const data = response.data;
 
     setSuccess(true);
+    toast.success("Create successfully!")
     setTimeout(() => {
       setSuccess(false);
       setFormData({
@@ -220,7 +221,7 @@ export default function CreateShopPage({ onBack }) {
     }, 3000);
 
   } catch (error) {
-    setError(error.response?.data?.message || error.message);
+    toast.error("Create fail!")
   } finally {
     setLoading(false);
   }
@@ -259,13 +260,6 @@ export default function CreateShopPage({ onBack }) {
               <h3 className="text-green-500 font-semibold">Shop Created Successfully!</h3>
               <p className="text-green-400 text-sm">Your shop has been created and is now active.</p>
             </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6 flex items-center gap-3">
-            <AlertCircle className="text-red-500" size={20} />
-            <p className="text-red-400">{error}</p>
           </div>
         )}
 
