@@ -154,7 +154,7 @@ export default function CreateShopPage({ onBack }) {
       const url = await uploadToCloudinary(file);
       setUploadedUrls(prev => ({
         ...prev,
-        [`${type}_url`]: url
+        [`${type}_url`]: url.url
       }));
       setError('');
     } catch (error) {
