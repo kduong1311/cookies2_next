@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Clock, 
-  Users, 
-  ChefHat, 
-  Heart, 
-  MessageSquare, 
-  Share2, 
-  Bookmark, 
+import axios from 'axios';
+import {
+  Clock,
+  Users,
+  ChefHat,
+  Heart,
+  Share2,
   Star,
   ArrowLeft,
   Loader
@@ -18,26 +17,26 @@ export default function RecipePage({ postId, onBack }) {
   const [rating, setRating] = useState(0);
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  // Fetch recipe data from API
   useEffect(() => {
     const fetchRecipe = async () => {
       if (!postId) return;
-      
+
       try {
         setLoading(true);
-        const response = await fetch(`http://103.253.145.7:3004/api/recipes/post/${postId}`);
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-          setRecipe(data.data);
+        const response = await axios.get(`http://103.253.145.7:8080/api/recipes/post/${postId}`);
+        if (response.data.status === 'success') {
+          setRecipe(response.data.data);
         } else {
-          setError('Failed to load recipe');
+          setNotFound(true);
         }
       } catch (err) {
-        setError('Error fetching recipe data');
-        console.error('Error fetching recipe:', err);
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          console.error('Error fetching recipe:', err);
+        }
       } finally {
         setLoading(false);
       }
@@ -67,20 +66,10 @@ export default function RecipePage({ postId, onBack }) {
     );
   }
 
-  if (error || !recipe) {
+  if (notFound || !recipe) {
     return (
       <div className="bg-gray-800 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-400 mb-4">{error || 'Recipe not found'}</p>
-          {onBack && (
-            <button 
-              onClick={onBack}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
-            >
-              Go Back
-            </button>
-          )}
-        </div>
+        <p className="text-white text-xl font-semibold">Not have recipe</p>
       </div>
     );
   }
@@ -93,7 +82,7 @@ export default function RecipePage({ postId, onBack }) {
       {/* Header with back button */}
       {onBack && (
         <div className="p-4 border-b border-gray-600">
-          <button 
+          <button
             onClick={onBack}
             className="flex items-center gap-2 text-gray-300 hover:text-white transition"
           >
@@ -103,11 +92,11 @@ export default function RecipePage({ postId, onBack }) {
         </div>
       )}
 
-      {/* Header and cover image */}
+      {/* Cover image and recipe info */}
       <div className="relative">
-        <img 
-          src={recipe.cover_media_url || "https://bizweb.dktcdn.net/100/477/987/products/pho-bo-ha-noi-jpeg.jpg?v=1712628941747"} 
-          alt={recipe.name} 
+        <img
+          src={recipe.cover_media_url || "https://bizweb.dktcdn.net/100/477/987/products/pho-bo-ha-noi-jpeg.jpg?v=1712628941747"}
+          alt={recipe.name}
           className="w-full h-64 md:h-96 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
