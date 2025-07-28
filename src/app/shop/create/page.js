@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 
@@ -167,26 +168,26 @@ export default function CreateShopPage({ onBack }) {
   };
 
   const handleSubmit = async (e) => {
-    setLoading(true);
-    setError('');
-    setFieldErrors({});
+  setLoading(true);
+  setError('');
+  setFieldErrors({});
 
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setError('Please fix the errors below');
-      setLoading(false);
-      return;
-    }
+  const errors = validateForm();
+  if (Object.keys(errors).length > 0) {
+    setFieldErrors(errors);
+    setError('Please fix the errors below');
+    setLoading(false);
+    return;
+  }
 
-    try {
-      const submitData = {
-        ...formData,
-        logo_url: uploadedUrls.logo_url || null,
-        cover_photo_url: uploadedUrls.cover_photo_url || null
-      };
+  try {
+    const submitData = {
+      ...formData,
+      logo_url: uploadedUrls.logo_url || null,
+      cover_photo_url: uploadedUrls.cover_photo_url || null
+    };
 
-      const response = await axios.post(
+    const response = await axios.post(
       'http://103.253.145.7:8080/api/shops/',
       submitData,
       {
@@ -197,37 +198,34 @@ export default function CreateShopPage({ onBack }) {
       }
     );
 
-      const data = await response.json();
+    const data = response.data;
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Create shop fail');
-      }
+    setSuccess(true);
+    setTimeout(() => {
+      setSuccess(false);
+      setFormData({
+        name: '',
+        description: '',
+        contact_email: '',
+        contact_phone: '',
+        address: '',
+        city: '',
+        country: '',
+        postal_code: '',
+        business_registration: ''
+      });
+      setFiles({ logo: null, cover_photo: null });
+      setUploadedUrls({ logo_url: '', cover_photo_url: '' });
+      setFieldErrors({});
+    }, 3000);
 
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setFormData({
-          name: '',
-          description: '',
-          contact_email: '',
-          contact_phone: '',
-          address: '',
-          city: '',
-          country: '',
-          postal_code: '',
-          business_registration: ''
-        });
-        setFiles({ logo: null, cover_photo: null });
-        setUploadedUrls({ logo_url: '', cover_photo_url: '' });
-        setFieldErrors({});
-      }, 3000);
+  } catch (error) {
+    setError(error.response?.data?.message || error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="bg-gray-800 min-h-screen pb-12">

@@ -164,7 +164,7 @@ export default function ProductsPage() {
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
             <span className="text-blue-400">📦</span>
-            Quản lý sản phẩm
+            Product Management
           </h1>
           <p className="text-gray-400">Manage Products</p>
         </div>
