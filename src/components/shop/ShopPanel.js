@@ -11,13 +11,11 @@ export default function ShopPanel({ onProductClick, onClose }) {
   const [activeView, setActiveView] = useState("productList"); // productList | productDetail | cart
   const [selectedProductId, setSelectedProductId] = useState(null);
 
-  // Quay lại danh sách sản phẩm
   const handleBackToList = () => {
     setSelectedProductId(null);
     setActiveView("productList");
   };
 
-  // Mở giỏ hàng
   const handleCartClick = () => {
     setActiveView("cart");
   };
@@ -31,12 +29,11 @@ export default function ShopPanel({ onProductClick, onClose }) {
         margin: "20px auto",
       }}
     >
-      {/* Header dùng chung */}
+
       <Header onCartClick={handleCartClick} onClose={onClose} />
 
       <div className="flex justify-between items-center border-b pb-4 mb-4" />
 
-      {/* Giao diện theo từng chế độ */}
       {activeView === "productList" && (
         <>
           <Banner />

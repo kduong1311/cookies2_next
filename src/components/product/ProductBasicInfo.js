@@ -9,7 +9,6 @@ import {
 const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
   return (
     <div className="space-y-6">
-      {/* Product Name */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
         <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Package className="w-4 h-4 text-orange-500" />
@@ -24,7 +23,6 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
         />
       </div>
 
-      {/* Description */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
         <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Info className="w-4 h-4 text-orange-500" />
@@ -39,9 +37,7 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
         />
       </div>
 
-      {/* Price & Category */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Price */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
           <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <DollarSign className="w-4 h-4 text-green-500" />
@@ -56,8 +52,7 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
             step="0.01"
           />
         </div>
-
-        {/* Category */}
+        
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
           <label className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <Tag className="w-4 h-4 text-blue-500" />

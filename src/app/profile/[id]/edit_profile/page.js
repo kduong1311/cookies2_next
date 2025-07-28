@@ -17,7 +17,6 @@ const EditProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   
-  // Separate state for user profile
   const [profileData, setProfileData] = useState({
     username: '',
     bio: '',
@@ -31,7 +30,6 @@ const EditProfilePage = () => {
     date_of_birth: ''
   });
 
-  // Separate state for shipping address
   const [shippingData, setShippingData] = useState({
     recipient_name: '',
     contact_number: '',
@@ -44,7 +42,6 @@ const EditProfilePage = () => {
     postal_code: ''
   });
 
-  // Track if shipping address exists
   const [shippingAddressId, setShippingAddressId] = useState(null);
 
   const [previewImages, setPreviewImages] = useState({
@@ -52,7 +49,6 @@ const EditProfilePage = () => {
     cover: ''
   });
 
-  // Fetch user data and shipping address
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userId) return;
@@ -93,7 +89,7 @@ const EditProfilePage = () => {
         });
         if (!res.ok) return; // No address yet
         const data = await res.json();
-        const address = data.data; // <-- this is the actual address object
+        const address = data.data;
         if (address) {
           setShippingData({
             recipient_name: address.recipient_name || '',
@@ -108,14 +104,12 @@ const EditProfilePage = () => {
           });
         }
       } catch (error) {
-        // ignore if not found
       }
     };
     fetchUserData();
     fetchShippingAddress();
   }, [userId]);
 
-  // Unified input change handler
   const handleProfileChange = (e) => {
     const { name, value, type, checked } = e.target;
     setProfileData(prev => ({
@@ -167,7 +161,6 @@ const EditProfilePage = () => {
     setSaving(true);
     setMessage({ type: '', text: '' });
     try {
-      // 1. Update user profile
       const response = await fetch(`http://103.253.145.7:3000/api/users/${userId}`, {
         method: 'PUT',
         credentials: "include",
@@ -177,7 +170,6 @@ const EditProfilePage = () => {
         body: JSON.stringify(profileData),
       });
       if (!response.ok) throw new Error('Failed to update profile');
-      // 2. Update or create shipping address
       const shippingPayload = { ...shippingData };
       let shippingRes;
       if (shippingAddressId) {
@@ -220,7 +212,6 @@ const EditProfilePage = () => {
 
   return (
     <div className="h-screen bg-gray-900 text-white overflow-y-auto hide-scrollbar">
-      {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
@@ -230,7 +221,6 @@ const EditProfilePage = () => {
         </div>
       </div>
 
-      {/* Message */}
       {message.text && (
         <div className={`max-w-4xl mx-auto px-4 py-4`}>
           <div className={`flex items-center gap-3 p-4 rounded-lg ${
@@ -243,10 +233,8 @@ const EditProfilePage = () => {
         </div>
       )}
 
-      {/* Form */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-8">
-          {/* Cover Photo Section */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Camera className="w-5 h-5 text-orange-500" />
@@ -260,7 +248,6 @@ const EditProfilePage = () => {
                   className="w-full h-full object-cover"
                 />
               )}
-              {/* Gradient overlay for hover effect */}
               <div className="absolute inset-0 pointer-events-none group-hover:opacity-100 opacity-0 transition-opacity"
                 style={{
                   background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%)'
@@ -279,7 +266,6 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* Avatar Section */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-orange-500" />
@@ -316,7 +302,6 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* Basic Information */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-orange-500" />
@@ -369,7 +354,6 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* Location*/}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-orange-500" />
@@ -401,7 +385,6 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* Bio */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-orange-500" />
@@ -417,7 +400,7 @@ const EditProfilePage = () => {
             />
             <p className="text-sm text-gray-400 mt-2">{profileData.bio.length}/500 characters</p>
           </div>
-          {/* Shipping Address */}
+
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Truck className="w-5 h-5 text-orange-500" />
@@ -526,7 +509,6 @@ const EditProfilePage = () => {
             </div>
           </div>
 
-          {/* Chef Status */}
           <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
             <h2 className="text-xl font-semibold mb-4">Chef Status</h2>
             <div className="flex items-center gap-3">
@@ -545,8 +527,7 @@ const EditProfilePage = () => {
               Check this if you are a professional chef or culinary expert
             </p>
           </div>
-
-          {/* Submit Button */}
+          
           <div className="flex justify-center pt-6">
             <button
               type="button"

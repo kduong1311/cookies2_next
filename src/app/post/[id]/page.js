@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VideoPlayer from "@/components/video/VideoPlayer";
 import VideoInteractions from "@/components/video/VideoInteractions";
-import RecipePage from "@/components/layouts/Recipe";
+import RecipePage from "@/components/video/Recipe";
 import CommentPage from "@/components/video/CommentPage";
 import Loading from "@/components/Loading";
 import { useAuth } from "@/contexts/AuthContext";
+import axios from "axios";
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -18,43 +19,44 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [refreshPost, setRefreshPost] = useState(false);
 
-  // States for panels - giống y hệt MainLayout
   const [isRecipeOpen, setIsRecipeOpen] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [currentPostId, setCurrentPostId] = useState(null);
 
-  // Determine active panel type - giống y hệt MainLayout
   const activePanelType = isRecipeOpen ? "recipe" : isCommentOpen ? "comment" : null;
 
   const increaseViewCount = async (postId) => {
-  try {
-    await fetch(`http://103.253.145.7:3001/api/posts/${postId}/view`, {
-      method: "POST",
-      credentials: "include",
-    });
-  } catch (error) {
-    console.error("Failed to increase view count:", error);
-  }
-};
+    try {
+      await axios.post(
+        `http://103.253.145.7:8080/api/posts/${postId}/view`,
+        {},
+        { withCredentials: true }
+      );
+    } catch (error) {
+      console.error("Failed to increase view count:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://103.253.145.7:3001/api/posts/${id}`, {
-          credentials: "include",
+
+        const res = await axios.get(`http://103.253.145.7:8080/api/posts/${id}`, {
+          withCredentials: true,
         });
-        const data = await res.json();
+
+        const data = res.data;
         if (data.status === "success") {
           setPost(data.data);
           setCurrentPostId(data.data.post_id);
-          increaseViewCount(data.data.post_id)
+          increaseViewCount(data.data.post_id);
 
-          const userRes = await fetch(`http://103.253.145.7:3000/api/users/${data.data.user_id}`, {
-            credentials: "include",
-          });
-          const userData = await userRes.json();
-          setUserInfo(userData || null);
+          const userRes = await axios.get(
+            `http://103.253.145.7:8080/api/users/${data.data.user_id}`,
+            { withCredentials: true }
+          );
+          setUserInfo(userRes.data || null);
         }
       } catch (err) {
         console.error("Error loading post:", err);
@@ -66,14 +68,12 @@ export default function PostDetailPage() {
     if (id) fetchPost();
   }, [id]);
 
-  // Handle recipe click - giống MainLayout
   const handleRecipeClick = () => {
     setIsRecipeOpen(true);
     setIsCommentOpen(false);
     setCurrentPostId(post.post_id);
   };
 
-  // Handle comment click - giống MainLayout
   const handleCommentClick = () => {
     setIsCommentOpen(true);
     setIsRecipeOpen(false);
@@ -84,9 +84,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="flex justify-center items-center w-full h-screen bg-black">
-      {/* Main content container - giống structure MainLayout */}
       <div className="flex w-full">
-        {/* Video and interactions container */}
         <div className="flex-grow flex items-center justify-center">
           <div className="flex items-center justify-center">
             <div className="h-[95vh] max-w-[600px] w-auto bg-black rounded-lg overflow-hidden">
@@ -105,7 +103,6 @@ export default function PostDetailPage() {
           </div>
         </div>
 
-        {/* Animated panels - copy exact từ MainLayout */}
         <AnimatePresence mode="wait">
           {activePanelType === "recipe" && (
             <motion.div

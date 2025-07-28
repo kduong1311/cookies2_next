@@ -49,7 +49,7 @@ export default function VideoInteractions({
   }
 
   try {
-    const response = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`, {
+    const response = await fetch(`http://103.253.145.7:8080/api/posts/${postId}`, {
       method: "GET",
       credentials: "include",
     });
@@ -87,7 +87,6 @@ useEffect(() => {
   }
 }, [postId, userId, refreshPost, initializePostData]);
 
-  // Xử lý like/unlike
   const handleLikeToggle = useCallback(async () => {
     if (!postId || !userId || loadingLike) return;
 
@@ -99,14 +98,12 @@ useEffect(() => {
     const currentLiked = liked;
     const currentLikeCount = likeCount;
 
-    // Optimistic update
     const newLiked = !currentLiked;
     const newLikeCount = newLiked ? Math.max(0, currentLikeCount) + 1 : Math.max(0, currentLikeCount - 1);
 
     setLiked(newLiked);
     setLikeCount(newLikeCount);
 
-    // Animation
     if (newLiked && heartRef.current) {
       gsap.fromTo(
         heartRef.current,
@@ -130,7 +127,7 @@ useEffect(() => {
       pendingLikeRequest.current = controller;
 
       const response = await fetch(
-        `http://103.253.145.7:3001/api/posts/${postId}/like`,
+        `http://103.253.145.7:8080/api/posts/${postId}/like`,
         { 
           method: newLiked ? "POST" : "DELETE",
           credentials: "include",
@@ -171,7 +168,6 @@ useEffect(() => {
   const openShareModal = useCallback(() => setShareOpen(true), []);
   const closeShareModal = useCallback(() => setShareOpen(false), []);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (pendingLikeRequest.current) {
@@ -182,7 +178,6 @@ useEffect(() => {
 
   return (
     <div className="flex flex-col items-center space-y-6 ml-4 mr-4">
-      {/* Like button */}
       <button
         className="flex flex-col items-center disabled:cursor-not-allowed transition-transform active:scale-95"
         onClick={handleLikeToggle}
@@ -201,7 +196,6 @@ useEffect(() => {
         </div>
       </button>
 
-      {/* Comment button */}
       <button 
         className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={onCommentClick}
@@ -214,7 +208,6 @@ useEffect(() => {
         </div>
       </button>
 
-      {/* Recipe button */}
       <button 
         className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={onRecipeClick}
@@ -224,7 +217,6 @@ useEffect(() => {
         </div>
       </button>
 
-      {/* Share button */}
       <button 
         className="flex flex-col items-center transition-transform active:scale-95" 
         onClick={openShareModal}

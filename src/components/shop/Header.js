@@ -14,7 +14,7 @@ export default function Header() {
     if (!user?.user_id) return;
 
     try {
-      const res = await fetch("http://103.253.145.7:3002/api/shops/", {
+      const res = await fetch("http://103.253.145.7:8080/api/shops/", {
         credentials: "include",
       });
       const data = await res.json();

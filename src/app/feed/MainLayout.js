@@ -7,7 +7,7 @@ import LeftSidebar from "@/components/sidebar/leftSide";
 import RightSidebar from "@/components/sidebar/rightSide";
 import TopNavbar from "@/components/sidebar/TopNavbar";
 import VideoFeed from "@/components/video/VideoFeed";
-import RecipePage from "@/components/layouts/Recipe";
+import RecipePage from "@/components/video/Recipe";
 import CommentPage from "@/components/video/CommentPage";
 import ProfilePage from "@/components/Profile/ProfilePage";
 import ChatBot from "@/components/chatbot/chatBot";
@@ -113,8 +113,7 @@ const isCustomPage = pathname.startsWith("/shop")
           </div>
         )}
       </div>
-
-      {/* <RightSidebar /> */}
+      
       <ChatBot apiKey={process.env.NEXT_PUBLIC_GEMINI_API_KEY}/>
     </div>
   );

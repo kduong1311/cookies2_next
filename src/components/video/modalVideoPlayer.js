@@ -2,7 +2,7 @@ import { useState, useEffect} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
-import RecipePage from "@/components/layouts/Recipe";
+import RecipePage from "@/components/video/Recipe";
 import CommentPage from "@/components/video/CommentPage";
 import VideoInteractions from "./VideoInteractions";
 

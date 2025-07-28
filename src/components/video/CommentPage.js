@@ -16,7 +16,7 @@ export default function CommentPage({ postId }) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}`);
+      const res = await fetch(`http://103.253.145.7:8080/api/posts/${postId}`);
       if (!res.ok) throw new Error("Failed to load comments.");
       const data = await res.json();
       if (data.status !== "success") throw new Error("Server responded with an error.");
@@ -59,7 +59,7 @@ export default function CommentPage({ postId }) {
           username: loggedInUser?.user_id === c.user_id
             ? "you"
             : newUsersMap[c.user_id]?.username || "unknown",
-          avatar: newUsersMap[c.user_id]?.avatar_url || "https://ui-avatars.com/api/?name=?&background=random",
+          avatar: newUsersMap[c.user_id]?.avatar_url || "https://res.cloudinary.com/da9rooi9r/image/upload/v1752864494/zyznfxs9jabfjnmvr0or.png",
           content: c.content,
           likes: c.likes_count || 0,
           time: timeDisplay,
@@ -113,7 +113,7 @@ export default function CommentPage({ postId }) {
         parent_comment_id: replyTo || null,
       };
 
-      const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments`, {
+      const res = await fetch(`http://103.253.145.7:8080/api/posts/${postId}/comments`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -133,7 +133,7 @@ export default function CommentPage({ postId }) {
         id: data.data.comment_id,
         userId: loggedInUser?.user_id,
         username: "you",
-        avatar: loggedInUser?.avatar_url || "https://ui-avatars.com/api/?name=?&background=random",
+        avatar: loggedInUser?.avatar_url || "https://res.cloudinary.com/da9rooi9r/image/upload/v1752864494/zyznfxs9jabfjnmvr0or.png",
         content: data.data.content,
         likes: 0,
         time: "Now",
@@ -203,7 +203,7 @@ export default function CommentPage({ postId }) {
   const handleDelete = async (commentId) => {
     if (!window.confirm("Are you sure you want to delete this comment?")) return;
     try {
-      const res = await fetch(`http://103.253.145.7:3001/api/posts/${postId}/comments/${commentId}`, {
+      const res = await fetch(`http://103.253.145.7:8080/api/posts/${postId}/comments/${commentId}`, {
         method: "DELETE",
         credentials: "include",
       });

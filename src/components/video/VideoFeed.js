@@ -29,12 +29,11 @@ export default function VideoFeed({
   return newArray;
 }
 
-  // Fetch posts và user data
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://103.253.145.7:3001/api/posts', {
+        const response = await fetch('http://103.253.145.7:8080/api/posts', {
           credentials: 'include'
         });
         const data = await response.json();
@@ -44,14 +43,14 @@ export default function VideoFeed({
           setPosts(shuffledPosts);
           const postDetailPromises = shuffledPosts.map(async (post) => {
             try {
-              const res = await fetch(`http://103.253.145.7:3001/api/posts/${post.post_id}`, {
+              const res = await fetch(`http://103.253.145.7:8080/api/posts/${post.post_id}`, {
                 method: "GET",
                 credentials: 'include'
               });
               return res.json();
             } catch (error) {
               console.error('Error fetching post details:', error);
-              return { status: 'error', data: post }; // Fallback về data cơ bản nếu có lỗi
+              return { status: 'error', data: post };
             }
           });
 
@@ -190,7 +189,7 @@ export default function VideoFeed({
 
   const increaseView = async () => {
     try {
-      await fetch(`http://103.253.145.7:3001/api/posts/${currentPost.post_id}/view`, {
+      await fetch(`http://103.253.145.7:8080/api/posts/${currentPost.post_id}/view`, {
         method: 'POST',
         credentials: 'include'
       });

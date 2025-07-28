@@ -70,7 +70,6 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
 
   return (
     <div className="space-y-6">
-      {/* Upload Area */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 hover:border-orange-500/30 transition-all duration-300">
         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
           <ImageIcon className="w-5 h-5 text-orange-500" />
@@ -120,7 +119,6 @@ const ProductImages = ({ images, setImages, isUploading, setIsUploading }) => {
         </div>
       </div>
 
-      {/* Image Preview */}
       {images.length > 0 && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
           <h4 className="text-md font-semibold text-white mb-4">

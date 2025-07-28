@@ -7,6 +7,7 @@ import AddToCartModal from "./AddToCartModal";
 import { useCart } from "@/contexts/CartContext";
 import toast from "react-hot-toast";
 import ShareModal from "../user/ShareModal";
+import axios from "axios";
 
 export default function ProductDetail({ productId, onBack }) {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function ProductDetail({ productId, onBack }) {
 
   const fetchShopById = async (shopId) => {
     try {
-      const response = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`);
+      const response = await axios.get(`http://103.253.145.7:8080/api/shops/${shopId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch shop');
       }

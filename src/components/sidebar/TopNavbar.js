@@ -11,12 +11,11 @@ export default function TopNavbar() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
-  // Fetch user details từ API
   const fetchUserDetails = async () => {
     if (!user?.user_id) return;
     
     try {
-      const response = await fetch(`http://103.253.145.7:3000/api/users/${user.user_id}`);
+      const response = await fetch(`http://103.253.145.7:8080/api/users/${user.user_id}`);
       const data = await response.json();
       setUserDetails(data);
     } catch (error) {
@@ -24,7 +23,6 @@ export default function TopNavbar() {
     }
   };
 
-  // Fetch notifications từ API
   const fetchNotifications = async () => {
     if (!user?.user_id) return;
     
@@ -63,7 +61,6 @@ export default function TopNavbar() {
     }
   };
 
-  // Fetch data khi component mount
   useEffect(() => {
     fetchUserDetails();
     fetchNotifications();
@@ -80,7 +77,6 @@ export default function TopNavbar() {
     return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
   };
 
-  // Get notification icon based on type
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'like':
@@ -138,7 +134,6 @@ export default function TopNavbar() {
     setShowNotifications(false);
   };
 
-  // Mark all as read
   const markAllAsRead = async () => {
   try {
     if (!user?.user_id) return;
@@ -154,7 +149,6 @@ export default function TopNavbar() {
       })
     });
 
-    // Cập nhật local state
     setNotifications(prev =>
       prev.map(notif => ({ ...notif, is_read: true }))
     );
@@ -213,19 +207,18 @@ export default function TopNavbar() {
                 {/* Header */}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-orange-600">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-white text-lg">Thông báo</h3>
+                    <h3 className="font-semibold text-white text-lg">Notification</h3>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
                         className="text-white/80 hover:text-white text-sm underline transition-colors"
                       >
-                        Đánh dấu tất cả đã đọc
+                        Mark all as read
                       </button>
                     )}
                   </div>
                 </div>
 
-                {/* Notifications List */}
                 <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
                   {loading ? (
                     <div className="p-8 text-center">
@@ -258,12 +251,10 @@ export default function TopNavbar() {
                           }`}
                         >
                           <div className="flex items-start space-x-3">
-                            {/* Icon */}
                             <div className="flex-shrink-0 mt-1">
                               {getNotificationIcon(notification.type)}
                             </div>
                             
-                            {/* Content */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -287,13 +278,12 @@ export default function TopNavbar() {
                                     </p>
                                     {notification.count > 1 && (
                                       <span className="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
-                                        {notification.count} người
+                                        {notification.count} people
                                       </span>
                                     )}
                                   </div>
                                 </div>
-                                
-                                {/* Unread indicator */}
+
                                 {!notification.is_read && (
                                   <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 ml-2 animate-pulse"></div>
                                 )}
@@ -306,14 +296,13 @@ export default function TopNavbar() {
                   )}
                 </div>
 
-                {/* Footer */}
                 {notifications.length > 0 && (
                   <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <button
                       onClick={() => setShowNotifications(false)}
                       className="w-full text-center text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 text-sm font-medium transition-colors py-1"
                     >
-                      Đóng
+                      Close
                     </button>
                   </div>
                 )}
@@ -322,7 +311,6 @@ export default function TopNavbar() {
           </AnimatePresence>
         </div>
 
-        {/* User Avatar */}
         <div className="relative">
           <button 
             onClick={handleAvatarClick}
@@ -337,11 +325,9 @@ export default function TopNavbar() {
               }}
             />
           </button>
-          
-          {/* Online status indicator */}
+
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
           
-          {/* Verified badge if user is verified */}
           {userDetails?.is_verified && (
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="white">

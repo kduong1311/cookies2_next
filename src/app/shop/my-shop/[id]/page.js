@@ -25,8 +25,7 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
 
-      // Fetch shop data
-      const shopResponse = await fetch(`http://103.253.145.7:3002/api/shops/${shopId}`, {
+      const shopResponse = await fetch(`http://103.253.145.7:8080/api/shops/${shopId}`, {
         credentials: 'include'
       });
       
@@ -40,7 +39,7 @@ export default function DashboardPage() {
       }
 
       // Fetch products data
-      const productsResponse = await fetch(`http://103.253.145.7:3002/api/products/shop/${shopId}`, {
+      const productsResponse = await fetch(`http://103.253.145.7:8080/api/products/shop/${shopId}`, {
         credentials: 'include'
       });
       
@@ -52,7 +51,7 @@ export default function DashboardPage() {
       }
 
       // Fetch orders data
-      const ordersResponse = await fetch(`http://103.253.145.7:3002/api/orders/shop/${shopId}`, {
+      const ordersResponse = await fetch(`http://103.253.145.7:8080/api/orders/shop/${shopId}`, {
         credentials: 'include'
       });
       
@@ -112,7 +111,6 @@ export default function DashboardPage() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
           <span className="text-blue-400">📊</span>
@@ -120,7 +118,6 @@ export default function DashboardPage() {
         </h1>
         <p className="text-gray-400 text-lg">Business overview and statistics</p>
         
-        {/* Shop Info */}
         <div className="mt-4 bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-4 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
             <div>
@@ -155,7 +152,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-xl shadow-lg">
           <div className="flex items-center justify-between">
@@ -198,9 +194,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-        {/* Revenue Chart */}
         <div className="xl:col-span-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-white flex items-center gap-2">
@@ -220,9 +214,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right side - 2 pie charts */}
         <div className="space-y-6">
-          {/* Product Categories Chart */}
           <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               🎯 Product Categories
@@ -236,7 +228,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Order Status Chart */}
           <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               📋 Order Status
@@ -252,7 +243,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent Activity */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
         {/* Recent Orders */}
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
@@ -289,7 +279,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Products */}
         <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             📦 Recent Products
@@ -323,7 +312,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-6 rounded-xl shadow-xl">
         <nav className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link

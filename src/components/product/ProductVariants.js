@@ -163,7 +163,6 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                   </div>
                 </div>
 
-                {/* Variant Image Upload */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-3">
                     Variant Image (optional)
@@ -207,7 +206,6 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                   </div>
                 </div>
 
-                {/* Stock Quantity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Stock Quantity

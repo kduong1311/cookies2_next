@@ -38,7 +38,6 @@ const ProfilePage = ({ userId }) => {
   const [videosLoading, setVideosLoading] = useState(false);
   const [recipesLoading, setRecipesLoading] = useState(false);
 
-  // Follow states
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -55,10 +54,9 @@ const ProfilePage = ({ userId }) => {
     const fetchUser = async () => {
        try {
         setLoading(true);
-        const res = await axios.get(`http://103.253.145.7:3000/api/users/${userId}`, { withCredentials: true });
+        const res = await axios.get(`http://103.253.145.7:8080/api/users/${userId}`, { withCredentials: true });
         setProfileUser(res.data);
         
-        // Initialize follow states
         setIsFollowing(res.data.isFollowing || false);
         setFollowersCount(res.data.followersCount || 0);
       } catch (err) {
@@ -71,7 +69,6 @@ const ProfilePage = ({ userId }) => {
     if (userId) fetchUser();
   }, [userId]);
 
-  // Follow handler
   const handleFollow = async () => {
     if (!user) {
       router.push('/login');
@@ -81,19 +78,17 @@ const ProfilePage = ({ userId }) => {
     try {
       setFollowLoading(true);
       
-      // Optimistic update
       const wasFollowing = isFollowing;
       setIsFollowing(!wasFollowing);
       setFollowersCount(prev => wasFollowing ? prev - 1 : prev + 1);
 
       await axios.post(
-        `http://103.253.145.7:3000/api/users/${userId}/follow`,
+        `http://103.253.145.7:8080/api/users/${userId}/follow`,
         {},
         { withCredentials: true }
       );
       
     } catch (err) {
-      // Revert on error
       setIsFollowing(isFollowing);
       setFollowersCount(followersCount);
       console.error('Follow error:', err);
@@ -102,7 +97,6 @@ const ProfilePage = ({ userId }) => {
     }
   };
 
-  // Navigation handlers
   const handleUpdateProfile = () => {
     router.push(`/profile/${userId}/edit_profile`);
   };
@@ -111,7 +105,6 @@ const ProfilePage = ({ userId }) => {
     router.push(`/profile/${userId}/my_orders`);
   };
 
-  // Profile Action Buttons (for owner)
   const ProfileActionButtons = () => {
     if (!isOwner) return null;
 

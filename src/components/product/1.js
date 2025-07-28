@@ -21,7 +21,6 @@ import {
 import toast from "react-hot-toast";
 
 export default function AddProductModal1({ open, onOpenChange, shopId, onSuccess }) {
-  // Basic product info
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(0);

@@ -13,6 +13,7 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react';
+import axios from 'axios';
 
 import { uploadToCloudinary } from "@/components/upload/uploadCloudinary";
 
@@ -127,15 +128,14 @@ export default function CreateShopPage({ onBack }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
+
     if (!file.type.startsWith('image/')) {
-      setError('Vui lòng chọn file hình ảnh');
+      setError('Choose image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError('Kích thước file không được vượt quá 5MB');
+      setError('not over 5MB');
       return;
     }
 
@@ -158,7 +158,7 @@ export default function CreateShopPage({ onBack }) {
       }));
       setError('');
     } catch (error) {
-      setError(`Lỗi upload ${type}: ${error.message}`);
+      setError(`Error upload ${type}: ${error.message}`);
     } finally {
       setUploadingImages(prev => ({
         ...prev,
@@ -172,7 +172,6 @@ export default function CreateShopPage({ onBack }) {
     setError('');
     setFieldErrors({});
 
-    // Validate form
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -188,23 +187,24 @@ export default function CreateShopPage({ onBack }) {
         cover_photo_url: uploadedUrls.cover_photo_url || null
       };
 
-      const response = await fetch('http://103.253.145.7:3002/api/shops/', {
-        method: 'POST',
-        credentials: "include",
+      const response = await axios.post(
+      'http://103.253.145.7:8080/api/shops/',
+      submitData,
+      {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(submitData)
-      });
+        withCredentials: true
+      }
+    );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Tạo shop thất bại');
+        throw new Error(data.message || 'Create shop fail');
       }
 
       setSuccess(true);
-      // Reset form after 3 seconds
       setTimeout(() => {
         setSuccess(false);
         setFormData({
@@ -232,7 +232,6 @@ export default function CreateShopPage({ onBack }) {
 
   return (
     <div className="bg-gray-800 min-h-screen pb-12">
-      {/* Header with back button */}
       {onBack && (
         <div className="p-4 border-b border-gray-600">
           <button 
@@ -245,7 +244,6 @@ export default function CreateShopPage({ onBack }) {
         </div>
       )}
 
-      {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-8 text-white">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
@@ -257,7 +255,6 @@ export default function CreateShopPage({ onBack }) {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 -mt-6 relative">
-        {/* Success Message */}
         {success && (
           <div className="bg-green-500/20 border border-green-500 rounded-lg p-4 mb-6 flex items-center gap-3">
             <CheckCircle className="text-green-500" size={20} />
@@ -268,7 +265,6 @@ export default function CreateShopPage({ onBack }) {
           </div>
         )}
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-6 flex items-center gap-3">
             <AlertCircle className="text-red-500" size={20} />
@@ -276,7 +272,6 @@ export default function CreateShopPage({ onBack }) {
           </div>
         )}
 
-        {/* Form */}
         <div className="bg-gray-700 rounded-lg shadow-lg p-6 mb-6">
           {/* Image Uploads */}
           <div className="mb-8">
@@ -337,7 +332,6 @@ export default function CreateShopPage({ onBack }) {
                 </div>
               </div>
 
-              {/* Cover Photo Upload */}
               <div className="bg-gray-600 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
                   <Camera size={20} />
@@ -390,7 +384,6 @@ export default function CreateShopPage({ onBack }) {
             </div>
           </div>
 
-          {/* Basic Information */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
@@ -463,7 +456,6 @@ export default function CreateShopPage({ onBack }) {
             </div>
           </div>
 
-          {/* Contact Information */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
@@ -519,7 +511,6 @@ export default function CreateShopPage({ onBack }) {
             </div>
           </div>
 
-          {/* Address Information */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
@@ -612,7 +603,6 @@ export default function CreateShopPage({ onBack }) {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-end gap-4">
             <button
               type="button"
