@@ -22,7 +22,6 @@ export default function ProductDetail({ productId, onBack }) {
   const { addToCart, setBuyNow} = useCart();
 
   const fetchShopById = async (shopId) => {
-    console.log(`http://103.253.145.7:8080/api/shops/${shopId}`)
     try {
       const response = await axios.get(`http://103.253.145.7:8080/api/shops/${shopId}`);
       if (response.status !== 200) {
@@ -180,7 +179,7 @@ export default function ProductDetail({ productId, onBack }) {
       <div className="bg-black-cs text-white min-h-screen px-4 py-6">
         <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
           <ChevronLeft size={20} />
-          <span>Back</span>
+          <span>Back to last page</span>
         </button>
         <div className="text-center py-8 text-red-500">{error || "Product not found"}</div>
       </div>
