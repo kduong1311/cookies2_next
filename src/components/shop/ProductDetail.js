@@ -23,17 +23,20 @@ export default function ProductDetail({ productId, onBack }) {
 
   const fetchShopById = async (shopId) => {
     try {
-      const response = await axios.get(`http://103.253.145.7:8080/api/shops/${shopId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch shop');
+      const response = await axios.get(`http://103.253.145.7:3002/api/shops/${shopId}`);
+      if (response.status !== 200) {
+        console.error('Unexpected status:', response.status);
+        throw new Error('Failed to fetch shop', error);
       }
-      const data = await response.json();
+
+      const data = response.data;
       return data.status === 'success' ? data.data : null;
     } catch (error) {
       console.error('Error fetching shop:', error);
       return null;
     }
   };
+
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -176,7 +179,7 @@ export default function ProductDetail({ productId, onBack }) {
       <div className="bg-black-cs text-white min-h-screen px-4 py-6">
         <button onClick={() => router.back()} className="flex items-center mb-6 text-gray-400 hover:text-white">
           <ChevronLeft size={20} />
-          <span>Back</span>
+          <span>Back to last page</span>
         </button>
         <div className="text-center py-8 text-red-500">{error || "Product not found"}</div>
       </div>
