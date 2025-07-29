@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import VideoPlayer from './VideoPlayer';
 import VideoInteractions from './VideoInteractions';
 import Loading from '../Loading';
@@ -16,38 +17,37 @@ export default function VideoFeed({
   const [users, setUsers] = useState({});
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [postData, setPostData] = useState({}); // Lưu toàn bộ dữ liệu post chi tiết
+  const [postData, setPostData] = useState({});
   const [refreshPost, setRefreshPost] = useState(false);
   const { user } = useAuth();
 
-  function shuffleArray(array) {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-}
+  const shuffleArray = (array) => {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  };
 
   useEffect(() => {
+    if (!user) return;
+
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://103.253.145.7:8080/api/posts', {
-          credentials: 'include'
-        });
-        const data = await response.json();
+        const { data } = await axios.get('http://103.253.145.7:8080/api/posts', { withCredentials: true });
 
         if (data.status === 'success') {
           const shuffledPosts = shuffleArray(data.data);
           setPosts(shuffledPosts);
+
           const postDetailPromises = shuffledPosts.map(async (post) => {
             try {
-              const res = await fetch(`http://103.253.145.7:8080/api/posts/${post.post_id}`, {
-                method: "GET",
-                credentials: 'include'
+              const res = await axios.get(`http://103.253.145.7:8080/api/posts/${post.post_id}`, {
+                withCredentials: true
               });
-              return res.json();
+              return res.data;
             } catch (error) {
               console.error('Error fetching post details:', error);
               return { status: 'error', data: post };
@@ -63,14 +63,12 @@ export default function VideoFeed({
           });
           setPostData(newPostData);
 
-          // Fetch user data
           const userPromises = shuffledPosts.map(async (post) => {
             try {
-              const userResponse = await fetch(`http://103.253.145.7:3000/api/users/${post.user_id}`, {
-                credentials: 'include'
+              const res = await axios.get(`http://103.253.145.7:3000/api/users/${post.user_id}`, {
+                withCredentials: true
               });
-              const userData = await userResponse.json();
-              return { userId: post.user_id, userData };
+              return { userId: post.user_id, userData: res.data };
             } catch (error) {
               console.error('Error fetching user:', error);
               return { userId: post.user_id, userData: null };
@@ -97,7 +95,7 @@ export default function VideoFeed({
     };
 
     fetchPosts();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (posts.length === 0) return;
@@ -107,11 +105,10 @@ export default function VideoFeed({
 
     const intervalId = setInterval(async () => {
       try {
-        const response = await fetch(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
-          credentials: 'include'
+        const { data } = await axios.get(`http://103.253.145.7:3001/api/posts/${currentPostId}`, {
+          withCredentials: true
         });
-        const data = await response.json();
-        
+
         if (data.status === 'success') {
           setPostData(prev => ({
             ...prev,
@@ -159,6 +156,7 @@ export default function VideoFeed({
   const handleNext = () => {
     setCurrentPostIndex((prev) => (prev === posts.length - 1 ? 0 : prev + 1));
   };
+
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowUp') {
@@ -182,24 +180,24 @@ export default function VideoFeed({
     }
   }, [currentPostIndex, posts, setCurrentPostId]);
 
-
   useEffect(() => {
-  const currentPost = posts[currentPostIndex];
-  if (!currentPost) return;
+    const currentPost = posts[currentPostIndex];
+    if (!currentPost) return;
 
-  const increaseView = async () => {
-    try {
-      await fetch(`http://103.253.145.7:8080/api/posts/${currentPost.post_id}/view`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (error) {
-      console.error('Failed to increase view count:', error);
-    }
-  };
+    const increaseView = async () => {
+      try {
+        await axios.post(
+          `http://103.253.145.7:8080/api/posts/${currentPost.post_id}/view`,
+          {},
+          { withCredentials: true }
+        );
+      } catch (error) {
+        console.error('Failed to increase view count:', error);
+      }
+    };
 
-  increaseView();
-}, [currentPostIndex]);
+    increaseView();
+  }, [currentPostIndex]);
 
   const currentPost = posts.length > 0 ? posts[currentPostIndex] : null;
   const currentPostDetail = currentPost ? (postData[currentPost.post_id] || currentPost) : null;
