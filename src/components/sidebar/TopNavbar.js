@@ -247,8 +247,8 @@ export default function TopNavbar() {
                           }
                           className={`p-4 cursor-pointer transition-all duration-200 relative ${
                             !notification.is_read
-                              ? "bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500"
-                              : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                              ? "bg-orange-50 border-l-4 border-orange-500"
+                              : "hover:bg-gray-50"
                           }`}
                         >
                           <div className="flex items-start space-x-3">
