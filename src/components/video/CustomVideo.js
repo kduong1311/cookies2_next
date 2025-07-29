@@ -1,23 +1,29 @@
 import { useRef, useState, useEffect } from "react";
-import { Volume2, Play, Settings } from "lucide-react";
+import { Volume2, VolumeX, Play } from "lucide-react";
 
 export default function CustomVideo({ src, isActive }) {
   const videoRef = useRef(null);
   const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    video.muted = muted;
+
     if (isActive) {
-      video.play();
-      setPlaying(true);
+      video.play().then(() => {
+        setPlaying(true);
+      }).catch((err) => {
+        console.error("Autoplay failed:", err);
+      });
     } else {
       video.pause();
       setPlaying(false);
     }
-  }, [isActive]);
+  }, [isActive, muted]);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -30,6 +36,10 @@ export default function CustomVideo({ src, isActive }) {
       video.pause();
       setPlaying(false);
     }
+  };
+
+  const toggleMute = () => {
+    setMuted(prev => !prev);
   };
 
   const handleTimeUpdate = () => {
@@ -55,11 +65,20 @@ export default function CustomVideo({ src, isActive }) {
         onTimeUpdate={handleTimeUpdate}
         className="w-full h-full object-cover cursor-pointer"
         onClick={togglePlay}
+        muted={muted}
+        autoPlay
         loop
+        playsInline
       />
 
       <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent z-10">
-        <Volume2 className="text-white" />
+        <button onClick={toggleMute}>
+          {muted ? (
+            <VolumeX className="text-white" />
+          ) : (
+            <Volume2 className="text-white" />
+          )}
+        </button>
       </div>
 
       <div
