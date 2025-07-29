@@ -13,13 +13,16 @@ import Image from "next/image";
 import { FaGooglePlusSquare, FaFacebookSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, googleProvider } from "@/lib/firebase";
+import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, googleProvider, sendPasswordResetEmail } from "@/lib/firebase";
 
 export default function LoginModal({ open, onOpenChange }) {
   const [formMode, setFormMode] = useState("social");
   const [registerError, setRegisterError] = useState("");
   const [loginError, setLoginError] = useState("");
-  const {login} = useAuth();
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
+  const { login } = useAuth();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,74 +109,128 @@ export default function LoginModal({ open, onOpenChange }) {
             )}
 
             {formMode === "login" && (
-              <form className="flex flex-col space-y-4"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const email = e.target.email.value;
-                const password = e.target.password.value;
+              <>
+                <form className="flex flex-col space-y-4"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const email = e.target.email.value;
+                    const password = e.target.password.value;
 
-                setLoginError("");
-                try {
-                  // Sign in with Firebase
-                  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                  const idToken = await userCredential.user.getIdToken();
+                    setLoginError("");
+                    try {
+                      // Sign in with Firebase
+                      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                      const idToken = await userCredential.user.getIdToken();
 
-                  // Call backend API to create user instance in DB (like Google login)
-                  const res = await fetch("http://103.253.145.7:3000/api/users/google-auth", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ 
-                      idToken,
-                      user: {
-                        username: userCredential.user.displayName || userCredential.user.email.split('@')[0],
-                        photoURL: userCredential.user.photoURL
+                      // Call backend API to create user instance in DB (like Google login)
+                      const res = await fetch("http://103.253.145.7:3000/api/users/google-auth", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          idToken,
+                          user: {
+                            username: userCredential.user.displayName || userCredential.user.email.split('@')[0],
+                            photoURL: userCredential.user.photoURL
+                          }
+                        }),
+                        credentials: "include",
+                      });
+                      const data = await res.json();
+
+                      if (!res.ok) {
+                        setLoginError(data.message || "Login failed");
+                        return;
                       }
-                    }),
-                    credentials: "include",
-                  });
-                  const data = await res.json();
 
-                  if (!res.ok) {
-                    setLoginError(data.message || "Login failed");
-                    return;
-                  }
-
-                  await login();
-                  onOpenChange(false);
-                }
-                catch (e) {
-                  setLoginError(e.message);
-                }
-              }}
-              >
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  className="p-2 rounded bg-gray-100 text-black"
-                />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  className="p-2 rounded bg-gray-100 text-black"
-                />
-                {loginError && (
-                  <span className="text-red-500 text-sm">{loginError}</span>
-                )}
-                <Button type="submit" className="w-full bg-orange">
-                  Login
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-sm text-gray-400"
-                  onClick={() => setFormMode("social")}
+                      await login();
+                      onOpenChange(false);
+                    }
+                    catch (e) {
+                      setLoginError(e.message);
+                    }
+                  }}
                 >
-                  ← Back to Social Login
-                </Button>
-              </form>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="p-2 rounded bg-gray-100 text-black"
+                  />
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    className="p-2 rounded bg-gray-100 text-black"
+                  />
+                  {loginError && (
+                    <span className="text-red-500 text-sm">{loginError}</span>
+                  )}
+                  <Button type="submit" className="w-full bg-orange">
+                    Login
+                  </Button>
+                  <button
+                    type="button"
+                    className="text-xs text-blue-400 underline self-end mt-[-10px] mb-2 hover:text-blue-600"
+                    onClick={() => setFormMode("reset")}
+                  >
+                    Forgot password?
+                  </button>
+                  <Button
+                    variant="ghost"
+                    className="text-sm text-gray-400"
+                    onClick={() => setFormMode("social")}
+                  >
+                    ← Back to Social Login
+                  </Button>
+                </form>
+              </>
+            )}
+            {formMode === "reset" && (
+              <div className="flex flex-col items-center text-center text-white">
+                <DialogHeader>
+                  <DialogTitle>Reset Your Password</DialogTitle>
+                  <DialogDescription>
+                    Enter your email address and we'll send you a link to reset your password.
+                  </DialogDescription>
+                </DialogHeader>
+                <form className="flex flex-col space-y-4 w-full mt-4"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setResetError("");
+                    setResetSuccess("");
+                    try {
+                      await sendPasswordResetEmail(auth, resetEmail);
+                      setResetSuccess("Password reset email sent! Please check your inbox.");
+                    } catch (e) {
+                      setResetError(e.message);
+                    }
+                  }}
+                >
+                  <input
+                    type="email"
+                    name="resetEmail"
+                    placeholder="Enter your email"
+                    className="p-2 rounded bg-gray-100 text-black focus:outline-none focus:ring-2 focus:ring-orange"
+                    value={resetEmail}
+                    onChange={e => setResetEmail(e.target.value)}
+                    required
+                  />
+                  {resetError && <span className="flex items-center gap-2 text-red-500 text-sm"><svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' /></svg>{resetError}</span>}
+                  {resetSuccess && <span className="flex items-center gap-2 text-green-500 text-sm"><svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' /></svg>{resetSuccess}</span>}
+                  <Button type="submit" className="w-full bg-orange mt-2">
+                    Send Password Reset Email
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-sm text-gray-400"
+                    onClick={() => setFormMode("login")}
+                  >
+                    ← Back to Login
+                  </Button>
+                </form>
+              </div>
             )}
 
             {formMode === "register" && (

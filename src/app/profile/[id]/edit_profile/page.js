@@ -6,6 +6,8 @@ import {
 import { uploadToCloudinary } from '@/components/upload/uploadCloudinary';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { Button } from '@/components/ui/button';
+import { sendPasswordResetEmail, auth } from '@/lib/firebase';
 
 
 const EditProfilePage = () => {
@@ -528,25 +530,33 @@ const EditProfilePage = () => {
             </p>
           </div>
           
-          <div className="flex justify-center pt-6">
-            <button
-              type="button"
+          <div className="flex justify-center gap-4 mt-8">
+            <Button
               onClick={handleSubmit}
+              className="bg-orange px-8 py-3 text-lg font-semibold rounded-md flex items-center gap-2"
               disabled={saving}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed px-8 py-4 rounded-lg font-semibold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95"
             >
-              {saving ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  Save Changes
-                </>
-              )}
-            </button>
+              {saving ? <Loader2 className="animate-spin" /> : <Save />}
+              Save Changes
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!profileData.email) {
+                  toast.error('No email found for this user.');
+                  return;
+                }
+                try {
+                  await sendPasswordResetEmail(auth, profileData.email);
+                  toast.success('Password reset email sent!');
+                } catch (e) {
+                  toast.error(e.message || 'Failed to send password reset email.');
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg font-semibold rounded-md flex items-center gap-2"
+            >
+              <Mail />
+              Send Password Reset Email
+            </Button>
           </div>
         </div>
       </div>
