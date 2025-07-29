@@ -14,6 +14,7 @@ import { FaGooglePlusSquare, FaFacebookSquare } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { useAuth } from "@/contexts/AuthContext";
 import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, googleProvider, sendPasswordResetEmail } from "@/lib/firebase";
+import toast from "react-hot-toast";
 
 export default function LoginModal({ open, onOpenChange }) {
   const [formMode, setFormMode] = useState("social");
@@ -24,10 +25,26 @@ export default function LoginModal({ open, onOpenChange }) {
   const [resetSuccess, setResetSuccess] = useState("");
   const { login } = useAuth();
 
+    function getFirebaseErrorMessage(code) {
+    switch (code) {
+      case "auth/invalid-credential":
+        return "Invalid email or password.";
+      case "auth/email-already-in-use":
+        return "This email is already registered.";
+      case "auth/user-not-found":
+        return "No user found with this email.";
+      case "auth/wrong-password":
+        return "Wrong password.";
+      case "auth/network-request-failed":
+        return "Network error. Please try again.";
+      default:
+        return "An unexpected error occurred.";
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="text-white sm:max-w-[700px] grid grid-cols-2 gap-6 bg-gray-900">
-        {/* Left: Ảnh */}
         <div className="relative h-[400px] rounded-lg overflow-hidden">
           <Image
             src="/Login_pic.png"
@@ -37,7 +54,6 @@ export default function LoginModal({ open, onOpenChange }) {
           />
         </div>
 
-        {/* Right: Form hoặc Social login */}
         <div className="flex flex-col justify-between">
           <div className="flex flex-col items-center text-center text-white">
             <DialogHeader>
@@ -54,7 +70,6 @@ export default function LoginModal({ open, onOpenChange }) {
             </DialogHeader>
           </div>
 
-          {/* Nội dung động: login / register / social */}
           <div className="text-black py-4">
             {formMode === "social" && (
               <div className="grid gap-4">
@@ -88,10 +103,10 @@ export default function LoginModal({ open, onOpenChange }) {
                       }
                       
                       await login();
-                      alert("Google login successful!");
+                      toast.success("Google login successful!");
                       onOpenChange(false);
                     } catch (error) {
-                      alert(error.message);
+                      toast.error("Google login fail!")
                     }
                   }}
                 >
@@ -148,7 +163,7 @@ export default function LoginModal({ open, onOpenChange }) {
                       onOpenChange(false);
                     }
                     catch (e) {
-                      setLoginError(e.message);
+                      toast.error(getFirebaseErrorMessage(e.code));
                     }
                   }}
                 >
@@ -295,10 +310,10 @@ export default function LoginModal({ open, onOpenChange }) {
                   }
 
                   login(data.user);
-                  alert("Registration successful!")
+                  toast.success("Registration successful!")
                   onOpenChange(false);
                 } catch (err) {
-                  setRegisterError("* " + err.message);
+                  toast.error(getFirebaseErrorMessage(err.code));
                 }
               }
 
@@ -338,7 +353,6 @@ export default function LoginModal({ open, onOpenChange }) {
             )}
           </div>
 
-          {/* Footer chuyển đổi */}
           <div className="col-span-2 text-center mt-2">
             {formMode === "register" ? (
               <span className="text-gray-400">

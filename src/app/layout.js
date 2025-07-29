@@ -5,10 +5,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ConfirmProvider } from "@/contexts/ConfirmContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { Toaster } from "react-hot-toast";
+import { icons } from "lucide-react";
 
 export const metadata = {
-  title: "Foodie Platform",
+  title: "Cookies",
   description: "Discover, Watch & Shop Delicious Recipes",
+  icons: {
+    icon: "/Logo.png"
+  }
 };
 
 export default function RootLayout({ children }) {

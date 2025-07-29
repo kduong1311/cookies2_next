@@ -10,14 +10,10 @@ export default function ShopLayout({ children }) {
         margin: "20px auto",
       }}
     >
-      {/* Header dùng chung cho tất cả các trang shop */}
-      {/* onClose và onCartClick sẽ được xử lý ở đây hoặc truyền xuống từ layout cha nếu cần */}
-      {/* Ví dụ: onClose={handleCloseShop} nếu có logic đóng shop từ layout cha */}
       <Header/>
 
       <div className="flex justify-between items-center border-b pb-4 mb-4" />
 
-      {/* `children` sẽ là nội dung của `page.js` (ví dụ: shop/page.js hoặc shop/[id]/page.js) */}
       {children}
     </div>
   );
