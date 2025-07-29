@@ -154,24 +154,23 @@
 
 .custom-scrollbar {
   &::-webkit-scrollbar {
-    width: 8px; /* Độ rộng của scrollbar dọc */
-    height: 8px; /* Chiều cao của scrollbar ngang */
+    width: 8px;
+    height: 8px; 
   }
 
   &::-webkit-scrollbar-track {
-    background: theme('colors.gray.200'); /* Nền màu xám nhạt */
+    background: theme('colors.gray.200'); 
     border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: theme('colors.gray.500'); /* Màu xanh cho phần cuộn */
+    background: theme('colors.gray.500');
     border-radius: 10px;
-    border: 2px solid theme('colors.gray.200'); /* Viền để tạo hiệu ứng nổi */
+    border: 2px solid theme('colors.gray.200'); 
   }
 
-  /* Khi rê chuột vào phần cuộn */
   &::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.gray.600'); /* Màu xanh đậm hơn khi hover */
+    background: theme('colors.gray.600');
   }
 }
 
@@ -188,7 +187,7 @@
   --color: #ffffff;
   position: relative;
   z-index: 1;
-  display: inline-block; /* cần để viền khớp nút */
+  display: inline-block;
 }
 
 .main_div::before,
