@@ -316,14 +316,13 @@ export default function TopNavbar() {
           </AnimatePresence>
         </div>
 
-        {/* Avatar */}
         <div className="relative">
           <button
             onClick={handleAvatarClick}
             className="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500 hover:border-orange-600 transition-all duration-200 hover:scale-105 shadow-lg"
           >
             <img
-              src={userDetails?.avatar_url || defaultAvatar}
+              src={user.avatar_url || defaultAvatar}
               alt="User Avatar"
               className="w-full h-full object-cover"
               onError={(e) => {
