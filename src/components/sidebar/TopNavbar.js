@@ -238,9 +238,9 @@ export default function TopNavbar() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           whileHover={{
-                            backgroundColor: notification.is_read
-                              ? "rgba(0,0,0,0.02)"
-                              : "rgba(249,115,22,0.05)",
+                                backgroundColor: notification.is_read
+                          ? "rgba(0, 0, 0, 0.02)"
+                          : "rgba(249, 115, 22, 0.05)",
                           }}
                           onClick={() =>
                             handleNotificationClick(notification)
