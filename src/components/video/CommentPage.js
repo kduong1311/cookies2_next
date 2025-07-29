@@ -25,7 +25,7 @@ export default function CommentPage({ postId }) {
       const userIds = [...new Set(fetchedComments.map(c => c.user_id))];
       const userFetches = userIds.map(async (id) => {
         try {
-          const userRes = await fetch(`http://103.253.145.7:8080/api/users/${id}`);
+          const userRes = await fetch(`http://103.253.145.7:8080/api/users/${id}`, {credentials: "include"});
           if (!userRes.ok) throw new Error("Failed to load user information.");
           const userData = await userRes.json();
           console.log("user", userData)
