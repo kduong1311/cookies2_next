@@ -1,18 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Bell, 
-  Heart, 
-  UserPlus, 
-  MessageSquare, 
-  Check,
-  CheckCheck,
-  User,
-  Clock,
-  X,
-  Loader2
-} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -91,34 +79,9 @@ export default function TopNavbar() {
     }
   };
 
-  const deleteNotification = async (notificationId) => {
-    try {
-      await axios.delete(
-        `http://103.253.145.7:3005/api/notifications/${notificationId}`,
-        { withCredentials: true }
-      );
-      setNotifications((prev) =>
-        prev.filter((notif) => notif.notification_id !== notificationId)
-      );
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-    }
-  };
-
   useEffect(() => {
     fetchUserDetails();
     fetchNotifications();
-  }, [user?.user_id]);
-
-  // Auto-refresh notifications every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (user?.user_id) {
-        fetchNotifications();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
   }, [user?.user_id]);
 
   const handleNotificationClick = async (notification) => {
@@ -149,42 +112,35 @@ export default function TopNavbar() {
     const notificationTime = new Date(timestamp);
     const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
 
-    if (diffInMinutes < 1) return "Just now";
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
-    return `${Math.floor(diffInMinutes / 1440)}d ago`;
+    if (diffInMinutes < 1) return "Now";
+    if (diffInMinutes < 60) return `${diffInMinutes} Last min`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} last hour`;
+    return `${Math.floor(diffInMinutes / 1440)} ngày trước`;
   };
 
   const getNotificationIcon = (type) => {
-    const iconProps = {
-      size: 16,
-      className: "text-white"
+    const icons = {
+      like: "bg-red-500",
+      follow: "bg-blue-500",
+      comment: "bg-green-500",
+      default: "bg-gray-500",
     };
 
-    const iconConfig = {
-      like: {
-        icon: <Heart {...iconProps} fill="white" />,
-        bgColor: "bg-red-500"
-      },
-      follow: {
-        icon: <UserPlus {...iconProps} />,
-        bgColor: "bg-blue-500"
-      },
-      comment: {
-        icon: <MessageSquare {...iconProps} />,
-        bgColor: "bg-green-500"
-      },
-      default: {
-        icon: <Bell {...iconProps} />,
-        bgColor: "bg-gray-500"
-      }
+    const paths = {
+      like: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28...",
+      follow: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7...",
+      comment: "M21 11.5a8.38 8.38 0 01-.9 3.8...",
+      default: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10...",
     };
 
-    const config = iconConfig[type] || iconConfig.default;
+    const fillPath = paths[type] || paths.default;
+    const bgColor = icons[type] || icons.default;
 
     return (
-      <div className={`w-8 h-8 ${config.bgColor} rounded-full flex items-center justify-center shadow-sm`}>
-        {config.icon}
+      <div className={`w-8 h-8 ${bgColor} rounded-full flex items-center justify-center`}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <path d={fillPath} />
+        </svg>
       </div>
     );
   };
@@ -192,6 +148,7 @@ export default function TopNavbar() {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
   const defaultAvatar =
     "https://img.freepik.com/premium-photo/male-female-profile-avatar-user-avatars-gender-icons_1020867-75099.jpg";
+
 
   return (
     <div className="fixed top-0 right-0 z-50 p-4">
@@ -205,11 +162,23 @@ export default function TopNavbar() {
                 fetchNotifications();
               }
             }}
-            className="p-2 bg-orange-500 rounded-full transition-all duration-200 relative hover:bg-orange-600 hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+            className="p-2 bg-orange-500 rounded-full transition-all duration-200 relative hover:bg-orange-600 hover:scale-105 shadow-lg"
           >
-            <Bell size={24} className="text-white" />
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-white"
+            >
+              <path
+                d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+                fill="currentColor"
+              />
+            </svg>
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse font-semibold">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
@@ -218,168 +187,124 @@ export default function TopNavbar() {
           {/* Notification Dropdown */}
           <AnimatePresence>
             {showNotifications && (
-              <>
-                {/* Backdrop */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black bg-opacity-20 z-40"
-                  onClick={() => setShowNotifications(false)}
-                />
-                
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute right-0 mt-2 w-[420px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm z-50"
-                >
-                  {/* Header */}
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-orange-600">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Bell size={20} className="text-white" />
-                        <h3 className="font-semibold text-white text-lg">Notifications</h3>
-                        {unreadCount > 0 && (
-                          <span className="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">
-                            {unreadCount} new
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={markAllAsRead}
-                            className="text-white/80 hover:text-white text-sm underline transition-colors flex items-center space-x-1"
-                          >
-                            <CheckCheck size={14} />
-                            <span>Mark all read</span>
-                          </button>
-                        )}
-                        <button
-                          onClick={() => setShowNotifications(false)}
-                          className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
-                    {loading ? (
-                      <div className="p-8 text-center">
-                        <Loader2 className="animate-spin h-8 w-8 text-orange-500 mx-auto" />
-                        <p className="text-gray-400 mt-2">Loading notifications...</p>
-                      </div>
-                    ) : notifications.length === 0 ? (
-                      <div className="p-8 text-center">
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Bell size={24} className="text-gray-400" />
-                        </div>
-                        <p className="text-gray-400 font-medium">No new notifications</p>
-                        <p className="text-gray-500 text-sm mt-1">New notifications will appear here</p>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {notifications.map((notification) => (
-                          <motion.div
-                            key={notification.notification_id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            whileHover={{ backgroundColor: notification.is_read ? 'rgba(0,0,0,0.02)' : 'rgba(249,115,22,0.05)' }}
-                            className={`p-4 cursor-pointer transition-all duration-200 relative group ${
-                              !notification.is_read 
-                                ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500' 
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                            }`}
-                          >
-                            <div className="flex items-start space-x-3">
-                              <div 
-                                className="flex-shrink-0 mt-1"
-                                onClick={() => handleNotificationClick(notification)}
-                              >
-                                {getNotificationIcon(notification.type)}
-                              </div>
-                              
-                              <div 
-                                className="flex-1 min-w-0"
-                                onClick={() => handleNotificationClick(notification)}
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <p className={`text-sm font-medium ${
-                                      !notification.is_read 
-                                        ? 'text-gray-900 dark:text-white' 
-                                        : 'text-gray-700 dark:text-gray-300'
-                                    }`}>
-                                      {notification.title}
-                                    </p>
-                                    <p className={`text-sm mt-1 ${
-                                      !notification.is_read 
-                                        ? 'text-gray-600 dark:text-gray-400' 
-                                        : 'text-gray-500 dark:text-gray-500'
-                                    }`}>
-                                      {notification.content}
-                                    </p>
-                                    <div className="flex items-center mt-2 space-x-2">
-                                      <Clock size={12} className="text-gray-400" />
-                                      <p className="text-xs text-gray-400">
-                                        {formatTime(notification.created_at)}
-                                      </p>
-                                      {notification.count > 1 && (
-                                        <span className="text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
-                                          +{notification.count - 1} others
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center space-x-2 ml-2">
-                                    {!notification.is_read && (
-                                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                                    )}
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteNotification(notification.notification_id);
-                                      }}
-                                      className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all duration-200"
-                                    >
-                                      <X size={14} />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 mt-2 w-[420px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm"
+              >
+                {/* Header */}
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-orange-600">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-white text-lg">Notification</h3>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-white/80 hover:text-white text-sm underline transition-colors"
+                      >
+                        Mark all as read
+                      </button>
                     )}
                   </div>
+                </div>
 
-                  {notifications.length > 0 && (
-                    <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                      <button
-                        onClick={() => setShowNotifications(false)}
-                        className="w-full text-center text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 text-sm font-medium transition-colors py-1 rounded-md hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                      >
-                        Close
-                      </button>
+                <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+                  {loading ? (
+                    <div className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                      <p className="text-gray-400 mt-2">Loading...</p>
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-400">
+                          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="currentColor"/>
+                        </svg>
+                      </div>
+                      <p className="text-gray-400 font-medium">Have no new notification</p>
+                      <p className="text-gray-500 text-sm mt-1">New notification will be here</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {notifications.map((notification) => (
+                        <motion.div
+                          key={notification.notification_id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          whileHover={{ backgroundColor: notification.is_read ? 'rgba(0,0,0,0.02)' : 'rgba(249,115,22,0.05)' }}
+                          onClick={() => handleNotificationClick(notification)}
+                          className={`p-4 cursor-pointer transition-all duration-200 relative ${
+                            !notification.is_read 
+                              ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500' 
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 mt-1">
+                              {getNotificationIcon(notification.type)}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className={`text-sm font-medium ${
+                                    !notification.is_read 
+                                      ? 'text-gray-900 dark:text-white' 
+                                      : 'text-gray-700 dark:text-gray-300'
+                                  }`}>
+                                    {notification.title}
+                                  </p>
+                                  <p className={`text-sm mt-1 ${
+                                    !notification.is_read 
+                                      ? 'text-gray-600 dark:text-gray-400' 
+                                      : 'text-gray-500 dark:text-gray-500'
+                                  }`}>
+                                    {notification.content}
+                                  </p>
+                                  <div className="flex items-center mt-2 space-x-2">
+                                    <p className="text-xs text-gray-400">
+                                      {formatTime(notification.created_at)}
+                                    </p>
+                                    {notification.count > 1 && (
+                                      <span className="text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
+                                        {notification.count} people
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {!notification.is_read && (
+                                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 ml-2 animate-pulse"></div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
                   )}
-                </motion.div>
-              </>
+                </div>
+
+                {notifications.length > 0 && (
+                  <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    <button
+                      onClick={() => setShowNotifications(false)}
+                      className="w-full text-center text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 text-sm font-medium transition-colors py-1"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* User Avatar */}
         <div className="relative">
           <button 
             onClick={handleAvatarClick}
-            className="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500 hover:border-orange-600 transition-all duration-200 hover:scale-105 shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-300"
+            className="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500 hover:border-orange-600 transition-all duration-200 hover:scale-105 shadow-lg"
           >
             <img
               src={userDetails?.avatar_url || defaultAvatar}
@@ -391,13 +316,13 @@ export default function TopNavbar() {
             />
           </button>
 
-          {/* Online Status */}
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></div>
           
-          {/* Verified Badge */}
           {userDetails?.is_verified && (
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-              <Check size={10} className="text-white" />
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
             </div>
           )}
         </div>
