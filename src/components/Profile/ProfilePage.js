@@ -87,7 +87,7 @@ const ProfilePage = ({ userId }) => {
       setFollowersCount(prev => wasFollowing ? prev - 1 : prev + 1);
 
       if (wasFollowing) {
-        await axios.delete(`http://103.253.145.7:8080/api/users/${userId}/follow`, {
+        await axios.delete(`http://103.253.145.7:3000/users/${userId}/follow`, {
           withCredentials: true,
         });
       } else {
