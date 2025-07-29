@@ -6,7 +6,6 @@ export default function CustomVideo({ src, isActive }) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Auto play/pause based on isActive prop
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -57,16 +56,12 @@ export default function CustomVideo({ src, isActive }) {
         className="w-full h-full object-cover cursor-pointer"
         onClick={togglePlay}
         loop
-        muted
       />
 
-      {/* Top Controls */}
       <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent z-10">
         <Volume2 className="text-white" />
-        <Settings className="text-white" />
       </div>
 
-      {/* Bottom Progress */}
       <div
         className="absolute bottom-0 left-0 w-full h-2 bg-gray-700 cursor-pointer z-10"
         onClick={handleProgressClick}
@@ -74,7 +69,6 @@ export default function CustomVideo({ src, isActive }) {
         <div className="h-full bg-orange-500" style={{ width: `${progress}%` }}></div>
       </div>
 
-      {/* Center Play Icon: chỉ hiện khi paused, không chặn pointer */}
       {!playing && (
         <div
           className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
