@@ -13,10 +13,8 @@ import {
   UserPlus, 
   UserMinus, 
   Loader2, 
-  Settings,
-  ShoppingBag,
-  Edit3,
-  Package
+  Edit3, 
+  Package 
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -52,13 +50,19 @@ const ProfilePage = ({ userId }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-       try {
+      try {
         setLoading(true);
-        const res = await axios.get(`http://103.253.145.7:8080/api/users/${userId}`, { withCredentials: true });
+        const res = await axios.get(`http://103.253.145.7:8080/api/users/${userId}`, {
+          withCredentials: true,
+        });
+
         setProfileUser(res.data);
-        
-        setIsFollowing(res.data.isFollowing || false);
         setFollowersCount(res.data.followersCount || 0);
+
+        if (user?.user_id !== userId) {
+          setIsFollowing(res.data.isFollowing || false);
+        }
+
       } catch (err) {
         setError(err.response?.data?.message || err.message);
       } finally {
@@ -67,7 +71,7 @@ const ProfilePage = ({ userId }) => {
     };
 
     if (userId) fetchUser();
-  }, [userId]);
+  }, [userId, user]);
 
   const handleFollow = async () => {
     if (!user) {
@@ -77,63 +81,50 @@ const ProfilePage = ({ userId }) => {
 
     try {
       setFollowLoading(true);
-      
       const wasFollowing = isFollowing;
+
       setIsFollowing(!wasFollowing);
       setFollowersCount(prev => wasFollowing ? prev - 1 : prev + 1);
 
-      await axios.post(
-        `http://103.253.145.7:8080/api/users/${userId}/follow`,
-        {},
-        { withCredentials: true }
-      );
-      
+      if (wasFollowing) {
+        await axios.delete(`http://103.253.145.7:8080/api/users/${userId}/follow`, {
+          withCredentials: true,
+        });
+      } else {
+        await axios.post(`http://103.253.145.7:8080/api/users/${userId}/follow`, {}, {
+          withCredentials: true,
+        });
+      }
+
     } catch (err) {
       setIsFollowing(isFollowing);
-      setFollowersCount(followersCount);
+      setFollowersCount(prev => isFollowing ? prev + 1 : prev - 1);
       console.error('Follow error:', err);
     } finally {
       setFollowLoading(false);
     }
   };
 
-  const handleUpdateProfile = () => {
-    router.push(`/profile/${userId}/edit_profile`);
-  };
-
-  const handleMyOrders = () => {
-    router.push(`/profile/${userId}/my_orders`);
-  };
+  const handleUpdateProfile = () => router.push(`/profile/${userId}/edit_profile`);
+  const handleMyOrders = () => router.push(`/profile/${userId}/my_orders`);
 
   const ProfileActionButtons = () => {
     if (!isOwner) return null;
 
     return (
       <div className="flex gap-3">
-        <button
-          onClick={handleUpdateProfile}
-          className="group relative px-5 py-2.5 rounded-full font-medium text-sm
-            bg-gradient-to-r from-blue-500 to-purple-600 text-white
-            hover:from-blue-600 hover:to-purple-700
-            transition-all duration-300 ease-out transform hover:scale-105
-            shadow-lg hover:shadow-xl hover:shadow-blue-500/25
-            border border-transparent"
-        >
+        <button onClick={handleUpdateProfile} className="group relative px-5 py-2.5 rounded-full font-medium text-sm
+          bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700
+          transition-all duration-300 ease-out transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 border border-transparent">
           <div className="flex items-center justify-center">
             <Edit3 className="w-4 h-4 mr-2 group-hover:rotate-6 transition-transform duration-200" />
             <span>Edit Profile</span>
           </div>
         </button>
 
-        <button
-          onClick={handleMyOrders}
-          className="group relative px-5 py-2.5 rounded-full font-medium text-sm
-            bg-gradient-to-r from-green-500 to-emerald-600 text-white
-            hover:from-green-600 hover:to-emerald-700
-            transition-all duration-300 ease-out transform hover:scale-105
-            shadow-lg hover:shadow-xl hover:shadow-green-500/25
-            border border-transparent"
-        >
+        <button onClick={handleMyOrders} className="group relative px-5 py-2.5 rounded-full font-medium text-sm
+          bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700
+          transition-all duration-300 ease-out transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-500/25 border border-transparent">
           <div className="flex items-center justify-center">
             <Package className="w-4 h-4 mr-2 group-hover:bounce transition-transform duration-200" />
             <span>My Orders</span>
@@ -143,7 +134,6 @@ const ProfilePage = ({ userId }) => {
     );
   };
 
-  // Follow Button Component
   const FollowButton = () => {
     if (isOwner) return null;
 
@@ -151,16 +141,13 @@ const ProfilePage = ({ userId }) => {
       <button
         onClick={handleFollow}
         disabled={followLoading}
-        className={`
-          group relative px-6 py-2.5 rounded-full font-medium text-sm
+        className={`group relative px-6 py-2.5 rounded-full font-medium text-sm
           transition-all duration-300 ease-out transform hover:scale-105
           disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100
           ${isFollowing 
             ? 'bg-transparent border-2 border-gray-500 text-gray-300 hover:bg-gray-700 hover:border-gray-400 hover:shadow-lg' 
-            : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 border-2 border-transparent hover:shadow-xl hover:shadow-orange-500/25'
-          }
-          shadow-lg
-        `}
+            : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 border-2 border-transparent hover:shadow-xl hover:shadow-orange-500/25'}
+          shadow-lg`}
       >
         {followLoading ? (
           <div className="flex items-center justify-center">
@@ -172,7 +159,7 @@ const ProfilePage = ({ userId }) => {
             {isFollowing ? (
               <>
                 <UserMinus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                <span>Following</span>
+                <span>Unfollow</span>
               </>
             ) : (
               <>
@@ -191,7 +178,7 @@ const ProfilePage = ({ userId }) => {
       setVideosLoading(true);
       const res = await fetch(`http://103.253.145.7:3001/api/posts/user/${userId}`);
       const data = res.ok ? await res.json() : [];
-      setUserVideos(data.data);
+      setUserVideos(data.data || []);
     } catch {
       setUserVideos([]);
     } finally {
@@ -204,7 +191,7 @@ const ProfilePage = ({ userId }) => {
       setRecipesLoading(true);
       const res = await fetch(`http://103.253.145.7:3004/api/recipes/user/${userId}`);
       const data = res.ok ? await res.json() : [];
-      setUserRecipes(data.data.recipes);
+      setUserRecipes(data.data?.recipes || []);
     } catch {
       setUserRecipes([]);
     } finally {
@@ -290,31 +277,22 @@ const ProfilePage = ({ userId }) => {
       <div className="w-full max-w-[1000px] bg-gray-800 h-[95vh] overflow-y-auto rounded-2xl hide-scrollbar">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-gray-800/95 backdrop-blur-sm shadow-sm px-4 py-3 flex items-center border-b border-gray-700">
-          <button 
-            onClick={handleBack} 
-            className="flex items-center text-gray-600 hover:text-gray-300 mr-4 transition-colors group"
-          >
+          <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-300 mr-4 transition-colors group">
             <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
             <span className="text-sm">back</span>
           </button>
           <h2 className="text-lg font-semibold text-white">Profile</h2>
         </div>
 
-        {/* Profile Header with Action Buttons */}
+        {/* Profile Header */}
         <div className="relative">
           <ProfileHeader userProfile={profileUser} />
-          
-          {/* Action Buttons Container */}
           <div className="absolute top-4 right-4 z-10">
-            {isOwner ? (
-              <ProfileActionButtons />
-            ) : (
-              <FollowButton />
-            )}
+            {isOwner ? <ProfileActionButtons /> : <FollowButton />}
           </div>
         </div>
 
-        {/* Profile Tabs */}
+        {/* Tabs */}
         <ProfileTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
