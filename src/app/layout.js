@@ -10,9 +10,6 @@ import { icons } from "lucide-react";
 export const metadata = {
   title: "Cookies",
   description: "Discover, Watch & Shop Delicious Recipes",
-  icons: {
-    icon: "/Logo.png"
-  }
 };
 
 export default function RootLayout({ children }) {
