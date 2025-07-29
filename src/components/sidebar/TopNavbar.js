@@ -245,11 +245,7 @@ export default function TopNavbar() {
                           onClick={() =>
                             handleNotificationClick(notification)
                           }
-                          className={`p-4 cursor-pointer transition-all duration-200 relative ${
-                            !notification.is_read
-                              ? "bg-orange-50 border-l-4 border-orange-500"
-                              : "hover:bg-gray-50"
-                          }`}
+                          className={`p-4 cursor-pointer transition-all duration-200 relative`}
                         >
                           <div className="flex items-start space-x-3">
                             <div className="flex-shrink-0 mt-1">
