@@ -284,12 +284,15 @@ export default function TopNavbar() {
                     ) : (
                       <div className="divide-y divide-gray-200 dark:divide-gray-700">
                         {notifications.map((notification) => (
-                          <div
+                          <motion.div
                             key={notification.notification_id}
-                            className={`p-4 cursor-pointer transition-colors duration-200 relative group hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            whileHover={{ backgroundColor: notification.is_read ? 'rgba(0,0,0,0.02)' : 'rgba(249,115,22,0.05)' }}
+                            className={`p-4 cursor-pointer transition-all duration-200 relative group ${
                               !notification.is_read 
                                 ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500' 
-                                : ''
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                             }`}
                           >
                             <div className="flex items-start space-x-3">
@@ -350,7 +353,7 @@ export default function TopNavbar() {
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     )}
@@ -399,32 +402,6 @@ export default function TopNavbar() {
           )}
         </div>
       </div>
-
-      {/* Custom Scrollbar Styles */}
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #c1c1c1;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #a1a1a1;
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-track {
-          background: #374151;
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #6b7280;
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #9ca3af;
-        }
-      `}</style>
     </div>
   );
 }
