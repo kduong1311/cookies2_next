@@ -1,4 +1,4 @@
-// app/layout.js
+
 import "../app/globals.css"
 import MainLayout from "./feed/MainLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -10,6 +10,9 @@ import { icons } from "lucide-react";
 export const metadata = {
   title: "Cookies",
   description: "Discover, Watch & Shop Delicious Recipes",
+  icons: {
+    icon: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({ children }) {
