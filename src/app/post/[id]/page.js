@@ -86,11 +86,12 @@ export default function PostDetailPage() {
     <div className="flex justify-center items-center w-full h-screen bg-black">
       <div className="flex w-full">
         <div className="flex-grow flex items-center justify-center">
-          <div className="flex items-center justify-center">
-            <div className="h-[95vh] max-w-[600px] w-auto bg-black rounded-lg overflow-hidden">
-              <VideoPlayer currentPost={post} currentUser={userInfo} />
-            </div>
+          <div className="flex items-center justify-center gap-4">
+          <div className="h-[95vh] max-w-[600px] w-auto bg-black rounded-lg overflow-hidden">
+            <VideoPlayer currentPost={post} currentUser={userInfo} />
+          </div>
 
+          <div className="flex-shrink-0 flex items-center h-[95vh]">
             <VideoInteractions
               currentPost={post}
               currentUser={userInfo}
@@ -101,6 +102,8 @@ export default function PostDetailPage() {
               onUpdatePost={(updated) => setPost({ ...post, ...updated })}
             />
           </div>
+        </div>
+
         </div>
 
         <AnimatePresence mode="wait">

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import AddProductModal from "@/components/product/AddProductModal";
+import ProductEditDialog from "@/components/product/editProductDialog";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -28,6 +29,10 @@ export default function ProductsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [categoriesData, setCategoriesData] = useState([]);
 
+  // State cho Edit Dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -43,8 +48,7 @@ export default function ProductsPage() {
     fetchCategories();
   }, []);
 
-
-   useEffect(() => {
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
@@ -87,6 +91,40 @@ export default function ProductsPage() {
     }
   }, [shopId]);
 
+  const refreshProducts = () => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(`http://103.253.145.7:8080/api/products/shop/${shopId}`, {
+          withCredentials: true,
+        });
+
+        if (res.data.status === "success") {
+          const transformedProducts = res.data.data.data.map((product) => ({
+            id: product.product_id,
+            name: product.name,
+            category: getCategoryFromProduct(product),
+            price: parseFloat(product.price),
+            stock: product.stock_quantity,
+            status: getStatusFromStock(product.stock_quantity),
+            image: product.images?.[0]?.image_url || "📦",
+            description: product.description,
+            rating: parseFloat(product.rating),
+            total_sales: product.total_sales,
+            currency: product.currency,
+            sale_price: product.sale_price,
+            is_featured: product.is_featured,
+            created_at: product.created_at,
+          }));
+
+          setProducts(transformedProducts);
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+    fetchProducts();
+  };
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || product.category === filterCategory;
@@ -105,6 +143,7 @@ export default function ProductsPage() {
 
         if (res.data.status === "success") {
           setProducts(products.filter((p) => p.id !== id));
+          toast.success("Product deleted successfully!");
         } else {
           toast.error("Delete fail!");
         }
@@ -112,6 +151,22 @@ export default function ProductsPage() {
         console.error("Delete Error:", error);
         toast.error("Delete fail!");
       }
+    }
+  };
+
+  // Function để handle edit product
+  const handleEditProduct = (productId) => {
+    setSelectedProductId(productId);
+    setEditDialogOpen(true);
+  };
+
+  // Function để handle close edit dialog
+  const handleEditDialogClose = (open) => {
+    setEditDialogOpen(open);
+    if (!open) {
+      setSelectedProductId(null);
+      // Refresh products khi đóng dialog để cập nhật dữ liệu mới
+      refreshProducts();
     }
   };
 
@@ -247,6 +302,13 @@ export default function ProductsPage() {
         }}
       />
 
+      {/* Edit Product Dialog */}
+      <ProductEditDialog
+        productId={selectedProductId}
+        isOpen={editDialogOpen}
+        onClose={handleEditDialogClose}
+      />
+
       <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">
@@ -320,8 +382,7 @@ export default function ProductsPage() {
                     <td className="p-4 text-gray-300">{product.stock}</td>
                     <td className="p-4">
                       <span
-                          className={`${getStatusColor(product.status)} text-white px-1.5 py-0.5 rounded text-[10px] leading-tight`}
-
+                        className={`${getStatusColor(product.status)} text-white px-1.5 py-0.5 rounded text-[10px] leading-tight`}
                       >
                         {product.status}
                       </span>
@@ -330,12 +391,20 @@ export default function ProductsPage() {
                       ⭐ {product.rating} ({product.total_sales} sale)
                     </td>
                     <td className="p-4">
-                      <button
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditProduct(product.id)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

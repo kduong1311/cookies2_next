@@ -26,7 +26,7 @@ export default function TopNavbar() {
     if (!user) return;
     try {
       const response = await axios.get(
-        `http://103.253.145.7:8080/api/users/${user.user_id}`
+        `http://103.253.145.7:8080/api/users/${user.user_id}`, {withCredentials: true}
       );
       setUserDetails(response.data);
     } catch (error) {
@@ -188,7 +188,7 @@ export default function TopNavbar() {
                 transition={{ duration: 0.2 }}
                 className="absolute right-0 mt-2 w-[420px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl overflow-hidden backdrop-blur-sm"
               >
-                {/* Header */}
+
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-500 to-orange-600">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-white text-lg">
