@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, X, Upload, Edit, Trash2, RefreshCw } from 'lucide-react';
 import { uploadToCloudinary } from '../upload/uploadCloudinary';
 import toast from 'react-hot-toast';
@@ -254,36 +253,24 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
               
               {loadingCategories ? (
                 <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
-                  <span className="ml-2 text-gray-400">Loading categories...</span>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
+                    <span className="ml-2 text-gray-400">Loading categories...</span>
                 </div>
-              ) : (
-                <Select
-                  value={product.category_id}
-                  onValueChange={(value) => setProduct(prev => ({ ...prev, category_id: value }))}
+                ) : (
+                <select
+                    value={product.category_id || ''}
+                    onChange={(e) => setProduct(prev => ({ ...prev, category_id: e.target.value }))}
+                    className="bg-gray-800 border border-gray-600 text-white rounded px-3 py-2 w-full focus:border-orange-500 focus:ring-orange-500"
                 >
-                  <SelectTrigger className="bg-gray-800 border-gray-600 text-white focus:border-orange-500 focus:ring-orange-500">
-                    <SelectValue placeholder="Select a category">
-                      {product.category_id ? getCurrentCategoryName() : "Select a category"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-600">
-                    <SelectItem value="" className="text-gray-400 focus:bg-gray-700 focus:text-white">
-                      No category
-                    </SelectItem>
+                    <option value="">No category</option>
                     {categories.map((category) => (
-                      <SelectItem 
-                        key={category.id} 
-                        value={category.id}
-                        className="text-white focus:bg-orange-500 focus:text-white"
-                      >
+                    <option key={category.id} value={category.id}>
                         {category.name}
-                      </SelectItem>
+                    </option>
                     ))}
-                  </SelectContent>
-                </Select>
-              )}
-              
+                </select>
+                )}
+                            
               {product.category_id && (
                 <div className="text-sm text-gray-400 mt-1">
                   Current category: <span className="text-orange-400">{getCurrentCategoryName()}</span>
