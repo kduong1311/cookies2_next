@@ -154,18 +154,15 @@ export default function ProductsPage() {
     }
   };
 
-  // Function để handle edit product
   const handleEditProduct = (productId) => {
     setSelectedProductId(productId);
     setEditDialogOpen(true);
   };
 
-  // Function để handle close edit dialog
   const handleEditDialogClose = (open) => {
     setEditDialogOpen(open);
     if (!open) {
       setSelectedProductId(null);
-      // Refresh products khi đóng dialog để cập nhật dữ liệu mới
       refreshProducts();
     }
   };
@@ -302,13 +299,6 @@ export default function ProductsPage() {
         }}
       />
 
-      {/* Edit Product Dialog */}
-      <ProductEditDialog
-        productId={selectedProductId}
-        isOpen={editDialogOpen}
-        onClose={handleEditDialogClose}
-      />
-
       <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">
@@ -362,7 +352,7 @@ export default function ProductsPage() {
                           </div>
                           {product.is_featured && (
                             <span className="inline-block bg-yellow-500 text-yellow-900 px-2 py-1 rounded text-xs font-medium mt-1">
-                              Nổi bật
+                              Featured
                             </span>
                           )}
                         </div>
@@ -375,7 +365,7 @@ export default function ProductsPage() {
                       </div>
                       {product.sale_price && (
                         <div className="text-green-400 text-sm">
-                          Giảm: {formatPrice(product.sale_price, product.currency)}
+                          Sale: {formatPrice(product.sale_price, product.currency)}
                         </div>
                       )}
                     </td>
@@ -413,6 +403,13 @@ export default function ProductsPage() {
           </table>
         </div>
       </div>
+      
+      <ProductEditDialog
+        productId={selectedProductId}
+        isOpen={editDialogOpen}
+        onClose={handleEditDialogClose}
+      />
+
     </div>
   );
 }
