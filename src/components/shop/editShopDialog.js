@@ -157,7 +157,7 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 text-white border-gray-700">
+      <DialogContent className="max-w-6xl max-h-[60vh] overflow-y-auto bg-gray-900 text-white border-gray-700 hide-scrollbar">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
             Edit Shop Information
