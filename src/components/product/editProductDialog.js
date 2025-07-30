@@ -41,10 +41,12 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://103.253.145.7:3003/api/products/${productId}`);
+      const response = await fetch(`http://103.253.145.7:3003/api/products/${productId}`, {
+        credentials: "include"
+      });
       if (response.ok) {
         const data = await response.json();
-        setProduct(data);
+        setProduct(data.data);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -59,6 +61,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
       setLoading(true);
       const response = await fetch(`http://103.253.145.7:3003/api/products/${productId}`, {
         method: 'PUT',
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },
@@ -231,7 +234,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                   {product.images.map((image, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={image.thumbnail_url || image.url}
+                        src={image.thumbnail_url || image.image_url}
                         alt={image.alt_text}
                         className={`w-full h-24 object-cover rounded border-2 ${
                           image.is_primary ? 'border-blue-500' : 'border-gray-200'
