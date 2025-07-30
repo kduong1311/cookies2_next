@@ -61,7 +61,7 @@ const ProfilePage = ({ userId }) => {
 
         console.log("k", res.data)
 
-        setIsFollowing(res.data.isFollowing || true);
+        setIsFollowing(res.data.isFollowing || false);
 
       } catch (err) {
         setError(err.response?.data?.message || err.message);

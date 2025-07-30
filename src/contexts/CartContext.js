@@ -9,13 +9,13 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [buyNowItem, setBuyNowItem] = useState(null);
 
-    const setBuyNow = (product) => {
-      setBuyNowItem(product);
-    };
+  const setBuyNow = (product) => {
+    setBuyNowItem(product);
+  };
 
-    const clearBuyNow = () => {
-      setBuyNowItem(null);
-    };
+  const clearBuyNow = () => {
+    setBuyNowItem(null);
+  };
 
   const addToCart = (product) => {
     const { id, product_id, name, price, sale_price, image, quantity = 1, variant, shop_id} = product;
@@ -42,7 +42,7 @@ export const CartProvider = ({ children }) => {
           sale_price,
           image,
           quantity,
-          variant, // { variant_id, color, size, material, sku, image_url }
+          variant,
           shop_id,
         },
       ];

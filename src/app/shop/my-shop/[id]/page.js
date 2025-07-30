@@ -4,6 +4,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
+import EditShopDialog from "@/components/shop/editShopDialog";
 
 
 export default function DashboardPage() {
@@ -15,6 +16,8 @@ export default function DashboardPage() {
   const [ordersData, setOrdersData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 
   useEffect(() => {
     if (shopId) {
@@ -102,10 +105,19 @@ export default function DashboardPage() {
     <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-          <span className="text-blue-400">📊</span>
-          Dashboard - {shopData?.name || "Shop"}
+        <span className="text-blue-400">📊</span>
+        Dashboard - {shopData?.name || "Shop"}
         </h1>
-        <p className="text-gray-400 text-lg">Business overview and statistics</p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-gray-400 text-lg">Business overview and statistics</p>
+          <button 
+            onClick={() => setIsDialogOpen(true)} 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            ✏️ Edit Shop
+          </button>
+        </div>
+
         
         <div className="mt-4 bg-gray-800/50 backdrop-blur-sm border border-gray-700 p-4 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
@@ -343,6 +355,11 @@ export default function DashboardPage() {
           </Link>
         </nav>
       </div>
+      <EditShopDialog 
+      isOpen={isDialogOpen} 
+      onClose={() => setIsDialogOpen(false)} 
+      shopId={shopId}
+    />
     </div>
   );
 }

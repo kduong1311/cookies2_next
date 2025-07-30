@@ -108,11 +108,6 @@ export default function TopNavbar() {
       notification.reference_id
     ) {
       router.push(`/post/${notification.reference_id}`);
-    } else if (
-      notification.reference_type === "user" &&
-      notification.reference_id
-    ) {
-      router.push(`/profile/${notification.reference_id}`);
     }
 
     setShowNotifications(false);
@@ -168,7 +163,6 @@ export default function TopNavbar() {
   return (
     <div className="fixed top-0 right-0 z-50 p-4">
       <div className="flex items-center space-x-3">
-        {/* Notification Button */}
         <div className="relative">
           <button
             onClick={() => {
@@ -185,7 +179,6 @@ export default function TopNavbar() {
             )}
           </button>
 
-          {/* Notification Dropdown */}
           <AnimatePresence>
             {showNotifications && (
               <motion.div

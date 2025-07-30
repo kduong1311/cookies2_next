@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button";
@@ -144,7 +143,6 @@ export default function CookingUploadPage() {
     if (!file) return alert("Choose file please!");
     if (!title.trim()) return alert("Enter Title please!");
     
-    // Only validate recipe fields if hasRecipe is true
   if (hasRecipe) {
   if (!recipe.title.trim()) return alert("Please enter the recipe title!");
   if (isPremium && (!premiumPrice || premiumPrice <= 0)) return alert("Please enter a valid price for premium content!");
@@ -162,7 +160,6 @@ export default function CookingUploadPage() {
     setIsUploading(true);
 
     try {
-      // Step 1: Upload file to Cloudinary
       const dataCloud = await uploadToCloudinary(file);
 
       setDuration(dataCloud.duration);
@@ -172,7 +169,6 @@ export default function CookingUploadPage() {
         recipeCoverUrl = await uploadToCloudinary(recipeCover);
       }
 
-      // Step 2: Create post
       const postData = {
         content_type: file.type.startsWith("image") ? "image" : "video",
         title: title.trim(),
@@ -188,7 +184,7 @@ export default function CookingUploadPage() {
         media: [{
           url: dataCloud.url,
           type: file.type.startsWith("image") ? "image" : "video",
-          duration: duration,
+          duration:dataCloud.duration,
         }]
       };
 
@@ -284,7 +280,6 @@ export default function CookingUploadPage() {
         height: "95vh",
         margin: "20px auto",
       }}>
-      {/* Header - Compact */}
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
           <ChefHat className="w-6 h-6 text-orange-500" />
@@ -294,9 +289,7 @@ export default function CookingUploadPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-        {/* Left Column - Media Upload */}
         <div className="space-y-4 overflow-y-auto pr-2">
-          {/* File Upload - Compact */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
               <Camera className="w-4 h-4 text-orange-500" />
@@ -351,7 +344,6 @@ export default function CookingUploadPage() {
             </div>
           </div>
 
-          {/* Title */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <Label className="text-sm font-semibold text-white mb-2 block">
               Post Title *
@@ -365,7 +357,6 @@ export default function CookingUploadPage() {
             <p className="text-xs text-gray-500 mt-1">{title.length}/200</p>
           </div>
 
-          {/* Caption */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <Label className="text-sm font-semibold text-white mb-2 block">
               Descriptions:
@@ -380,9 +371,7 @@ export default function CookingUploadPage() {
           </div>
         </div>
 
-        {/* Right Column - Recipe */}
         <div className="space-y-4 overflow-y-auto pr-2">
-          {/* Recipe Toggle */}
           <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold text-white flex items-center gap-2">
@@ -407,7 +396,7 @@ export default function CookingUploadPage() {
           {hasRecipe && (
             <>
             <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700 space-y-3">
-            <h3 className="text-lg font-semibold text-white">Cover iamge (optional)</h3>
+            <h3 className="text-lg font-semibold text-white">Cover image (optional)</h3>
             <div className="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center hover:border-orange-500 transition-colors">
               <input
                 type="file"
@@ -422,7 +411,7 @@ export default function CookingUploadPage() {
                     <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
                       <ImageIcon className="w-6 h-6 text-orange-500" />
                     </div>
-                    <p className="text-sm font-medium text-white">Choose cover iamge</p>
+                    <p className="text-sm font-medium text-white">Choose cover image</p>
                   </>
                 ) : (
                   <Image 
@@ -436,7 +425,6 @@ export default function CookingUploadPage() {
               </label>
             </div>
           </div>
-              {/* Recipe Basic Info */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700 space-y-3">
                 <h3 className="text-lg font-semibold text-white">Basic Information</h3>
                 
@@ -447,7 +435,7 @@ export default function CookingUploadPage() {
                     value={recipe.title}
                     onChange={(e) => setRecipe({...recipe, title: e.target.value})}
                     className="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                    placeholder="Tên món ăn..."
+                    placeholder="Food name..."
                   />
                 </div>
 
@@ -543,7 +531,6 @@ export default function CookingUploadPage() {
                 </div>
               </div>
 
-              {/* Premium Settings */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <Label className="text-sm font-semibold text-white flex items-center gap-2">
@@ -573,12 +560,11 @@ export default function CookingUploadPage() {
                       placeholder="50000"
                       min="0"
                     />
-                    <p className="text-xs text-gray-400 mt-1">Người dùng sẽ phải trả phí để xem công thức này</p>
+                    <p className="text-xs text-gray-400 mt-1">User must paid for this recipe</p>
                   </div>
                 )}
               </div>
 
-              {/* Ingredients */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-white">Ingredients</h3>
@@ -598,7 +584,7 @@ export default function CookingUploadPage() {
                         value={ingredient}
                         onChange={(e) => updateIngredient(index, e.target.value)}
                         className="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400"
-                        placeholder="Ví dụ: 500g Beef"
+                        placeholder="Example: 500g Beef"
                       />
                       {recipe.ingredients.length > 1 && (
                         <Button
@@ -613,7 +599,6 @@ export default function CookingUploadPage() {
                 </div>
               </div>
 
-              {/* Instructions */}
               <div className="bg-gray-800 rounded-2xl p-4 border border-gray-700">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-white">Steps</h3>
@@ -655,7 +640,6 @@ export default function CookingUploadPage() {
             </>
           )}
 
-          {/* Submit Button */}
           <Button
             onClick={handleSubmit}
             disabled={!file || isUploading}

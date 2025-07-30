@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // App Router
+import { useRouter } from "next/navigation";
+import { useCart } from "./CartContext";
 
 export const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -8,7 +9,8 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const router = useRouter(); // 👈 Add this
+    const router = useRouter();
+    const {clearCart} = useCart();
 
     useEffect(() => {
         checkAuthStatus();
@@ -49,7 +51,8 @@ export function AuthProvider({ children }) {
             console.error("Logout fail: ", err);
         } finally {
             setUser(null);
-            router.push("/"); // 👈 Redirect after logout
+            router.push("/");
+            clearCart();
         }
     };
 

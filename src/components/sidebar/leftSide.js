@@ -1,19 +1,32 @@
 "use client";
-import { Compass, BellRing, Flame, HeartPlus, ShoppingBag, Info, Upload, LogIn, LogOut, Search } from 'lucide-react';
+import {Compass, BellRing, Flame, HeartPlus, ShoppingBag, Info, Upload, LogIn, LogOut, Search} from 'lucide-react';
 import LoginModal from '@/components/user/LoginModal';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConfirm } from '@/contexts/ConfirmContext';
-import { usePathname } from 'next/navigation';
 import "@/app/css/loginButton.css";
 
 export default function LeftSidebar({ openShop, goToVideoFeed }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const router = useRouter();
   const { logout, user } = useAuth();
   const confirm = useConfirm();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const getNavItemFromPath = (path) => {
+    if (path?.includes("search")) return "Search";
+    if (path?.includes("shop")) return "Shop";
+    if (path?.includes("upload")) return "Upload";
+    if (path?.includes("about")) return "About";
+    return "Featured";
+  };
+
+  const [activeItem, setActiveItem] = useState(() => getNavItemFromPath(pathname));
+
+  useEffect(() => {
+    setActiveItem(getNavItemFromPath(pathname));
+  }, [pathname]);
 
   const handleClick = (item, callback) => {
     setActiveItem(item);
@@ -27,31 +40,23 @@ export default function LeftSidebar({ openShop, goToVideoFeed }) {
     });
     if (ok) {
       await logout();
-      setIsLoginModalOpen(true);
+      router.push("/");
     }
   };
-
-  const pathname = usePathname();
-const [activeItem, setActiveItem] = useState(() => {
-  if (pathname?.includes("search")) return "Search";
-  if (pathname?.includes("shop")) return "Shop";
-  if (pathname?.includes("upload")) return "Upload";
-  return "Featured";
-});
 
   const navItems = [
     { label: "Featured", icon: <Flame className="h-5 w-5" />, onClick: () => router.push("/") },
     { label: "Search", icon: <Search className="h-5 w-5" />, onClick: () => router.push("/search") },
     { label: "Shop", icon: <ShoppingBag className="h-5 w-5" />, onClick: () => router.push("/shop") },
     { label: "Upload", icon: <Upload className="h-5 w-5" />, onClick: () => router.push("/upload") },
-    { label: "About Cookies", icon: <Info className="h-5 w-5" />, onClick: () => router.push("/about")},
+    { label: "About Cookies", icon: <Info className="h-5 w-5" />, onClick: () => router.push("/about") },
   ];
 
   useEffect(() => {
-  if (!user) {
-    setIsLoginModalOpen(true);
-  }
-}, [user]);
+    if (!user) {
+      setIsLoginModalOpen(true);
+    }
+  }, [user]);
 
   return (
     <div className="w-64 border-r border-gray-800 p-4 flex flex-col">
@@ -73,9 +78,12 @@ const [activeItem, setActiveItem] = useState(() => {
                   Login
                 </button>
               </div>
-              <LoginModal open={isLoginModalOpen} onOpenChange={()=> 
-                {if (user) setIsLoginModalOpen(open)}
-              } />
+              <LoginModal
+                open={isLoginModalOpen}
+                onOpenChange={() => {
+                  if (user) setIsLoginModalOpen(false);
+                }}
+              />
             </>
           )}
         </div>
@@ -99,10 +107,8 @@ const [activeItem, setActiveItem] = useState(() => {
         </ul>
       </nav>
 
-      <div className="mt-auto">
-        <div className="text-xs text-gray-400 mt-4">
-          <p className="mb-2">© 2025 Cookies</p>
-        </div>
+      <div className="text-xs text-gray-400 mt-4">
+        <p className="mb-2">© 2025 Cookies</p>
       </div>
     </div>
   );
