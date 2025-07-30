@@ -18,8 +18,10 @@ import toast from 'react-hot-toast';
 const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   
+  // Cho phép component được kiểm soát từ bên ngoài hoặc tự quản lý state
   const open = isOpen !== undefined ? isOpen : internalOpen;
   const setOpen = onClose !== undefined ? onClose : setInternalOpen;
+
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -27,7 +29,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
     name: '',
     description: '',
     price: 0,
-    category_id: '',
+    category_id: '', // Sẽ được cập nhật từ API
     shop_id: '',
     images: [],
     variants: []
@@ -49,7 +51,20 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
       });
       if (response.ok) {
         const data = await response.json();
-        setProduct(data.data);
+        const fetchedProductData = data.data;
+
+        // **FIX**: Trích xuất category_id từ mảng categories của API
+        const categoryId = fetchedProductData.categories && fetchedProductData.categories.length > 0
+          ? fetchedProductData.categories[0].category_id
+          : '';
+
+        setProduct({
+          ...fetchedProductData,
+          price: parseFloat(fetchedProductData.price) || 0, // Đảm bảo giá là số
+          category_id: categoryId, // Gán category_id đã trích xuất
+          variants: fetchedProductData.variants || [],
+          images: fetchedProductData.images || []
+        });
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -81,13 +96,21 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
     e.preventDefault();
     try {
       setLoading(true);
+      const payload = {
+        ...product,
+        // Đảm bảo chỉ gửi các trường cần thiết nếu API yêu cầu
+        // Ví dụ: có thể cần loại bỏ mảng `categories` gốc
+      };
+      // Xóa mảng categories gốc để tránh gửi dữ liệu thừa
+      delete payload.categories;
+
       const response = await fetch(`http://103.253.145.7:3003/api/products/${productId}`, {
         method: 'PUT',
         credentials: "include",
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(product),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -183,20 +206,16 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
   };
 
   const getCurrentCategoryName = () => {
+    // Logic này vẫn đúng
     const currentCategory = categories.find(cat => cat.id === product.category_id);
     return currentCategory ? currentCategory.name : 'No category selected';
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white dark:border-orange-400 dark:text-orange-400 dark:hover:bg-orange-400">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Product
-          </Button>
-        )}
-      </DialogTrigger>
+      {/* **FIX**: Chỉ render Trigger khi có children, không tạo nút mặc định */}
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
+      
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-orange-500">Edit Product</DialogTitle>
@@ -214,7 +233,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                 <Label htmlFor="name" className="text-gray-200">Product Name</Label>
                 <Input
                   id="name"
-                  value={product.name}
+                  value={product.name || ''}
                   onChange={(e) => setProduct(prev => ({ ...prev, name: e.target.value }))}
                   required
                   className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
@@ -226,8 +245,8 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                   id="price"
                   type="number"
                   step="0.01"
-                  value={product.price}
-                  onChange={(e) => setProduct(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
+                  value={product.price || ''}
+                  onChange={(e) => setProduct(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
                   required
                   className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                 />
@@ -282,7 +301,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
               <Label htmlFor="description" className="text-gray-200">Description</Label>
               <Textarea
                 id="description"
-                value={product.description}
+                value={product.description || ''}
                 onChange={(e) => setProduct(prev => ({ ...prev, description: e.target.value }))}
                 rows={3}
                 className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
@@ -319,7 +338,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                   {product.images.map((image, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={image.thumbnail_url || image.image_url}
+                        src={image.thumbnail_url || image.url || image.image_url}
                         alt={image.alt_text}
                         className={`w-full h-24 object-cover rounded border-2 ${
                           image.is_primary ? 'border-orange-500' : 'border-gray-600'
@@ -331,18 +350,18 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                           size="sm"
                           variant="secondary"
                           onClick={() => setPrimaryImage(index)}
-                          className="bg-orange-500 hover:bg-orange-600 text-white"
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 text-xs"
                         >
                           Primary
                         </Button>
                         <Button
                           type="button"
-                          size="sm"
+                          size="icon"
                           variant="destructive"
                           onClick={() => removeImage(index)}
-                          className="bg-red-600 hover:bg-red-700"
+                          className="bg-red-600 hover:bg-red-700 w-6 h-6"
                         >
-                          <X className="w-3 h-3" />
+                          <X className="w-4 h-4" />
                         </Button>
                       </div>
                       {image.is_primary && (
@@ -388,7 +407,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                      <Label className="text-gray-300">SKU</Label>
+                      <Label className="text-xs text-gray-300">SKU</Label>
                       <Input
                         value={variant.sku || ''}
                         onChange={(e) => updateVariant(index, 'sku', e.target.value)}
@@ -397,21 +416,21 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300">Price ($)</Label>
+                      <Label className="text-xs text-gray-300">Price ($)</Label>
                       <Input
                         type="number"
                         step="0.01"
-                        value={variant.price}
-                        onChange={(e) => updateVariant(index, 'price', parseFloat(e.target.value))}
+                        value={variant.price || ''}
+                        onChange={(e) => updateVariant(index, 'price', parseFloat(e.target.value) || 0)}
                         className="bg-gray-700 border-gray-500 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300">Stock Quantity</Label>
+                      <Label className="text-xs text-gray-300">Stock Quantity</Label>
                       <Input
                         type="number"
                         value={variant.stock_quantity || ''}
-                        onChange={(e) => updateVariant(index, 'stock_quantity', parseInt(e.target.value))}
+                        onChange={(e) => updateVariant(index, 'stock_quantity', parseInt(e.target.value) || 0)}
                         placeholder="Stock"
                         className="bg-gray-700 border-gray-500 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                       />
@@ -420,29 +439,29 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                      <Label className="text-gray-300">Color</Label>
+                      <Label className="text-xs text-gray-300">Color</Label>
                       <Input
                         value={variant.color || ''}
                         onChange={(e) => updateVariant(index, 'color', e.target.value)}
-                        placeholder="Color"
+                        placeholder="e.g., Red"
                         className="bg-gray-700 border-gray-500 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300">Size</Label>
+                      <Label className="text-xs text-gray-300">Size</Label>
                       <Input
                         value={variant.size || ''}
                         onChange={(e) => updateVariant(index, 'size', e.target.value)}
-                        placeholder="Size"
+                        placeholder="e.g., M"
                         className="bg-gray-700 border-gray-500 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                       />
                     </div>
                     <div>
-                      <Label className="text-gray-300">Material</Label>
+                      <Label className="text-xs text-gray-300">Material</Label>
                       <Input
                         value={variant.material || ''}
                         onChange={(e) => updateVariant(index, 'material', e.target.value)}
-                        placeholder="Material"
+                        placeholder="e.g., Cotton"
                         className="bg-gray-700 border-gray-500 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                       />
                     </div>
