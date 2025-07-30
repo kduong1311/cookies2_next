@@ -48,7 +48,8 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
           credentials: "include",
         });
         if (!res.ok) throw new Error('Failed to load shop data');
-        const data = await res.json();
+        const resJson = await res.json();
+        const data = resJson.data;
         
         const cleanShopData = {
           name: data.name || '',
