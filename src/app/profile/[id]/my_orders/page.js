@@ -419,9 +419,9 @@ const OrdersPage = () => {
                       {selectedOrder.items.map((item) => (
                         <div key={item.order_item_id} className="flex items-center space-x-4 p-4 bg-gray-800 border border-gray-600 rounded-lg hover:border-orange-500 transition-colors">
                           <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center overflow-hidden">
-                            {orderDetails.products && orderDetails.products[item.product_id] && orderDetails.products[item.product_id].image ? (
+                            {orderDetails.products && orderDetails.products[item.product_id] && orderDetails.products[item.product_id].images && orderDetails.products[item.product_id].images.length > 0 ? (
                               <img 
-                                src={orderDetails.products[item.product_id].image} 
+                                src={orderDetails.products[item.product_id].images.find(img => img.is_primary)?.image_url || orderDetails.products[item.product_id].images[0].image_url} 
                                 alt={item.product_name}
                                 className="w-full h-full object-cover rounded-lg"
                                 onError={(e) => {
@@ -430,7 +430,7 @@ const OrdersPage = () => {
                                 }}
                               />
                             ) : null}
-                            <Package className={`h-10 w-10 text-white ${orderDetails.products && orderDetails.products[item.product_id] && orderDetails.products[item.product_id].image ? 'hidden' : 'block'}`} />
+                            <Package className={`h-10 w-10 text-white ${orderDetails.products && orderDetails.products[item.product_id] && orderDetails.products[item.product_id].images && orderDetails.products[item.product_id].images.length > 0 ? 'hidden' : 'block'}`} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-white text-lg mb-2 truncate">
