@@ -206,8 +206,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
   };
 
   const getCurrentCategoryName = () => {
-    // Logic này vẫn đúng
-    const currentCategory = categories.find(cat => cat.id === product.category_id);
+    const currentCategory = categories.find(cat => cat.category_id === product.category_id);
     return currentCategory ? currentCategory.name : 'No category selected';
   };
 
@@ -283,7 +282,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                 >
                     <option value="">No category</option>
                     {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
+                    <option key={category.category_id} value={category.category_id}>
                         {category.name}
                     </option>
                     ))}
@@ -410,7 +409,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
                       <Label className="text-xs text-gray-300">SKU</Label>
                       <Input
                         value={variant.sku || ''}
-                        onChange={(e) => updateVariant(index, 'sku', e.target.value)}
+                        onChange={(e) => updateVariant(index, 'sku', e.target.value || null)}
                         placeholder="SKU"
                         className="bg-gray-700 border-gray-500 text-white placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500"
                       />
