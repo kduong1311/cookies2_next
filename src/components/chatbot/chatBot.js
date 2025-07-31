@@ -69,6 +69,7 @@ Keep your answer concise but informative.`;
 
     try {
       const cookingPrompt = createCookingPrompt(input);
+      console.log("api", apiKey)
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
