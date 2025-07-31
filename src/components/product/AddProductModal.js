@@ -37,8 +37,17 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
     description: "",
     price: 0,
     category_id: "",
+    stock_quantity: 0,
     shop_id: shopId
   });
+
+  useEffect(() => {
+  const total = variants.reduce(
+    (sum, v) => sum + (Number(v.stock_quantity) || 0),
+    0
+  );
+  setProduct(prev => ({ ...prev, stock_quantity: total }));
+}, [variants]);
 
   const [images, setImages] = useState([]);
   const [variants, setVariants] = useState([
@@ -125,6 +134,7 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
 
   const canProceed = validateStep(currentStep);
 
+
   const handleSubmit = async () => {
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
       toast.error("Please complete all required fields.");
@@ -134,9 +144,15 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
     setIsSubmitting(true);
     setSubmitStatus(null);
 
+    const totalStock = variants.reduce(
+      (sum, variant) => sum + (Number(variant.stock_quantity) || 0),
+      0
+    );
+
     try {
       const productData = {
         ...product,
+        stock_quantity: totalStock,
         images,
         variants: variants.map(variant => ({
           ...variant,
