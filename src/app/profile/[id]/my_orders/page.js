@@ -130,7 +130,7 @@ const OrdersPage = () => {
               <ShoppingBag className="h-6 w-6 text-orange-500" />
             </div>
           </div>
-          <p className="mt-6 text-gray-300 text-lg">Đang tải đơn hàng...</p>
+          <p className="mt-6 text-gray-300 text-lg">Loading orders...</p>
         </div>
       </div>
     );
@@ -145,8 +145,8 @@ const OrdersPage = () => {
               <ShoppingBag className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Đơn hàng của tôi</h1>
-              <p className="text-gray-400 text-lg">Quản lý và theo dõi các đơn hàng của bạn</p>
+              <h1 className="text-4xl font-bold text-white mb-2">My Orders</h1>
+              <p className="text-gray-400 text-lg">Manage and track your orders</p>
             </div>
           </div>
           <div className="h-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full w-24"></div>
@@ -164,11 +164,11 @@ const OrdersPage = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-semibold text-white mb-2">Chưa có đơn hàng nào</h3>
-                <p className="text-gray-400">Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm!</p>
+                <h3 className="text-2xl font-semibold text-white mb-2">No orders yet</h3>
+                <p className="text-gray-400">You don't have any orders yet. Start shopping!</p>
               </div>
               <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg">
-                Khám phá sản phẩm
+                Explore Products
               </Button>
             </CardContent>
           </Card>
@@ -207,7 +207,7 @@ const OrdersPage = () => {
                             className="bg-gray-700 border-gray-600 text-white hover:bg-orange-500 hover:border-orange-500 transition-all duration-200"
                           >
                             <Eye className="h-4 w-4 mr-2" />
-                            Chi tiết
+                            Details
                           </Button>
                         </DialogTrigger>
                       </Dialog>
@@ -221,7 +221,7 @@ const OrdersPage = () => {
                         <DollarSign className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-gray-400 text-sm">Tổng tiền</p>
+                        <p className="text-gray-400 text-sm">Total Amount</p>
                         <p className="font-bold text-xl text-green-400">
                           {formatCurrency(order.total_amount)}
                         </p>
@@ -232,7 +232,7 @@ const OrdersPage = () => {
                         <CreditCard className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-gray-400 text-sm">Thanh toán</p>
+                        <p className="text-gray-400 text-sm">Payment</p>
                         <p className="font-semibold text-white capitalize">
                           {order.payment_method.replace('_', ' ')}
                         </p>
@@ -243,7 +243,7 @@ const OrdersPage = () => {
                         <Truck className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-gray-400 text-sm">Vận chuyển</p>
+                        <p className="text-gray-400 text-sm">Shipping</p>
                         <p className="font-semibold text-white capitalize">
                           {order.shipping_method}
                         </p>
@@ -256,12 +256,12 @@ const OrdersPage = () => {
                     <div className="flex items-center space-x-2">
                       <Package className="h-4 w-4 text-orange-500" />
                       <span className="text-gray-300">
-                        {order.items.length} sản phẩm
+                        {order.items.length} products
                       </span>
                     </div>
                     {order.order_number && (
                       <div className="flex items-center space-x-2 text-sm text-gray-400">
-                        <span>Mã vận đơn:</span>
+                        <span>Tracking Code:</span>
                         <span className="font-mono text-orange-400 bg-gray-700 px-2 py-1 rounded">
                           {order.order_number}
                         </span>
@@ -272,8 +272,8 @@ const OrdersPage = () => {
                   {/* Progress Bar */}
                   <div className="mb-4">
                     <div className="flex justify-between text-xs text-gray-400 mb-2">
-                      <span>Đang xử lý</span>
-                      <span>Hoàn thành</span>
+                      <span>Processing</span>
+                      <span>Completed</span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
@@ -292,7 +292,7 @@ const OrdersPage = () => {
                   {order.notes && (
                     <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                       <p className="text-orange-300 text-sm">
-                        <strong>Ghi chú:</strong> {order.notes}
+                        <strong>Notes:</strong> {order.notes}
                       </p>
                     </div>
                   )}
@@ -309,7 +309,7 @@ const OrdersPage = () => {
                 <div className="p-2 bg-orange-500 rounded-lg">
                   <Package className="h-6 w-6 text-white" />
                 </div>
-                <span>Chi tiết đơn hàng {selectedOrder?.order_number}</span>
+                <span>Order Details {selectedOrder?.order_number}</span>
               </DialogTitle>
             </DialogHeader>
 
@@ -318,7 +318,7 @@ const OrdersPage = () => {
                 {loadingDetails && (
                   <div className="flex items-center justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-600 border-t-orange-500"></div>
-                    <span className="ml-3 text-gray-300">Đang tải chi tiết...</span>
+                    <span className="ml-3 text-gray-300">Loading details...</span>
                   </div>
                 )}
 
@@ -329,45 +329,45 @@ const OrdersPage = () => {
                     <CardHeader className="border-b border-gray-600">
                       <CardTitle className="text-white flex items-center space-x-2">
                         <Package className="h-5 w-5 text-orange-500" />
-                        <span>Thông tin đơn hàng</span>
+                        <span>Order Information</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-4">
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Mã đơn hàng:</span>
-                        <span className="font-mono text-orange-400 bg-gray-800 px-3 py-1 rounded">
-                          {selectedOrder.order_number}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Ngày đặt:</span>
-                        <span className="text-white">{formatDate(selectedOrder.created_at)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Trạng thái:</span>
-                        <Badge className={`${getStatusColor(selectedOrder.order_status)} flex items-center space-x-1`}>
-                          {getStatusIcon(selectedOrder.order_status)}
-                          <span className="capitalize">{selectedOrder.order_status}</span>
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Thanh toán:</span>
-                        <span className="text-white capitalize">
-                          {selectedOrder.payment_method.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Vận chuyển:</span>
-                        <span className="text-white capitalize">{selectedOrder.shipping_method}</span>
-                      </div>
-                      {selectedOrder.order_number && (
+                                          <CardContent className="space-y-4 pt-4">
                         <div className="flex justify-between">
-                          <span className="text-gray-300">Mã vận đơn:</span>
+                          <span className="text-gray-300">Order ID:</span>
                           <span className="font-mono text-orange-400 bg-gray-800 px-3 py-1 rounded">
                             {selectedOrder.order_number}
                           </span>
                         </div>
-                      )}
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Order Date:</span>
+                          <span className="text-white">{formatDate(selectedOrder.created_at)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Status:</span>
+                          <Badge className={`${getStatusColor(selectedOrder.order_status)} flex items-center space-x-1`}>
+                            {getStatusIcon(selectedOrder.order_status)}
+                            <span className="capitalize">{selectedOrder.order_status}</span>
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Payment:</span>
+                          <span className="text-white capitalize">
+                            {selectedOrder.payment_method.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Shipping:</span>
+                          <span className="text-white capitalize">{selectedOrder.shipping_method}</span>
+                        </div>
+                                              {selectedOrder.order_number && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-300">Tracking Code:</span>
+                            <span className="font-mono text-orange-400 bg-gray-800 px-3 py-1 rounded">
+                              {selectedOrder.order_number}
+                            </span>
+                          </div>
+                        )}
                     </CardContent>
                   </Card>
 
@@ -376,33 +376,33 @@ const OrdersPage = () => {
                     <CardHeader className="border-b border-gray-600">
                       <CardTitle className="text-white flex items-center space-x-2">
                         <DollarSign className="h-5 w-5 text-green-500" />
-                        <span>Tóm tắt thanh toán</span>
+                        <span>Payment Summary</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-4">
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Tạm tính:</span>
-                        <span className="text-white">{formatCurrency(selectedOrder.subtotal)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Thuế:</span>
-                        <span className="text-white">{formatCurrency(selectedOrder.tax_amount)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-300">Phí vận chuyển:</span>
-                        <span className="text-white">{formatCurrency(selectedOrder.shipping_amount)}</span>
-                      </div>
-                      {selectedOrder.discount_amount > 0 && (
-                        <div className="flex justify-between text-green-400">
-                          <span>Giảm giá:</span>
-                          <span>-{formatCurrency(selectedOrder.discount_amount)}</span>
+                                          <CardContent className="space-y-4 pt-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Subtotal:</span>
+                          <span className="text-white">{formatCurrency(selectedOrder.subtotal)}</span>
                         </div>
-                      )}
-                      <div className="border-t border-gray-600 my-2"></div>
-                      <div className="flex justify-between font-bold text-xl">
-                        <span className="text-white">Tổng cộng:</span>
-                        <span className="text-green-400">{formatCurrency(selectedOrder.total_amount)}</span>
-                      </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Tax:</span>
+                          <span className="text-white">{formatCurrency(selectedOrder.tax_amount)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Shipping Fee:</span>
+                          <span className="text-white">{formatCurrency(selectedOrder.shipping_amount)}</span>
+                        </div>
+                        {selectedOrder.discount_amount > 0 && (
+                          <div className="flex justify-between text-green-400">
+                            <span>Discount:</span>
+                            <span>-{formatCurrency(selectedOrder.discount_amount)}</span>
+                          </div>
+                        )}
+                        <div className="border-t border-gray-600 my-2"></div>
+                        <div className="flex justify-between font-bold text-xl">
+                          <span className="text-white">Total:</span>
+                          <span className="text-green-400">{formatCurrency(selectedOrder.total_amount)}</span>
+                        </div>
                     </CardContent>
                   </Card>
                 </div>
@@ -411,7 +411,7 @@ const OrdersPage = () => {
                   <CardHeader className="border-b border-gray-600">
                     <CardTitle className="text-white flex items-center space-x-2">
                       <ShoppingBag className="h-5 w-5 text-orange-500" />
-                      <span>Sản phẩm đã đặt</span>
+                      <span>Ordered Products</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
@@ -428,10 +428,10 @@ const OrdersPage = () => {
                             <div className="space-y-1 text-sm text-gray-300">
                               <div className="flex items-center space-x-4 flex-wrap">
                                 <span className="bg-gray-700 px-2 py-1 rounded">SKU: {item.sku}</span>
-                                <span>Màu: {item.color}</span>
+                                <span>Color: {item.color}</span>
                                 <span>Size: {item.size}</span>
                               </div>
-                              <p>Chất liệu: {item.material}</p>
+                              <p>Material: {item.material}</p>
                             </div>
                             {orderDetails.shops && orderDetails.shops[item.shop_id] && (
                               <div className="flex items-center mt-3 text-sm">
@@ -447,7 +447,7 @@ const OrdersPage = () => {
                               {formatCurrency(item.price)}
                             </p>
                             <p className="text-gray-400 mb-2">
-                              SL: {item.quantity}
+                              Qty: {item.quantity}
                             </p>
                             <p className="text-lg font-bold text-green-400">
                               {formatCurrency(item.price * item.quantity)}
@@ -465,7 +465,7 @@ const OrdersPage = () => {
                     <CardHeader>
                       <CardTitle className="text-orange-300 flex items-center space-x-2">
                         <Star className="h-5 w-5" />
-                        <span>Ghi chú</span>
+                        <span>Notes</span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
