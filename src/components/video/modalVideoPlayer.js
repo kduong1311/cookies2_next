@@ -52,7 +52,6 @@ export default function ModalVideoPlayer({ video, onClose }) {
         onKeyDown={handleKeyDown}
         tabIndex={-1}
       >
-        {/* Container flex chính */}
         <div className="relative flex items-center">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -69,7 +68,6 @@ export default function ModalVideoPlayer({ video, onClose }) {
             />
           </motion.div>
 
-          {/* VideoInteractions hiện được đặt bên cạnh video */}
           <div className="ml-4">
             <VideoInteractions
               currentPost={video}
@@ -87,7 +85,6 @@ export default function ModalVideoPlayer({ video, onClose }) {
             />
           </div>
 
-          {/* Các panel Recipe/Comment */}
           <AnimatePresence mode="wait">
             {activePanelType === "recipe" && (
               <motion.div
@@ -110,7 +107,7 @@ export default function ModalVideoPlayer({ video, onClose }) {
                 transition={{ duration: 0.3 }}
                 className="w-[800px] h-[90vh] bg-gray-800 text-white p-6 overflow-y-auto shadow-lg hide-scrollbar"
               >
-                <CommentPage video={video.post_id} />
+                <CommentPage postId={video.post_id} />
               </motion.div>
             )}
           </AnimatePresence>
