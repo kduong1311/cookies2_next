@@ -107,7 +107,7 @@ const OrdersPage = () => {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('vi-VN', {
+    return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
@@ -303,7 +303,7 @@ const OrdersPage = () => {
         )}
         {/* Order Details Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="w-full max-h-[95vh] overflow-y-auto bg-gray-800 border-gray-700 text-white p-0">
+          <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto bg-gray-800 border-gray-700 text-white p-0">
             <DialogHeader className="border-b border-gray-700 pb-4 px-6 pt-6">
               <DialogTitle className="flex items-center space-x-3 text-2xl">
                 <div className="p-2 bg-orange-500 rounded-lg">
@@ -418,8 +418,19 @@ const OrdersPage = () => {
                     <div className="space-y-4">
                       {selectedOrder.items.map((item) => (
                         <div key={item.order_item_id} className="flex items-center space-x-4 p-4 bg-gray-800 border border-gray-600 rounded-lg hover:border-orange-500 transition-colors">
-                          <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                            <Package className="h-10 w-10 text-white" />
+                          <div className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center overflow-hidden">
+                            {orderDetails.products && orderDetails.products[item.product_id] && orderDetails.products[item.product_id].image ? (
+                              <img 
+                                src={orderDetails.products[item.product_id].image} 
+                                alt={item.product_name}
+                                className="w-full h-full object-cover rounded-lg"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <Package className={`h-10 w-10 text-white ${orderDetails.products && orderDetails.products[item.product_id] && orderDetails.products[item.product_id].image ? 'hidden' : 'block'}`} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-white text-lg mb-2 truncate">
