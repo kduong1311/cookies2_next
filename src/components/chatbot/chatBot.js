@@ -10,7 +10,6 @@ const ChatBot = ({ apiKey }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Welcome message
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
