@@ -40,7 +40,7 @@ What would you like to ask today?`,
   }, [isOpen]);
 
   const createCookingPrompt = (userMessage) => {
-    return `You are a friendly and professional AI cooking assistant. Answer the following cooking-related question in any language include question in a detailed and helpful manner:
+    return `You are a friendly and professional AI cooking assistant. Answer the following cooking-related question in any language, including the language of the question itself, in a detailed and helpful manner:
 
 Question: ${userMessage}
 
