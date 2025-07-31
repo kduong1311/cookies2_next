@@ -370,12 +370,8 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="p-4 text-gray-300">{product.stock}</td>
-                    <td className="p-4">
-                      <span
-                        className={`${getStatusColor(product.status)} text-white px-1.5 py-0.5 rounded text-[10px] leading-tight`}
-                      >
-                        {product.status}
-                      </span>
+                    <td className={`p-4 text-white text-sm font-semibold text-center ${getStatusColor(product.status)} rounded-md`}>
+                      {product.status}
                     </td>
                     <td className="p-4 text-yellow-400">
                       ⭐ {product.rating} ({product.total_sales} sale)
