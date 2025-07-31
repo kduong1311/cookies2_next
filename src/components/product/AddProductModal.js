@@ -41,14 +41,6 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
     shop_id: shopId
   });
 
-  useEffect(() => {
-  const total = variants.reduce(
-    (sum, v) => sum + (Number(v.stock_quantity) || 0),
-    0
-  );
-  setProduct(prev => ({ ...prev, stock_quantity: total }));
-}, [variants]);
-
   const [images, setImages] = useState([]);
   const [variants, setVariants] = useState([
     {
@@ -61,6 +53,14 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
       sku: ""
     }
   ]);
+
+    useEffect(() => {
+  const total = variants.reduce(
+    (sum, v) => sum + (Number(v.stock_quantity) || 0),
+    0
+  );
+  setProduct(prev => ({ ...prev, stock_quantity: total }));
+}, [variants]);
 
   const steps = [
     { title: "Basic Information", component: "basic" },
