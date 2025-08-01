@@ -180,12 +180,11 @@ export default function CookingUploadPage() {
         is_premium: hasRecipe ? isPremium : false,
         premium_price: hasRecipe && isPremium ? parseFloat(premiumPrice) : 0,
         status: "published",
-        user_id: user.user_id,
         is_featured: false,
         media: [{
           url: dataCloud.url,
           type: file.type.startsWith("image") ? "image" : "video",
-          duration:dataCloud.duration,
+          duration: dataCloud.duration,
         }]
       };
 
@@ -205,7 +204,6 @@ export default function CookingUploadPage() {
       }
 
       const postResult = await postResponse.json();
-      console.log("Create Post successfully", postResult);
 
       if (hasRecipe) {
         const recipeData = {
@@ -219,6 +217,7 @@ export default function CookingUploadPage() {
           ingredients: parseIngredients(recipe.ingredients),
           steps: parseInstructions(recipe.instructions),
           cover_media_url: recipeCoverUrl.url,
+          user_id: user.user_id,
         };
 
         console.log("Creating recipe...", recipeData);
