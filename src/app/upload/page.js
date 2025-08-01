@@ -180,6 +180,7 @@ export default function CookingUploadPage() {
         is_premium: hasRecipe ? isPremium : false,
         premium_price: hasRecipe && isPremium ? parseFloat(premiumPrice) : 0,
         status: "published",
+        user_id: user.user_id,
         is_featured: false,
         media: [{
           url: dataCloud.url,
