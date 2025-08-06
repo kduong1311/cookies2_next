@@ -109,10 +109,10 @@ export default function TopNavbar() {
       notification.reference_id
     ) {
       router.push(`/post/${notification.reference_id}`);
-    }
+    };
 
     if (
-      notification.reference_type === "order" &&
+      notification.reference_type === "order"
     ) {
       router.push(`/profile/${user?.user_id}/my_orders`);
     }
