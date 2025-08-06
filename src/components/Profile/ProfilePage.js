@@ -59,8 +59,6 @@ const ProfilePage = ({ userId }) => {
         setProfileUser(res.data);
         setFollowersCount(res.data.followersCount || 0);
 
-        console.log("k", res.data)
-
         setIsFollowing(res.data.isFollowing || false);
 
       } catch (err) {

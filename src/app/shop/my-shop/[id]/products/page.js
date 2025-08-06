@@ -172,7 +172,7 @@ export default function ProductsPage() {
       case "In Stock":
         return "bg-green-500";
       case "Low Stock":
-        return "bg-yellow-500";
+        return "bg-yellow-500 text-black";
       case "Out Stock":
         return "bg-red-500";
       default:
@@ -370,13 +370,13 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="p-4 text-gray-300">{product.stock}</td>
-                    <td className="p-4">
-                      <span
-                        className={`${getStatusColor(product.status)} text-white px-1.5 py-0.5 rounded text-[10px] leading-tight`}
-                      >
-                        {product.status}
-                      </span>
-                    </td>
+                    <td className="p-4 text-center">
+                    <span
+                      className={`${getStatusColor(product.status)} text-white px-2 py-1 rounded-full text-xs inline-block`}
+                    >
+                      {product.status}
+                    </span>
+                  </td>
                     <td className="p-4 text-yellow-400">
                       ⭐ {product.rating} ({product.total_sales} sale)
                     </td>

@@ -18,7 +18,6 @@ import toast from 'react-hot-toast';
 const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   
-  // Cho phép component được kiểm soát từ bên ngoài hoặc tự quản lý state
   const open = isOpen !== undefined ? isOpen : internalOpen;
   const setOpen = onClose !== undefined ? onClose : setInternalOpen;
 
@@ -29,7 +28,7 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
     name: '',
     description: '',
     price: 0,
-    category_id: '', // Sẽ được cập nhật từ API
+    category_id: '',
     shop_id: '',
     images: [],
     variants: []
@@ -53,15 +52,14 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
         const data = await response.json();
         const fetchedProductData = data.data;
 
-        // **FIX**: Trích xuất category_id từ mảng categories của API
         const categoryId = fetchedProductData.categories && fetchedProductData.categories.length > 0
           ? fetchedProductData.categories[0].category_id
           : '';
 
         setProduct({
           ...fetchedProductData,
-          price: parseFloat(fetchedProductData.price) || 0, // Đảm bảo giá là số
-          category_id: categoryId, // Gán category_id đã trích xuất
+          price: parseFloat(fetchedProductData.price) || 0,
+          category_id: categoryId,
           variants: fetchedProductData.variants || [],
           images: fetchedProductData.images || []
         });
@@ -96,12 +94,16 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
     e.preventDefault();
     try {
       setLoading(true);
+
+      const totalStock = product.variants.reduce(
+      (sum, variant) => sum + (parseInt(variant.stock_quantity) || 0),
+      0
+      );
+
       const payload = {
         ...product,
-        // Đảm bảo chỉ gửi các trường cần thiết nếu API yêu cầu
-        // Ví dụ: có thể cần loại bỏ mảng `categories` gốc
+        stock_quantity: totalStock,
       };
-      // Xóa mảng categories gốc để tránh gửi dữ liệu thừa
       delete payload.categories;
 
       const response = await fetch(`http://103.253.145.7:3003/api/products/${productId}`, {
@@ -212,7 +214,6 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {/* **FIX**: Chỉ render Trigger khi có children, không tạo nút mặc định */}
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">
@@ -226,7 +227,6 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-gray-200">Product Name</Label>
@@ -252,7 +252,6 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Category Section */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="category" className="text-gray-200">Category</Label>
@@ -307,7 +306,6 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
               />
             </div>
 
-            {/* Images Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-gray-200">Product Images</Label>
@@ -374,7 +372,6 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
               )}
             </div>
 
-            {/* Variants Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-gray-200">Product Variants</Label>
@@ -469,7 +466,6 @@ const ProductEditDialog = ({ productId, children, isOpen, onClose }) => {
               ))}
             </div>
 
-            {/* Submit Button */}
             <div className="flex justify-end space-x-2 pt-4 border-t border-gray-700">
               <Button 
                 type="button" 

@@ -79,7 +79,6 @@ export default function RecipePage({ postId, onBack }) {
 
   return (
     <div className="bg-gray-800 min-h-screen pb-12">
-      {/* Header with back button */}
       {onBack && (
         <div className="p-4 border-b border-gray-600">
           <button
@@ -92,7 +91,6 @@ export default function RecipePage({ postId, onBack }) {
         </div>
       )}
 
-      {/* Cover image and recipe info */}
       <div className="relative">
         <img
           src={recipe.cover_media_url || "https://bizweb.dktcdn.net/100/477/987/products/pho-bo-ha-noi-jpeg.jpg?v=1712628941747"}
@@ -111,7 +109,6 @@ export default function RecipePage({ postId, onBack }) {
         </div>
       </div>
 
-      {/* Card with general info right below the image */}
       <div className="max-w-5xl mx-auto px-4 -mt-6 relative">
         <div className="bg-gray-700 rounded-lg shadow-lg p-6 mb-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -147,10 +144,8 @@ export default function RecipePage({ postId, onBack }) {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="max-w-5xl mx-auto px-4 mt-6 relative">
         <div className="bg-gray-700 rounded-lg shadow-lg p-6 mb-6">
-          {/* Description */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
@@ -171,7 +166,6 @@ export default function RecipePage({ postId, onBack }) {
             </p>
           </div>
 
-          {/* Ingredients */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
@@ -197,7 +191,6 @@ export default function RecipePage({ postId, onBack }) {
             </div>
           </div>
 
-          {/* Steps */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4 text-gray-100 flex items-center">
               <span className="w-1 h-8 bg-orange-500 mr-3 rounded-full"></span>
@@ -242,7 +235,6 @@ export default function RecipePage({ postId, onBack }) {
             </div>
           </div>
 
-          {/* Interactions */}
           <div className="border-t border-gray-600 pt-6 mt-8">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-4">
@@ -265,7 +257,6 @@ export default function RecipePage({ postId, onBack }) {
               </div>
             </div>
 
-            {/* Rating */}
             <div className="mb-8">
               <h3 className="font-bold text-lg mb-4 text-gray-100">Rate this Recipe</h3>
               <div className="flex items-center gap-2">

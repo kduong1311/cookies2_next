@@ -10,7 +10,6 @@ const ChatBot = ({ apiKey }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Welcome message
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
@@ -41,7 +40,9 @@ What would you like to ask today?`,
   }, [isOpen]);
 
   const createCookingPrompt = (userMessage) => {
-    return `You are a friendly and professional AI cooking assistant. Answer the following cooking-related question in Vietnamese in a detailed and helpful manner:
+    return `You are a friendly and professional AI cooking assistant. 
+    Answer the following cooking-related question in any language, 
+    including the language of the question itself, in a detailed and helpful manner:
 
 Question: ${userMessage}
 
@@ -70,6 +71,7 @@ Keep your answer concise but informative.`;
 
     try {
       const cookingPrompt = createCookingPrompt(input);
+      console.log("api", apiKey)
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
         method: 'POST',

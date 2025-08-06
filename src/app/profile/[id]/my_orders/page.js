@@ -10,19 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Eye,
-  Package,
-  CreditCard,
-  Truck,
-  Calendar,
-  DollarSign,
-  Store,
-  ShoppingBag,
-  Clock,
-  Check,
-  X,
-  Star
+import {Eye, Package, CreditCard, Truck, Calendar, DollarSign, Store, ShoppingBag, Clock, Check, X, Star
 } from 'lucide-react';
 
 const OrdersPage = () => {
@@ -177,7 +165,6 @@ const OrdersPage = () => {
             {orders.map((order, index) => (
               <Card key={order.order_id} className="bg-gray-800 border-gray-700 hover:border-orange-500 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 group">
                 <CardContent className="p-6">
-                  {/* Order Header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-4">
                       <div className="p-3 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl">
@@ -214,7 +201,6 @@ const OrdersPage = () => {
                     </div>
                   </div>
 
-                  {/* Order Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div className="flex items-center space-x-4 p-4 bg-gray-700 rounded-xl">
                       <div className="p-2 bg-green-500 rounded-lg">
@@ -251,7 +237,6 @@ const OrdersPage = () => {
                     </div>
                   </div>
 
-                  {/* Order Items Summary */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
                       <Package className="h-4 w-4 text-orange-500" />
@@ -288,7 +273,6 @@ const OrdersPage = () => {
                     </div>
                   </div>
 
-                  {/* Notes */}
                   {order.notes && (
                     <div className="mt-4 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                       <p className="text-orange-300 text-sm">
@@ -301,7 +285,6 @@ const OrdersPage = () => {
             ))}
           </div>
         )}
-        {/* Order Details Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto bg-gray-800 border-gray-700 text-white p-0">
             <DialogHeader className="border-b border-gray-700 pb-4 px-6 pt-6">
@@ -322,9 +305,7 @@ const OrdersPage = () => {
                   </div>
                 )}
 
-                {/* Tóm tắt thanh toán */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  {/* Thông tin đơn hàng */}
                   <Card className="bg-gray-700 border-gray-600">
                     <CardHeader className="border-b border-gray-600">
                       <CardTitle className="text-white flex items-center space-x-2">
@@ -332,7 +313,7 @@ const OrdersPage = () => {
                         <span>Order Information</span>
                       </CardTitle>
                     </CardHeader>
-                                          <CardContent className="space-y-4 pt-4">
+                      <CardContent className="space-y-4 pt-4">
                         <div className="flex justify-between">
                           <span className="text-gray-300">Order ID:</span>
                           <span className="font-mono text-orange-400 bg-gray-800 px-3 py-1 rounded">
@@ -371,7 +352,6 @@ const OrdersPage = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Tóm tắt thanh toán */}
                   <Card className="bg-gray-700 border-gray-600">
                     <CardHeader className="border-b border-gray-600">
                       <CardTitle className="text-white flex items-center space-x-2">
@@ -379,7 +359,7 @@ const OrdersPage = () => {
                         <span>Payment Summary</span>
                       </CardTitle>
                     </CardHeader>
-                                          <CardContent className="space-y-4 pt-4">
+                  <CardContent className="space-y-4 pt-4">
                         <div className="flex justify-between">
                           <span className="text-gray-300">Subtotal:</span>
                           <span className="text-white">{formatCurrency(selectedOrder.subtotal)}</span>
@@ -470,7 +450,6 @@ const OrdersPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Notes */}
                 {selectedOrder.notes && (
                   <Card className="bg-orange-500/10 border-orange-500/20">
                     <CardHeader>

@@ -60,7 +60,6 @@ export default function SearchPage() {
 
   return (
     <div className="h-screen bg-black text-white overflow-y-auto hide-scrollbar">
-      {/* Header with Search Bar */}
       <div className="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-gray-800">
         <div className="max-w-4xl mx-auto p-4">
           <form onSubmit={handleSearch} className="relative">
@@ -90,9 +89,7 @@ export default function SearchPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-6xl mx-auto p-4">
-        {/* Loading State */}
         {loading && (
       <div className="flex justify-center items-center py-12 space-x-3">
             <InlineLoading />
@@ -100,7 +97,6 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Error State */}
         {error && (
           <div className="text-center py-12">
             <p className="text-red-500 mb-4">{error}</p>
@@ -113,7 +109,6 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && !error && query && results.length === 0 && (
           <div className="text-center py-12">
             <Search className="mx-auto mb-4 text-gray-600" size={48} />
@@ -122,7 +117,6 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* Results Grid */}
         {!loading && results.length > 0 && (
           <>
             <div className="mb-6">
@@ -139,7 +133,6 @@ export default function SearchPage() {
                   onClick={() => setSelectedVideo(video)}
                 >
                   <div className="relative aspect-[9/16] bg-gray-800 rounded-lg overflow-hidden">
-                    {/* Video Thumbnail */}
                     <video 
                       src={video.media[0]?.url} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -147,20 +140,16 @@ export default function SearchPage() {
                       preload="metadata"
                     />
                     
-                    {/* Play Overlay */}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <Play className="text-white" size={32} />
                     </div>
 
-                    {/* Duration Badge */}
                     {video.cooking_time > 0 && (
                       <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                         <Clock size={10} className="inline mr-1" />
                         {video.cooking_time}m
                       </div>
                     )}
-
-                    {/* Stats Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
                       <div className="flex items-center justify-between text-white text-xs">
                         <div className="flex items-center space-x-2">
@@ -180,7 +169,6 @@ export default function SearchPage() {
                     </div>
                   </div>
 
-                  {/* Video Info */}
                   <div className="mt-2 space-y-1">
                     <h3 className="text-white text-sm font-medium line-clamp-2 leading-tight">
                       {video.title}
@@ -195,7 +183,6 @@ export default function SearchPage() {
           </>
         )}
 
-        {/* Default State */}
         {!query && !loading && (
           <div className="text-center py-16">
             <Search className="mx-auto mb-4 text-gray-600" size={64} />
@@ -205,7 +192,6 @@ export default function SearchPage() {
         )}
       </div>
 
-      {/* Modal Video Player */}
       {selectedVideo && (
         <ModalVideoPlayer
           video={selectedVideo}

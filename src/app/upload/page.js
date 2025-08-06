@@ -184,7 +184,7 @@ export default function CookingUploadPage() {
         media: [{
           url: dataCloud.url,
           type: file.type.startsWith("image") ? "image" : "video",
-          duration:dataCloud.duration,
+          duration: dataCloud.duration,
         }]
       };
 
@@ -204,7 +204,6 @@ export default function CookingUploadPage() {
       }
 
       const postResult = await postResponse.json();
-      console.log("Create Post successfully", postResult);
 
       if (hasRecipe) {
         const recipeData = {
@@ -218,6 +217,7 @@ export default function CookingUploadPage() {
           ingredients: parseIngredients(recipe.ingredients),
           steps: parseInstructions(recipe.instructions),
           cover_media_url: recipeCoverUrl.url,
+          user_id: user.user_id,
         };
 
         console.log("Creating recipe...", recipeData);

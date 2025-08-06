@@ -14,7 +14,6 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
         </DialogHeader>
 
         <div className="mt-6 flex justify-center space-x-6">
-          {/* Facebook */}
           <a
             href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
             target="_blank"
@@ -25,7 +24,6 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
             <FaFacebookSquare className="text-white text-2xl" />
           </a>
 
-          {/* X (Twitter) */}
           <a
             href={`https://twitter.com/intent/tweet?url=${shareUrl}`}
             target="_blank"
@@ -36,7 +34,6 @@ export default function ShareModal({ open, onOpenChange, shareUrl }) {
             <FaSquareXTwitter className="text-white text-2xl" />
           </a>
 
-          {/* Telegram */}
           <a
             href={`https://t.me/share/url?url=${shareUrl}`}
             target="_blank"

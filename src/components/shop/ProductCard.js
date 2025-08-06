@@ -24,7 +24,7 @@ export default function ProductCard({ data }) {
           <p className="text-gray-400 truncate">{data.description}</p>
 
           <p className="text-green-500 font-bold text-xl mt-2">
-          {(data.price || 0).toLocaleString()}₫
+          ${(data.price || 0).toLocaleString()}
           </p>
 
           <div className="flex items-center text-sm text-gray-400 mt-2">
