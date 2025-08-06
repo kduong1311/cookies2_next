@@ -93,6 +93,7 @@ const EditProfilePage = () => {
         const data = await res.json();
         const address = data.data;
         if (address) {
+          setShippingAddressId(address.address_id); // Set the address ID for updates
           setShippingData({
             recipient_name: address.recipient_name || '',
             contact_number: address.contact_number || '',
@@ -173,22 +174,13 @@ const EditProfilePage = () => {
       });
       if (!response.ok) throw new Error('Failed to update profile');
       const shippingPayload = { ...shippingData };
-      let shippingRes;
-      if (shippingAddressId) {
-        shippingRes = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
-          method: 'PUT',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(shippingPayload)
-        });
-      } else {
-        shippingRes = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(shippingPayload)
-        });
-      }
+      // Use PATCH for upsert (create or update)
+      const shippingRes = await fetch('http://103.253.145.7:3000/api/users/shipping-address/', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shippingPayload)
+      });
       if (!shippingRes.ok) throw new Error('Failed to save shipping address');
       toast.success("Profile and shipping address updated successfully!");
       setMessage({ type: 'success', text: 'Profile and shipping address updated successfully!' });
