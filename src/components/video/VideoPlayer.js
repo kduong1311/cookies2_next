@@ -49,12 +49,6 @@ export default function VideoPlayer({ currentPost, currentUser, isRecipeOpen, is
           <p className="text-xs opacity-90 line-clamp-2 leading-tight">{currentPost.description}</p>
 
           <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs opacity-75">
-            {currentPost.cooking_time > 0 && (
-              <div className="flex items-center space-x-1">
-                <Clock size={10} />
-                <span>{currentPost.cooking_time}min</span>
-              </div>
-            )}
             <div className="flex items-center space-x-1">
               <Eye size={10} />
               <span>{currentPost.views_count || 0}</span>

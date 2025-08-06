@@ -29,8 +29,9 @@ export default function ProductsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [categoriesData, setCategoriesData] = useState([]);
 
-  // State cho Edit Dialog
+  //editdialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  
   const [selectedProductId, setSelectedProductId] = useState(null);
 
   useEffect(() => {

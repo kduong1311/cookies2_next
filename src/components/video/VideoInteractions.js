@@ -29,10 +29,11 @@ export default function VideoInteractions({
   const isInitialized = useRef(false);
   const lastClickTime = useRef(0);
 
-  const postId = useMemo(() => currentPost?.post_id, [currentPost?.post_id]);
-  const userId = useMemo(() => user?.user_id, [user?.user_id]);
-  const commentCount = useMemo(() => currentPost?.comments_count ?? 0, [currentPost?.comments_count]);
-  const shareCount = useMemo(() => currentPost?.shares_count ?? 0, [currentPost?.shares_count]);
+  const postId = currentPost?.post_id;
+  const userId = user?.user_id;
+  const commentCount = currentPost?.comments_count ?? 0;
+  const shareCount = currentPost?.shares_count ?? 0;
+
 
   const initializePostData = useCallback(async () => {
   if (!postId || !userId) return;

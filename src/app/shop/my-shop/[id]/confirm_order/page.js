@@ -141,7 +141,7 @@ export default function ConfirmOrdersPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex items-center justify-center">
-        <div className="text-red-400 text-xl">Error: {error}</div>
+        <div className="text-red-400 text-xl">Error</div>
       </div>
     );
   }

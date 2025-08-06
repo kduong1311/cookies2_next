@@ -12,6 +12,7 @@ import {
   UserPlus,
   CheckCircle,
   Circle,
+  ShoppingCart,
 } from "lucide-react";
 
 export default function TopNavbar() {
@@ -110,6 +111,12 @@ export default function TopNavbar() {
       router.push(`/post/${notification.reference_id}`);
     }
 
+    if (
+      notification.reference_type === "order" &&
+    ) {
+      router.push(`/profile/${user?.user_id}/my_orders`);
+    }
+
     setShowNotifications(false);
   };
 
@@ -136,6 +143,7 @@ export default function TopNavbar() {
       like: <Heart className="w-4 h-4 text-white" />,
       follow: <UserPlus className="w-4 h-4 text-white" />,
       comment: <MessageSquare className="w-4 h-4 text-white" />,
+      order: <ShoppingCart className="w-4 h-4 text-white" />,
       default: <Circle className="w-4 h-4 text-white" />,
     };
 
@@ -143,6 +151,7 @@ export default function TopNavbar() {
       like: "bg-red-500",
       follow: "bg-blue-500",
       comment: "bg-green-500",
+      order: "bg-gray-500",
       default: "bg-gray-500",
     };
 

@@ -60,7 +60,6 @@ const ProfileHeader = ({ userProfile }) => {
 
   return (
     <div className="w-full bg-gray-800 text-white">
-      {/* Cover Photo */}
       <div className="relative h-48 bg-gradient-to-r from-orange-400 to-red-500">
         <Image
           src={coverSrc}
