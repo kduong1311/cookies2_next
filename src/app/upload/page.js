@@ -501,6 +501,16 @@ export default function CookingUploadPage() {
                       placeholder="30"
                     />
                   </div>
+                 <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isKidFriendly"
+                    className="h-4 w-4 text-orange-500 bg-gray-700 border-gray-600 focus:ring-orange-500 rounded"
+                  />
+                  <label htmlFor="isKidFriendly" className="text-sm text-gray-300">
+                    👶 For Kid?
+                  </label>
+                </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
