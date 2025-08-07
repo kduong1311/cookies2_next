@@ -95,7 +95,6 @@ const OrderPage = () => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
     }).format(amount);
   };
 
@@ -431,14 +430,16 @@ const handleSubmit = async () => {
                       <span>-{formatCurrency(voucherDiscount)}</span>
                     </div>
                   )}
-                  <div className="flex-col border-t pt-2">
-                    <div className="flex justify-between font-semibold text-lg">
-                      <span>Total:</span>
-                      <span className="text-blue-600">{formatCurrency(total)}</span>
-                      <span className="text-blue-600">{formatCurrency(total * 25000)}</span>
-                    </div>
+                  <div className="flex flex-col border-t pt-2">
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total:</span>
+                    <span className="text-blue-600">${formatCurrency(total)}</span>
+                  </div>
+                  <div className="flex justify-end font-semibold text-base">
+                    <span className="text-blue-600">VND {formatCurrency(total * 25000)}</span>
                   </div>
                 </div>
+
 
                 <button
                   onClick={handleSubmit}
