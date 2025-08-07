@@ -187,7 +187,6 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
               </div>
             )}
 
-            {/* Cover Photo Section */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Camera className="w-5 h-5 text-orange-500" />
@@ -214,7 +213,6 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
               </div>
             </div>
 
-            {/* Logo Section */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Store className="w-5 h-5 text-orange-500" />
@@ -251,7 +249,6 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
               </div>
             </div>
 
-            {/* Basic Information */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-orange-500" />
@@ -267,6 +264,7 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
                     onChange={handleChange}
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                     placeholder="Enter shop name"
+                    required
                   />
                 </div>
                 <div>
@@ -294,7 +292,6 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
               </div>
             </div>
 
-            {/* Contact Information */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Mail className="w-5 h-5 text-orange-500" />
@@ -310,6 +307,7 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
                     onChange={handleChange}
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                     placeholder="Enter contact email"
+                    required
                   />
                 </div>
                 <div>
@@ -321,12 +319,12 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
                     onChange={handleChange}
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                     placeholder="Enter contact phone"
+                    required
                   />
                 </div>
               </div>
             </div>
 
-            {/* Address Information */}
             <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-orange-500" />
@@ -380,7 +378,6 @@ const EditShopDialog = ({ isOpen, onClose, shopId }) => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-4 pt-4">
               <Button
                 onClick={onClose}

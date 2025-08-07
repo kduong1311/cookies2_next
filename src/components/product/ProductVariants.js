@@ -117,6 +117,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                       onChange={(e) => updateVariant(index, "color", e.target.value)}
                       className="w-full p-3 bg-gray-600/50 border border-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
                       placeholder="e.g. Red, Blue, Black..."
+                      required
                     />
                   </div>
 
@@ -159,6 +160,7 @@ const ProductVariants = ({ variants, setVariants, isUploading, setIsUploading })
                       className="w-full p-3 bg-gray-600/50 border border-gray-500 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
                       placeholder="0.00"
                       step="0.01"
+                      required
                     />
                   </div>
                 </div>

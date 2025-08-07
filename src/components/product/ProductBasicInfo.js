@@ -20,6 +20,7 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
           onChange={(e) => setProduct({ ...product, name: e.target.value })}
           className="w-full p-4 bg-gray-700/50 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
           placeholder="Enter product name..."
+          required
         />
       </div>
 
@@ -50,6 +51,7 @@ const ProductBasicInfo = ({ product, setProduct, categories, isLoading }) => {
             className="w-full p-4 bg-gray-700/50 border border-gray-600/50 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-400 transition-all duration-300"
             placeholder="0.00"
             step="0.01"
+            required
           />
         </div>
         

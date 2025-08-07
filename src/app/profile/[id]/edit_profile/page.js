@@ -311,6 +311,7 @@ const EditProfilePage = () => {
                   onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your username"
+                  required
                 />
               </div>
               <div>
@@ -322,6 +323,7 @@ const EditProfilePage = () => {
                   onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your email"
+                  required
                 />
               </div>
               <div>
@@ -333,6 +335,7 @@ const EditProfilePage = () => {
                   onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
                   placeholder="Enter your phone number"
+                  required
                 />
               </div>
               <div>
@@ -343,6 +346,7 @@ const EditProfilePage = () => {
                   value={profileData.date_of_birth}
                   onChange={handleProfileChange}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                  required
                 />
               </div>
             </div>

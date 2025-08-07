@@ -235,7 +235,6 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
           <DialogDescription />
         </DialogHeader>
 
-        {/* Progress Steps */}
         <div className="flex items-center justify-between mb-6 px-4">
           {steps.map((step, index) => (
             <div key={index} className="flex items-center">
@@ -257,12 +256,10 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
           ))}
         </div>
 
-        {/* Step Content */}
         <div className="flex-1 overflow-y-auto px-4">
           {renderCurrentStep()}
         </div>
 
-        {/* Submit status */}
         {submitStatus && (
           <div className={`flex items-center gap-2 mt-4 px-4 py-2 rounded-md mx-4 my-2
             ${submitStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -273,7 +270,6 @@ const AddProductModal = ({ open, onClose, onSuccess }) => {
           </div>
         )}
 
-        {/* Navigation Buttons */}
         <div className="flex justify-between items-center mt-4 px-4 pb-4 border-t border-gray-700 pt-4">
           <button
             onClick={() => setCurrentStep(prev => Math.max(prev - 1, 0))}

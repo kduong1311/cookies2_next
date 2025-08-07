@@ -391,6 +391,7 @@ export default function CreateShopPage({ onBack }) {
                   onChange={handleInputChange}
                   className={`w-full bg-gray-600 text-white rounded-lg px-4 py-3 border ${fieldErrors.name ? 'border-red-500' : 'border-gray-500'} focus:border-orange-500 focus:outline-none transition`}
                   placeholder="Enter shop name"
+                  required
                 />
                 {fieldErrors.name && (
                   <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
@@ -411,6 +412,7 @@ export default function CreateShopPage({ onBack }) {
                   rows={4}
                   className={`w-full bg-gray-600 text-white rounded-lg px-4 py-3 border ${fieldErrors.description ? 'border-red-500' : 'border-gray-500'} focus:border-orange-500 focus:outline-none transition resize-none`}
                   placeholder="Describe your shop and what you offer"
+                  required
                 />
                 {fieldErrors.description && (
                   <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
@@ -465,6 +467,7 @@ export default function CreateShopPage({ onBack }) {
                     onChange={handleInputChange}
                     className={`w-full bg-gray-600 text-white rounded-lg px-4 py-3 pl-12 border ${fieldErrors.contact_email ? 'border-red-500' : 'border-gray-500'} focus:border-orange-500 focus:outline-none transition`}
                     placeholder="shop@example.com"
+                    required
                   />
                 </div>
                 {fieldErrors.contact_email && (
@@ -488,6 +491,7 @@ export default function CreateShopPage({ onBack }) {
                     onChange={handleInputChange}
                     className={`w-full bg-gray-600 text-white rounded-lg px-4 py-3 pl-12 border ${fieldErrors.contact_phone ? 'border-red-500' : 'border-gray-500'} focus:border-orange-500 focus:outline-none transition`}
                     placeholder="+1234567890"
+                    required
                   />
                 </div>
                 {fieldErrors.contact_phone && (
