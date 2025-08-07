@@ -117,6 +117,12 @@ export default function TopNavbar() {
       router.push(`/profile/${user?.user_id}/my_orders`);
     }
 
+    if (
+      notification.type === "new_post"
+    ) {
+      router.push(`/profile/${notification.reference_id}`);
+    }
+
     setShowNotifications(false);
   };
 

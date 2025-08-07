@@ -388,7 +388,7 @@ export default function VideoFeed({
               </button>
             </div>
             
-            {/* Progress indicator với cache info */}
+            {/* Progress indicator với cache info
             <div className="mt-4 text-center">
               <div className="text-white/60 text-xs">
                 {currentPostIndex + 1} / {allPostIds.length}
@@ -396,7 +396,7 @@ export default function VideoFeed({
               <div className="text-orange-400/60 text-xs mt-1">
                 Loaded: {loadedPosts.length}
               </div>
-            </div>
+            </div> */}
           </div>
         )}
       </div>
