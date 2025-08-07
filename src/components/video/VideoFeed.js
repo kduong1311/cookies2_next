@@ -23,8 +23,8 @@ export default function VideoFeed({
   const [refreshPost, setRefreshPost] = useState(false);
   const { user } = useAuth();
 
-  const POSTS_PER_BATCH = 3; // Giảm xuống 3 để load nhanh hơn
-  const PREFETCH_THRESHOLD = 1; // Prefetch sớm hơn
+  const POSTS_PER_BATCH = 3; 
+  const PREFETCH_THRESHOLD = 1;
 
   const shuffleArray = (array) => {
     const newArray = [...array];
@@ -35,7 +35,7 @@ export default function VideoFeed({
     return newArray;
   };
 
-  // Fetch danh sách tất cả posts (chỉ lấy ID)
+  // Fetch all post, only get id
   useEffect(() => {
     if (!user) return;
 
@@ -48,7 +48,7 @@ export default function VideoFeed({
           const shuffledPosts = shuffleArray(data.data);
           setAllPostIds(shuffledPosts);
           
-          // Load batch đầu tiên
+          // Load first batch
           await loadPostBatch(shuffledPosts, 0, POSTS_PER_BATCH);
           
           if (shuffledPosts.length > 0) {
@@ -65,7 +65,7 @@ export default function VideoFeed({
     fetchAllPostIds();
   }, [user]);
 
-  // Tối ưu function load batch - fetch song song và có timeout
+  // optimized load batch, fetch song//
   const loadPostBatch = async (postList, startIndex, count) => {
     const postsToLoad = postList.slice(startIndex, startIndex + count);
     if (postsToLoad.length === 0) return;
@@ -73,7 +73,7 @@ export default function VideoFeed({
     setLoadingMore(true);
     
     try {
-      // Tạo timeout cho mỗi request để tránh treo
+      // time out for reques
       const fetchWithTimeout = (url, timeout = 8000) => {
         return Promise.race([
           axios.get(url, { withCredentials: true }),
@@ -83,7 +83,7 @@ export default function VideoFeed({
         ]);
       };
 
-      // Fetch song song tất cả post details và user data
+      // Fetch song// user data and post data
       const allPromises = postsToLoad.flatMap(post => [
         // Post detail
         fetchWithTimeout(`http://103.253.145.7:8080/api/posts/${post.post_id}`)
@@ -96,14 +96,14 @@ export default function VideoFeed({
           .catch(error => ({ type: 'user', userId: post.user_id, error, data: null }))
       ]);
 
-      // Đợi tất cả requests hoàn thành song song
+      // Waite reques complete song2
       const results = await Promise.allSettled(allPromises);
       
       const newPostData = {};
       const newLoadedPosts = [];
       const usersMap = {};
 
-      // Xử lý kết quả
+      // handle result
       results.forEach(result => {
         if (result.status === 'fulfilled') {
           const { type, postId, userId, data } = result.value;
@@ -117,12 +117,12 @@ export default function VideoFeed({
         }
       });
 
-      // Sắp xếp posts theo thứ tự ban đầu
+      // sort by default list
       const sortedPosts = postsToLoad
         .map(post => newPostData[post.post_id])
         .filter(Boolean);
 
-      // Update state một lần
+      // Update state one time
       setPostData(prev => ({ ...prev, ...newPostData }));
       setLoadedPosts(prev => [...prev, ...sortedPosts]);
       setUsers(prev => ({ ...prev, ...usersMap }));
@@ -134,14 +134,14 @@ export default function VideoFeed({
     }
   };
 
-  // Prefetch background - không blocking UI
+  // Prefetch background not block ui
   const prefetchNextBatch = useCallback(async () => {
     if (loadedPosts.length >= allPostIds.length || loadingMore) return;
     
     const startIndex = loadedPosts.length;
     const nextBatch = allPostIds.slice(startIndex, startIndex + POSTS_PER_BATCH);
     
-    // Background prefetch - không cần setState loading
+    // Background prefetch
     try {
       const promises = nextBatch.map(async (post) => {
         try {
@@ -187,12 +187,12 @@ export default function VideoFeed({
       if (currentPostIndex >= loadedPosts.length - PREFETCH_THRESHOLD - 1) {
         prefetchNextBatch();
       }
-    }, 1000); // Đợi 1s sau khi user dừng scroll
+    }, 1000); //after stop scroll 1s
 
     return () => clearTimeout(timeoutId);
   }, [currentPostIndex, prefetchNextBatch]);
 
-  // Polling cho current post - tối ưu
+  // Polling for current post
   useEffect(() => {
     if (loadedPosts.length === 0) return;
 
@@ -220,7 +220,7 @@ export default function VideoFeed({
     return () => clearInterval(intervalId);
   }, [currentPostIndex, loadedPosts]);
 
-  // Sync load more - chỉ khi thực sự cần
+  //load more, when need
   const checkAndLoadMore = useCallback(async (newIndex) => {
     if (newIndex >= loadedPosts.length - PREFETCH_THRESHOLD && 
         loadedPosts.length < allPostIds.length && 
@@ -294,6 +294,7 @@ export default function VideoFeed({
   useEffect(() => {
     const currentPost = loadedPosts[currentPostIndex];
     if (!currentPost) return;
+    if (!currentPost?.post_id) return;
 
     const increaseView = async () => {
       try {
@@ -308,7 +309,7 @@ export default function VideoFeed({
     };
 
     increaseView();
-  }, [currentPostIndex]);
+  }, [currentPostIndex, loadedPosts]);
 
   const currentPost = loadedPosts.length > 0 ? loadedPosts[currentPostIndex] : null;
   const currentPostDetail = currentPost ? (postData[currentPost.post_id] || currentPost) : null;
@@ -335,7 +336,7 @@ export default function VideoFeed({
                 isCommentOpen={isCommentOpen}
               />
               
-              {/* Loading indicator - chỉ hiện khi thực sự đang load */}
+              {/* Loading indicator - only do on loading */}
               {loadingMore && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
                   <div className="flex items-center space-x-2">
