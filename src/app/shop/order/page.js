@@ -95,8 +95,17 @@ const OrderPage = () => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
+      currency: "USD"
     }).format(amount);
   };
+
+  const formatCurrencyVND = (amount) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
 
 const handleSubmit = async () => {
   if (
@@ -436,7 +445,7 @@ const handleSubmit = async () => {
                     <span className="text-blue-600"> ${formatCurrency(total)}</span>
                   </div>
                   <div className="flex justify-end font-semibold text-base">
-                    <span className="text-blue-600">{formatCurrency(total * 25000)}VND</span>
+                    <span className="text-blue-600">{formatCurrencyVND(total * 25000)}</span>
                   </div>
                 </div>
 
