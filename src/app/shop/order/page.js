@@ -433,10 +433,10 @@ const handleSubmit = async () => {
                   <div className="flex flex-col border-t pt-2">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total:</span>
-                    <span className="text-blue-600">USD {formatCurrency(total)}</span>
+                    <span className="text-blue-600"> ${formatCurrency(total)}</span>
                   </div>
                   <div className="flex justify-end font-semibold text-base">
-                    <span className="text-blue-600">VND {formatCurrency(total * 25000)}</span>
+                    <span className="text-blue-600">{formatCurrency(total * 25000)}VND</span>
                   </div>
                 </div>
 
