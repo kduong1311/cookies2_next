@@ -10,7 +10,7 @@ export const metadata = {
   title: "Cookies",
   description: "Discover, Watch & Shop Delicious Recipes",
   icons: {
-    icon: "/favicon.ico",
+    icon: "../favicon.ico",
   },
 };
 
