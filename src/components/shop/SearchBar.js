@@ -65,26 +65,6 @@ useEffect(() => {
           <Search size={16} className="absolute left-3 top-3 text-gray-400" />
         </div>
       </div>
-
-      {/* Category Filter */}
-      <div className="mb-6">
-        <h4 className="font-medium mb-2 text-white">Categories</h4>
-        <div className="flex flex-wrap gap-2">
-          {["All", ...categories.map((c) => c.name)].map((category) => (
-            <button
-              key={category}
-              className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                activeCategory === category
-                  ? "bg-yellow-500 text-black"
-                  : "bg-gray-800 hover:bg-gray-700 text-white"
-              }`}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
