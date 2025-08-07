@@ -4,10 +4,12 @@ import { Package, MapPin, CreditCard, Truck, ShoppingCart, CheckCircle, AlertCir
 import { useCart } from '@/contexts/CartContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 const OrderPage = () => {
   const {cartItems, buyNowItem, clearBuyNow} = useCart();
   const [orderItems, setOrderItems] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
   const fetchShippingAddress = async () => {
@@ -172,7 +174,7 @@ const handleSubmit = async () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Order placed successfully!</h2>
           <p className="text-gray-600 mb-6">Your order has been confirmed and will be processed as soon as possible.</p>
           <button 
-            onClick={() => window.location.reload()}
+            onClick={() => router.push('/shop')}
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
           >
             Place a new order
